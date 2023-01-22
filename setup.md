@@ -1,23 +1,18 @@
-todo list
-- get data from example url
-- get data list from database
-- get detail data list
-- crud operation (get, post, patch, delete)
-
-set up fastapi
+# set up fastapi
 - virtualenv venv
 (linux)
 - source venv/Scripts/activate
 (cmd)
 - venv\Scripts\activate.bat
 
+# create file
 (linux)
 - touch index.py
 (cmd)
 - type nul>index.py
 
-fastapi and mysql driver install
+# fastapi and mysql driver install
 - pip install fastapi sqlalchemy pymysql uvicorn
 
-run app
+# run app
 - uvicorn index:app --reload
