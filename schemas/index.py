@@ -1,1 +1,1 @@
-from schemas.userSchemas import User
+from schemas.userEdit import UserEdit

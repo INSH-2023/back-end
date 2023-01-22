@@ -1,1 +1,1 @@
-from models.user import users
+from models.user import userModel, deviceModel, fixModel
