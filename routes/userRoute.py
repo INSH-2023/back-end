@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from config.db import conn
 from models.index import userModel
 from schemas.index import UserEdit
@@ -18,7 +18,7 @@ async def read_data():
 async def read_detail(id: int):
     return conn.execute(select(user_list).where(userModel.c.userId == id)).fetchall()
 
-@user.post(api+"/")
+@user.post(api+"/", status_code=status.HTTP_201_CREATED)
 async def write_data(user: UserEdit):
     conn.execute(userModel.insert().values(
         userName=user.userName,
