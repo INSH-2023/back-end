@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker
 
 user = "root"
-password = "Tslol05346194!"
+password = "abcd1234"
 host = "localhost:3306"
 db = "fix_device"
 
