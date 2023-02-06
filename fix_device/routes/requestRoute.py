@@ -1,28 +1,57 @@
-# from fastapi import APIRouter
-# from config.db import conn
-# from models.index import deviceModel, fixModel
-# from sqlalchemy import select
-# device = APIRouter()
+from fastapi import APIRouter, status, HTTPException
+from config.db import conn
+from models.index import requestModel
+from schemas.index import RequestEdit
+from sqlalchemy import select
+request = APIRouter()
 
-# device_list1 = [fixModel.c.fixId, fixModel.c.deviceId, deviceModel.c.name, deviceModel.c.description, 
-# deviceModel.c.duration, fixModel.c.userId, fixModel.c.cost]
+api = "/api/requests"
 
-# device_list2 = [fixModel.c.deviceId, deviceModel.c.name, deviceModel.c.description, 
-# deviceModel.c.duration]
+@request.get(api+"/")
+async def read_data(search: str =''):
+    return conn.execute(select().where(requestModel.c.full_name.contains(search))).fetchall()
 
-# api = "/api/devices"
+@request.get(api+"/{id}")
+async def read_detail(id: int):
+    if not conn.execute(select().where(requestModel.c.requestId == id)).fetchone():
+        raise HTTPException(status_code=404, detail="request id:" + str(id) + "does not exist")
+    return conn.execute(select().where(requestModel.c.requestId == id)).fetchone()
 
-# # list devices that problem on users
-# @device.get(api)
-# async def read_data(search: str = '', page: int = 1, limit: int = 10):
-#     result = conn.execute(select(device_list1).where(fixModel.c.deviceId == deviceModel.c.deviceId)
-#     .where(deviceModel.c.name.contains(search))
-#     .order_by(deviceModel.c.duration.desc(),deviceModel.c.name)).fetchall()
-#     start = (page - 1)*limit
-#     end = start + limit
-#     return result[start:end]
+@request.post(api+"/", status_code=status.HTTP_201_CREATED)
+async def write_data(request: RequestEdit):
 
-# # list devices on userId
-# @device.get(api+"/user/{userId}")
-# async def read_detail(userId: int):
-#     return conn.execute(select(device_list2).where(fixModel.c.deviceId == deviceModel.c.deviceId).where(fixModel.c.userId == userId)).fetchall()
+    conn.execute(requestModel.insert().values(
+        full_name=request.full_name,
+        email=request.email,
+        service_type=request.service_type,
+        group_work=request.group_work,
+        subject=request.subject,
+        status=request.status,
+        req_date=request.req_date,
+        assign=request.assign
+    ))
+    return conn.execute(select()).fetchall()
+
+@request.put(api+"/{id}")
+async def update_data(id: int, request: RequestEdit):
+    # not found checking
+    if not conn.execute(select().where(requestModel.c.requestId == id)).fetchone():
+        raise HTTPException(status_code=404, detail="request id:" + str(id) + "does not exist")
+
+    conn.execute(requestModel.update().values(
+        full_name=request.full_name,
+        email=request.email,
+        service_type=request.service_type,
+        group_work=request.group_work,
+        subject=request.subject,
+        status=request.status,
+        req_date=request.req_date,
+        assign=request.assign
+    ).where(requestModel.c.requestId == id))
+    
+    return conn.execute(select().where(requestModel.c.requestId == id)).fetchone()
+
+@request.delete(api+"/{id}")
+async def delete_data(id: int):
+    conn.execute(requestModel.delete().where(requestModel.c.requestId == id))
+    return conn.execute(select()).fetchall()

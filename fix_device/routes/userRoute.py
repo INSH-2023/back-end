@@ -3,6 +3,7 @@ from config.db import conn
 from models.index import userModel
 from schemas.index import UserEdit
 from sqlalchemy import select
+from pydantic import validate_arguments
 user = APIRouter()
 
 user_list = [userModel.c.userId, userModel.c.emp_code, userModel.c.full_name, userModel.c.email,
@@ -24,7 +25,7 @@ async def read_detail(id: int):
 @user.post(api+"/", status_code=status.HTTP_201_CREATED)
 async def write_data(user: UserEdit):
     # error checking
-    validate_unique(user,-1)
+    await validate_unique(user,-1)
 
     conn.execute(userModel.insert().values(
         emp_code=user.emp_code,
@@ -46,7 +47,7 @@ async def update_data(id: int, user: UserEdit):
         raise HTTPException(status_code=404, detail="user id:" + str(id) + "does not exist")
 
     # error checking
-    validate_unique(user,id)
+    await validate_unique(user,id)
 
     conn.execute(userModel.update().values(
         emp_code=user.emp_code,
@@ -67,7 +68,8 @@ async def delete_data(id: int):
     conn.execute(userModel.delete().where(userModel.c.userId == id))
     return conn.execute(select(user_list)).fetchall()
 
-def validate_unique(user: UserEdit,id: int):
+@validate_arguments
+async def validate_unique(user: UserEdit,id: int):
     user_unique_check = conn.execute(select(user_list)).fetchall()
 
     for user_item in user_unique_check:

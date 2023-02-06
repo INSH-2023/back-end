@@ -36,6 +36,7 @@ itemModel = Table(
     'item', meta,
     Column('itemId',Integer,nullable=False),
     Column('name',String(100), nullable=False),
+    Column('number',String(100), nullable=False),
     Column('SL',String(15), nullable=False),
     Column('SW',String(13), nullable=False),
     Column('sent_date',DATE, nullable=False),
