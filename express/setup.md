@@ -16,3 +16,10 @@
 
 # install moment
 - npm i moment
+
+# install mysql
+- npm i mysql
+
+# fix connection with user error with auth
+- ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'abcd1234';
+- flush privileges;

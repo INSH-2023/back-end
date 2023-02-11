@@ -1,24 +1,32 @@
 const express = require('express')
 const path = require('path')
+const logger = require('./log/log')
 
 const app = express()
 const PORT = process.env.PORT || 5000;
 
-const users = [
-    {name: "Test", age: 20},
-    {name: "Hello", age: 15}
-]
-
+// listen port
 app.listen(PORT, ()=> console.log("Hello world"))
 
-app.get("/", (req, res)=>{
+// get log from middleware
+app.use(logger)
+
+// get text
+app.get("/hello", (req, res)=>{
     res.send("Hello express")
 })
 
+// set static folder
+app.use(express.static(path.join(__dirname, "public", "index.html")))
+
+// get file
 app.get('/file', (req, res)=>{
     res.sendFile(path.join(__dirname, "public", "index.html"))
 })
 
-app.get('/api/users', (req, res)=> {
-    res.json(users)
-})
+// body parser
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+
+// use users router
+app.use('/api/users', require('./router/api/users'))
