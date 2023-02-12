@@ -23,3 +23,6 @@
 # fix connection with user error with auth
 - ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'abcd1234';
 - flush privileges;
+
+# install node env for connection database
+- npm install dotenv

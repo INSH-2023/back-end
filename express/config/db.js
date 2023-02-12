@@ -1,10 +1,14 @@
 const mysql = require('mysql')
 
+if (process.env.NODE_ENV !== 'production') { 
+    require('dotenv').config(); 
+} 
+
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'abcd1234',
-    database: 'moral_it_device'
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
 })
 
 connection.connect((err) => {

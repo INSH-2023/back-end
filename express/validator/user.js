@@ -31,12 +31,10 @@ const validatePassword = (str,req,res) => {
 }
 
 const validateRole = (str,req,res) => {
-    console.log(str)
-    console.log(ROLE.Admin)
     if(str === undefined || str === null || str === ""){
         throw res.status(400).send(errorModel("user is not null",req.originalUrl))
     }else if(str != ROLE.Admin && str != ROLE.User){
-        throw res.status(400).send(errorModel(str + " is user or admin only",req.originalUrl))
+        throw res.status(400).send(errorModel("the role is user or admin only",req.originalUrl))
     }else{
         return str.trim()
     }

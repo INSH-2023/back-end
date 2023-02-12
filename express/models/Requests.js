@@ -1,17 +1,17 @@
 const conn = require('../config/db')
-const validator = require('../validator/user')
+const validator = require('../validator/request')
 
 // C
-const insertUser = (emp_code, full_name, role, group_work, office, status, position, email, password, req, res) => {
+const insertRequest = (full_name, email, group_work, service_type, subject, status, req_date, assign, req, res) => {
     try {
         conn.query(
-            "insert into user(emp_code, full_name, role, group_work, office, status, position, email, password) values (?,?,?,?,?,?,?,?,?);",
-            [emp_code, full_name, role, group_work, office, status, position, email, password],
+            "insert into request (full_name, email, group_work, subject, service_type, status, req_date, assign) values (?,?,?,?,?,?,?,?);",
+            [full_name, email, group_work, service_type, status, subject, req_date, assign],
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Insert error : " + err)
                 }
-                return res.status(201).json({msg: "user have been created"})
+                return res.status(201).json({msg: "request have been created"})
             }
         )
     } catch(err) {
@@ -21,13 +21,13 @@ const insertUser = (emp_code, full_name, role, group_work, office, status, posit
 }
 
 // R
-const selectUser = async (req, res) => {
+const selectRequest = async (req, res) => {
     try {
         conn.query(
-            "select userId, emp_code, full_name, role, group_work, office, status, position, email, createdAt, updatedAt from user;",
+            "select * from request;",
             (err, results, fields) => {
                 if (err) {
-                    return res.status(400).send("Insert error : " + err)
+                    return res.status(400).send("Select error : " + err)
                 }
                 return res.json(results)
             }
@@ -39,13 +39,13 @@ const selectUser = async (req, res) => {
 }
 
 // R id
-const selectUserById = (req, res) => {
+const selectRequestById = (req, res) => {
     try {
         conn.query(
-            "select userId, emp_code, full_name, role, group_work, office, status, position, email, createdAt, updatedAt from user;",
+            "select * from request;",
             (err, results, fields) => {
                 if (err) {
-                    return res.status(400).send("Insert error : " + err)
+                    return res.status(400).send("Select error : " + err)
                 }
                 results = validator.foundId(JSON.parse(JSON.stringify(results)),req,res)
                 return res.json(results)
@@ -60,7 +60,7 @@ const selectUserById = (req, res) => {
 const ValidateById = (req, res) => {
     try {
         conn.query(
-            "select userId from user;",
+            "select requestId from request;",
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Select error : " + err)
@@ -75,17 +75,17 @@ const ValidateById = (req, res) => {
 }
 
 // U
-const updateUser = (full_name, role, group_work, office, status, position, email, password, req, res) => {
+const updateRequest = (full_name, email, group_work, service_type, subject, status, req_date, assign, req, res) => {
     try {
         ValidateById(req, res)
         conn.query(
-            "update user set full_name = ?, role = ?, group_work = ?, office = ?, status = ?, position = ?, email = ?, password = ? where userId = ?;",
-            [full_name, role, group_work, office, status, position, email, password, req.params.id],
+            "update request set full_name = ?, email = ?, group_work = ?, service_type = ?, subject = ?, status = ?, req_date = ?, assign = ? where requestId = ?;",
+            [full_name, email, group_work, service_type, subject, status, req_date, assign, req.params.id],
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Update error : " + err)
                 }
-                return res.json({msg: "user id : " + req.params.id + " have been updated"})
+                return res.json({msg: "request id : " + req.params.id + " have been updated"})
             }
         )
     } catch(err) {
@@ -95,17 +95,17 @@ const updateUser = (full_name, role, group_work, office, status, position, email
 }
 
 // D
-const deleteUser = (req, res) => {
+const deleteRequest = (req, res) => {
     try {
         ValidateById(req, res)
         conn.query(
-            "delete from user where userId = ?;",
+            "delete from request where requestId = ?;",
             [req.params.id],
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Delete error : " + err)
                 }
-                return res.json({msg: "user id : " + req.params.id + " have been deleted" })
+                return res.json({msg: "request id : " + req.params.id + " have been deleted" })
             }
         )
     } catch(err) {
@@ -114,8 +114,8 @@ const deleteUser = (req, res) => {
     }
 }
 
-module.exports.insertUser = insertUser
-module.exports.selectUser = selectUser
-module.exports.selectUserById = selectUserById
-module.exports.updateUser = updateUser
-module.exports.deleteUser = deleteUser
+module.exports.insertRequest = insertRequest
+module.exports.selectRequest = selectRequest
+module.exports.selectRequestById = selectRequestById
+module.exports.updateRequest = updateRequest
+module.exports.deleteRequest = deleteRequest

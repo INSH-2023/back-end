@@ -1,17 +1,17 @@
 const conn = require('../config/db')
-const validator = require('../validator/user')
+const validator = require('../validator/item')
 
 // C
-const insertUser = (emp_code, full_name, role, group_work, office, status, position, email, password, req, res) => {
+const insertItem = (name, number, SL, SW, sent_date, type, note, req, res) => {
     try {
         conn.query(
-            "insert into user(emp_code, full_name, role, group_work, office, status, position, email, password) values (?,?,?,?,?,?,?,?,?);",
-            [emp_code, full_name, role, group_work, office, status, position, email, password],
+            "insert into item (name, number, SL, SW, sent_date, type, note) values (?,?,?,?,?,?,?);",
+            [name, number, SL, SW, sent_date, type, note],
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Insert error : " + err)
                 }
-                return res.status(201).json({msg: "user have been created"})
+                return res.status(201).json({msg: "item have been created"})
             }
         )
     } catch(err) {
@@ -21,10 +21,10 @@ const insertUser = (emp_code, full_name, role, group_work, office, status, posit
 }
 
 // R
-const selectUser = async (req, res) => {
+const selectItem = async (req, res) => {
     try {
         conn.query(
-            "select userId, emp_code, full_name, role, group_work, office, status, position, email, createdAt, updatedAt from user;",
+            "select * from item;",
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Insert error : " + err)
@@ -39,13 +39,13 @@ const selectUser = async (req, res) => {
 }
 
 // R id
-const selectUserById = (req, res) => {
+const selectItemById = (req, res) => {
     try {
         conn.query(
-            "select userId, emp_code, full_name, role, group_work, office, status, position, email, createdAt, updatedAt from user;",
+            "select * from item;",
             (err, results, fields) => {
                 if (err) {
-                    return res.status(400).send("Insert error : " + err)
+                    return res.status(400).send("Select error : " + err)
                 }
                 results = validator.foundId(JSON.parse(JSON.stringify(results)),req,res)
                 return res.json(results)
@@ -60,7 +60,7 @@ const selectUserById = (req, res) => {
 const ValidateById = (req, res) => {
     try {
         conn.query(
-            "select userId from user;",
+            "select itemId from item;",
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Select error : " + err)
@@ -75,37 +75,37 @@ const ValidateById = (req, res) => {
 }
 
 // U
-const updateUser = (full_name, role, group_work, office, status, position, email, password, req, res) => {
+const updateItem = (name, number, SL, SW, sent_date, type, note, req, res) => {
     try {
         ValidateById(req, res)
         conn.query(
-            "update user set full_name = ?, role = ?, group_work = ?, office = ?, status = ?, position = ?, email = ?, password = ? where userId = ?;",
-            [full_name, role, group_work, office, status, position, email, password, req.params.id],
+            "update item set name = ?, number = ?, SL = ?, SW = ?, sent_date = ?, type = ?, note = ? where itemId = ?;",
+            [name, number, SL, SW, sent_date, type, note, req.params.id],
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Update error : " + err)
                 }
-                return res.json({msg: "user id : " + req.params.id + " have been updated"})
+                return res.json({msg: "item id : " + req.params.id + " have been updated"})
             }
         )
     } catch(err) {
-        console.log(err)
+        // console.log(err)
         return res.status(500).send(err)
     }
 }
 
 // D
-const deleteUser = (req, res) => {
+const deleteItem = (req, res) => {
     try {
         ValidateById(req, res)
         conn.query(
-            "delete from user where userId = ?;",
+            "delete from item where itemId = ?;",
             [req.params.id],
             (err, results, fields) => {
                 if (err) {
                     return res.status(400).send("Delete error : " + err)
                 }
-                return res.json({msg: "user id : " + req.params.id + " have been deleted" })
+                return res.json({msg: "item id : " + req.params.id + " have been deleted" })
             }
         )
     } catch(err) {
@@ -114,8 +114,8 @@ const deleteUser = (req, res) => {
     }
 }
 
-module.exports.insertUser = insertUser
-module.exports.selectUser = selectUser
-module.exports.selectUserById = selectUserById
-module.exports.updateUser = updateUser
-module.exports.deleteUser = deleteUser
+module.exports.insertItem = insertItem
+module.exports.selectItem = selectItem
+module.exports.selectItemById = selectItemById
+module.exports.updateItem = updateItem
+module.exports.deleteItem = deleteItem

@@ -12,7 +12,7 @@ router.get('/', (req, res)=> {
 // get user by id
 router.get('/:id', (req, res)=>{
     // get user by id
-    users.selectUserById(req.params.id, req, res)
+    users.selectUserById(req, res)
 })
 
 // create user
@@ -34,7 +34,6 @@ router.post('/', (req, res)=>{
 // update user by id
 router.put('/:id', (req,res)=> {
     users.updateUser(
-        req.params.id,
         validator.validateStr(req.body.full_name,req,res),
         validator.validateRole(req.body.role,req,res),
         validator.validateStr(req.body.group_work,req,res),
@@ -49,7 +48,7 @@ router.put('/:id', (req,res)=> {
 
 // delete user by id
 router.delete('/:id', (req,res)=>{
-    users.deleteUser(req.params.id, req, res)
+    users.deleteUser(req, res)
 })
 
 
