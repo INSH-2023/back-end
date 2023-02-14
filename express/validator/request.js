@@ -1,11 +1,12 @@
 const errorModel = require('../response/errorModel')
+const Requests = require('../config/db').requests
 
-const foundId = (list,req,res) => {
-    const found = list.some(item => item.requestId === parseInt(req.params.id))
-    if(!found) {
+const foundId = async (req,res) => {
+    let request = await Requests.findOne({ where: { userId: req.params.id } })
+    if(request === null) {
         throw res.status(404).json(errorModel("request " + req.params.id + " does not exist", req.originalUrl))
     } else {
-        return list.filter(item => item.requestId === parseInt(req.params.id))[0]
+        return request
     }
 }
 

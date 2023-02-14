@@ -8,7 +8,7 @@
 - npm i express
 
 # install nodemon for auto deploy
-- npm i nodemon
+- npm i nodemon -D
 
 # run server
 - npm run start
@@ -17,8 +17,8 @@
 # install moment
 - npm i moment
 
-# install mysql
-- npm i mysql
+# install mysql2
+- npm i mysql2
 
 # fix connection with user error with auth
 - ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'abcd1234';
@@ -26,3 +26,9 @@
 
 # install node env for connection database
 - npm install dotenv
+
+# install sequelize for connection db and make entity
+- npm i sequelize
+
+# install cross origin
+- npm i cors

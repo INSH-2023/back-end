@@ -1,51 +1,66 @@
 const express = require('express')
-const items = require('../../models/Items')
+const Items = require('../../config/db').items
 const validator = require('../../validator/item')
-
 const router = express.Router()
 
 // get items
-router.get('/', (req, res)=> {
-    items.selectItem(req, res)
+router.get('/', async (req, res)=> {
+    let items = await Items.findAll({})
+    res.send(items)
 })
 
 // get item by id
-router.get('/:id', (req, res)=>{
+router.get('/:id', async (req, res)=>{
     // get item by id
-    items.selectItemById(req, res)
+    let item = await validator.foundId(req, res)
+    res.send(item)
 })
 
 // create item
-router.post('/', (req, res)=>{
-    items.insertItem(
-        validator.validateStr(req.body.name,req,res),
-        validator.validateStr(req.body.number,req,res),
-        validator.validateSL(req.body.SL,req,res),
-        validator.validateSW(req.body.SW,req,res),
-        validator.validateDate(req.body.sent_date,req,res),
-        validator.validateStr(req.body.type,req,res),
-        validator.validateStr(req.body.note,req,res),
-        req, res
-    )
+router.post('/', async (req, res)=>{
+    // validate body
+    let newItem = {
+        name: validator.validateStr(req.body.name,req,res),
+        number: validator.validateStr(req.body.number,req,res),
+        SL: validator.validateSL(req.body.SL,req,res),
+        SW: validator.validateSW(req.body.SW,req,res),
+        sent_date: validator.validateDate(req.body.sent_date,req,res),
+        type: validator.validateStr(req.body.type,req,res),
+        note: validator.validateStr(req.body.note,req,res)
+    }
+    
+    let item = await Items.create(newItem)
+    res.status(201).send(item)
 })
 
 // update item by id
-router.put('/:id', (req,res)=> {
-    items.updateItem(
-        validator.validateStr(req.body.name,req,res),
-        validator.validateStr(req.body.number,req,res),
-        validator.validateSL(req.body.SL,req,res),
-        validator.validateSW(req.body.SW,req,res),
-        validator.validateDate(req.body.sent_date,req,res),
-        validator.validateStr(req.body.type,req,res),
-        validator.validateStr(req.body.note,req,res),
-        req, res
-    )
+router.put('/:id', async (req,res)=> {
+    // get item by id
+    let item = await validator.foundId(req, res)
+
+    // validate body
+    let newItem = {
+        name: validator.validateStr(req.body.name,req,res),
+        number: validator.validateStr(req.body.number,req,res),
+        SL: validator.validateSL(req.body.SL,req,res),
+        SW: validator.validateSW(req.body.SW,req,res),
+        sent_date: validator.validateDate(req.body.sent_date,req,res),
+        type: validator.validateStr(req.body.type,req,res),
+        note: validator.validateStr(req.body.note,req,res)
+    }
+
+    await Items.update(newItem, { where: { itemId: item.itemId }})
+    res.send({msg: "item id : " + req.params.id + " have been updated"})
 })
 
 // delete item by id
-router.delete('/:id', (req,res)=>{
-    items.deleteItem(req, res)
+router.delete('/:id', async (req,res)=>{
+    // get item by id
+    let item = await validator.foundId(req, res)
+    
+    await Product.destroy({ where: { itemId: item.itemId }} )
+
+    res.send({msg: "item id : " + req.params.id + " have been deleted"})
 })
 
 

@@ -1,12 +1,13 @@
 const errorModel = require('../response/errorModel')
 const ROLE = require('../models/Role')
+const Users = require('../config/db').users
 
-const foundId = (list,req,res) => {
-    const found = list.some(item => item.userId === parseInt(req.params.id))
-    if(!found) {
+const foundId = async (req,res) => {
+    let user = await Users.findOne({ where: {userId: req.params.id}})
+    if(user === null) {
         throw res.status(404).json(errorModel("user " + req.params.id + " does not exist", req.originalUrl))
     } else {
-        return list.filter(item => item.userId === parseInt(req.params.id))[0]
+        return user
     }
 }
 
@@ -63,9 +64,18 @@ const validateNumber = (int,req,res) => {
     }
 }
 
+const validateUnique = (newUser,user,req,res) => {
+    if (req.params.id != user.userId) {
+        if(newUser.emp_code === user.emp_code || newUser.full_name === user.full_name || newUser.email === user.email) {
+            throw res.status(400).send(errorModel("this user is not unique by employee code : " + user.emp_code + ", full name : " + user.full_name + " and email : " + user.email,req.originalUrl))
+        }
+    }
+}
+
 module.exports.foundId = foundId
 module.exports.validateStr = validateStr
 module.exports.validateNumber = validateNumber
 module.exports.validateEmail = validateEmail
 module.exports.validatePassword = validatePassword
 module.exports.validateRole = validateRole
+module.exports.validateUnique = validateUnique

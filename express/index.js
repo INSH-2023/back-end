@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const logger = require('./log/log')
+const cors = require('cors')
 
 const app = express()
 const PORT = process.env.PORT || 5000;
@@ -11,11 +12,6 @@ app.listen(PORT, ()=> console.log("ACK"))
 // get log from middleware
 app.use(logger)
 
-// get text
-// app.get("/hello", (req, res)=>{
-//     res.send("Hello express")
-// })
-
 // set static folder
 app.use(express.static(path.join(__dirname, "public", "index.html")))
 
@@ -24,7 +20,12 @@ app.get('/file', (req, res)=>{
     res.sendFile(path.join(__dirname, "public", "index.html"))
 })
 
-// body parser
+const corOptions = {
+    origin: 'http://localhost:3000'
+}
+
+// body parser middleware
+app.use(cors(corOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
