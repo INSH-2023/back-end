@@ -3,71 +3,71 @@ const ROLE = require('../models/Role')
 const Users = require('../config/db').users
 
 const foundId = async (req,res) => {
-    let user = await Users.findOne({ where: {userId: req.params.id}})
+    let user = await Users.scope('withoutPassword').findOne({ where: {userId: req.params.id}})
     if(user === null) {
-        throw res.status(404).json(errorModel("user " + req.params.id + " does not exist", req.originalUrl))
+        await res.status(404).json(errorModel("user " + req.params.id + " does not exist", req.originalUrl))
     } else {
         return user
     }
 }
 
-const validateStr = (str,req,res) => {
+const validateStr = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("user is not null",req.originalUrl))
+        throw new Error("user is not null")
     }else if(str.length > 100){
-        throw res.status(400).send(errorModel(str + " have not more 100 characters",req.originalUrl))
+        throw new Error(str + " have not more than 100 characters")
     }else{
         return str.trim()
     }
 }
 
-const validatePassword = (str,req,res) => {
+const validatePassword = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("user is not null",req.originalUrl))
+        throw new Error("user is not null")
     }else if(str.length > 16 || str.length < 8){
-        throw res.status(400).send(errorModel(str + " password need have 8-16 characters",req.originalUrl))
+        throw new Error(str + " password need have between 8 and 16 characters")
     }else{
         return str.trim()
     }
 }
 
-const validateRole = (str,req,res) => {
+const validateRole = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("user is not null",req.originalUrl))
+        throw new Error("user is not null")
     }else if(str != ROLE.Admin && str != ROLE.User){
-        throw res.status(400).send(errorModel("the role is user or admin only",req.originalUrl))
+        throw new Error("the role is user or admin only")
     }else{
         return str.trim()
     }
 }
 
-const validateEmail = (str,req,res) => {
+const validateEmail = async (str) => {
     regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("user is not null",req.originalUrl))
+        throw new Error("user is not null")
     }else if(str.length > 100){
-        throw res.status(400).send(errorModel(str + " have not more 20 characters",req.originalUrl))
+        throw new Error(str + " have not more than 100 characters")
     }else if(!String(str).match(regex)){
-        throw res.status(400).send(errorModel(str + " is not email format",req.originalUrl))
+        throw new Error(str + " is not email format")
     }else{
         return str.trim()
     }
 }
 
-const validateNumber = (int,req,res) => {
+const validateNumber = async (int) => {
     if(int === undefined || int === null){
-        throw res.status(400).send(errorModel(int + " is not null",req.originalUrl))
+        throw new Error(int + " is not null")
     }else if(int <= 0){
-        throw res.status(400).send(errorModel(int + " is more than 0",req.originalUrl))
+        throw new Error(int + " is more than 0")
     }else{
         return int
     }
 }
 
-const validateUnique = (newUser,user,req,res) => {
+const validateUnique = (newUser,user,req) => {
     if (req.params.id != user.userId) {
         if(newUser.emp_code === user.emp_code || newUser.full_name === user.full_name || newUser.email === user.email) {
-            throw res.status(400).send(errorModel("this user is not unique by employee code : " + user.emp_code + ", full name : " + user.full_name + " and email : " + user.email,req.originalUrl))
+            throw new Error("this user is not unique by employee code : " + user.emp_code + ", full name : " + user.full_name + " and email : " + user.email)
         }
     }
 }

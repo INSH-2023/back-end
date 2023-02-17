@@ -1,11 +1,13 @@
 const express = require('express')
-const Requests = require('../../config/db').requests
+const Request = require('../../config/db').requests
 const validator = require('../../validator/request')
+const errorModel = require('../../response/errorModel')
 const router = express.Router()
 
 // get requests
 router.get('/', async (req, res)=> {
-    let requests = await Items.findAll({})
+    // get request all
+    let requests = await Request.findAll({})
     res.send(requests)
 })
 
@@ -18,19 +20,26 @@ router.get('/:id', async (req, res)=>{
 
 // create request
 router.post('/', async (req, res)=>{
-    let newRequests = {
-        full_name: validator.validateStr(req.body.full_name,req,res),
-        email: validator.validateEmail(req.body.email,req,res),
-        group_work: validator.validateStr(req.body.group_work,req,res),
-        service_type: validator.validateStr(req.body.service_type,req,res),
-        subject: validator.validateStr(req.body.subject,req,res),
-        status: validator.validateStr(req.body.status,req,res),
-        req_date: validator.validateDate(req.body.req_date,req,res),
-        assign: validator.validateStr(req.body.assign,req,res)
-    }
 
-    let requests = await Requests.create(newRequests)
-    res.status(201).send(requests)
+    // validate body
+    try {
+        let newRequests = {
+            full_name: await validator.validateStr(req.body.full_name),
+            email: await validator.validateEmail(req.body.email),
+            group_work: await validator.validateStr(req.body.group_work),
+            service_type: await validator.validateStr(req.body.service_type),
+            subject: await validator.validateStr(req.body.subject),
+            status: await validator.validateStr(req.body.status),
+            req_date: await validator.validateDate(req.body.req_date),
+            assign: await validator.validateStr(req.body.assign)
+        }
+
+        // create request
+        let requests = await Request.create(newRequests)
+        res.status(201).send(requests)
+    } catch(err) {
+        res.status(400).json(errorModel(err.message,req.originalUrl))
+    }
 })
 
 // update request by id
@@ -38,19 +47,25 @@ router.put('/:id', async (req,res)=> {
     // get request by id
     let request = await validator.foundId(req, res)
 
-    let newRequests = {
-        full_name: validator.validateStr(req.body.full_name,req,res),
-        email: validator.validateEmail(req.body.email,req,res),
-        group_work: validator.validateStr(req.body.group_work,req,res),
-        service_type: validator.validateStr(req.body.service_type,req,res),
-        subject: validator.validateStr(req.body.subject,req,res),
-        status: validator.validateStr(req.body.status,req,res),
-        req_date: validator.validateDate(req.body.req_date,req,res),
-        assign: validator.validateStr(req.body.assign,req,res)
-    }
+    // validate body
+    try {
+        let newRequests = {
+            full_name: await validator.validateStr(req.body.full_name),
+            email: await validator.validateEmail(req.body.email),
+            group_work: await validator.validateStr(req.body.group_work),
+            service_type: await validator.validateStr(req.body.service_type),
+            subject: await validator.validateStr(req.body.subject),
+            status: await validator.validateStr(req.body.status),
+            req_date: await validator.validateDate(req.body.req_date),
+            assign: await validator.validateStr(req.body.assign)
+        }
 
-    await Requests.update(newRequests, { where: { requestId: request.requestId }})
-    res.send({msg: "request id : " + req.params.id + " have been updated"})
+        // update request
+        await Request.update(newRequests, { where: { requestId: request.requestId }})
+        res.send({msg: "request id : " + req.params.id + " have been updated"})
+    } catch(err) {
+        res.status(400).json(errorModel(err.message,req.originalUrl))
+    }
 })
 
 // delete request by id
@@ -58,7 +73,8 @@ router.delete('/:id', async (req,res)=>{
     // get request by id
     let request = await validator.foundId(req, res)
 
-    await Product.destroy({ where: { requestId: request.requestId }} )
+    // delete request
+    await Request.destroy({ where: { requestId: request.requestId }} )
     res.send({msg: "request id : " + req.params.id + " have been deleted"})
 })
 

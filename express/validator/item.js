@@ -1,54 +1,55 @@
 const errorModel = require('../response/errorModel')
-const Items = require('../config/db').items
+const Item = require('../config/db').items
 
 const foundId = async (req,res) => {
-    let item = await Items.findOne({ where: { itemId: req.params.id } })
+    let item = await Item.findOne({ where: { itemId: req.params.id } })
     if(item === null) {
-        throw res.status(404).json(errorModel("item " + req.params.id + " does not exist", req.originalUrl))
+        await res.status(404).json(errorModel("item " + req.params.id + " does not exist", req.originalUrl))
     } else {
         return item
     }
 }
 
-const validateStr = (str,req,res) => {
+const validateStr = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("item is not null",req.originalUrl))
+        throw new Error("item is not null")
     }else if(str.length > 100){
-        throw res.status(400).send(errorModel(str + " have not more 100 characters",req.originalUrl))
+        throw new Error(str + " have not more than 100 characters")
     }else{
         return str.trim()
     }
 }
 
-const validateSL = (str,req,res) => {
+const validateSL = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("item is not null",req.originalUrl))
+        throw new Error("item is not null")
     }else if(str.length !== 15){
-        throw res.status(400).send(errorModel(str + " have 15 characters only",req.originalUrl))
+        throw new Error(str + " have 15 characters only")
     }else{
         return str.trim()
     }
 }
 
-const validateSW = (str,req,res) => {
+const validateSW = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("item is not null",req.originalUrl))
+        throw new Error("item is not null")
     }else if(str.length !== 13){
-        throw res.status(400).send(errorModel(str + " have 13 characters only",req.originalUrl))
+        throw new Error(str + " have 13 characters only")
     }else{
         return str.trim()
     }
 }
 
-const validateDate = (date,req,res) => {
+const validateDate = async (date) => {
     if(date === undefined || date === null || date === ""){
-        throw res.status(400).send(errorModel(date + " is not null",req.originalUrl))
+        throw new Error(date + " is not null")
     }else if(!date instanceof Date && isNaN(date)){
-        throw res.status(400).send(errorModel(date + " is not date format",req.originalUrl))
+        throw new Error(date + " is not date format")
     }else{
         return date
     }
 }
+
 
 module.exports.foundId = foundId
 module.exports.validateStr = validateStr

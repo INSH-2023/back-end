@@ -35,6 +35,19 @@ connection.sequelize = sequelize
 connection.users = require('../models/Users')(sequelize, DataTypes)
 connection.requests = require('../models/Requests')(sequelize, DataTypes)
 connection.items = require('../models/Items')(sequelize, DataTypes)
+connection.problems = require('../models/Problems')(sequelize, DataTypes)
+connection.solutions = require('../models/Solution/Solutions')(sequelize, DataTypes)
+connection.steps= require('../models/Solution/Steps')(sequelize, DataTypes)
+
+connection.solutions.hasMany(connection.steps, {
+    foreignKey: 'solutionId',
+    as: 'steps'
+})
+
+connection.solutions.belongsTo(connection.solutions, {
+    foreignKey: 'solutionId',
+    as: 'solution'
+})
 
 connection.sequelize.sync({ force: false })
 .then(() => {

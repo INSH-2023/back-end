@@ -37,3 +37,9 @@ app.use('/api/requests', require('./router/api/requests'))
 
 // use items router
 app.use('/api/items', require('./router/api/items'))
+
+// use problems router
+app.use('/api/problems', require('./router/api/problems'))
+
+// use solution router
+app.use('/api/solutions', require('./router/api/solutions'))

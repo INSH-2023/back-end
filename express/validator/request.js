@@ -1,43 +1,43 @@
 const errorModel = require('../response/errorModel')
-const Requests = require('../config/db').requests
+const Request = require('../config/db').requests
 
 const foundId = async (req,res) => {
-    let request = await Requests.findOne({ where: { userId: req.params.id } })
+    let request = await Request.findOne({ where: { requestId: req.params.id } })
     if(request === null) {
-        throw res.status(404).json(errorModel("request " + req.params.id + " does not exist", req.originalUrl))
+        await res.status(404).json(errorModel("request " + req.params.id + " does not exist", req.originalUrl))
     } else {
         return request
     }
 }
 
-const validateStr = (str,req,res) => {
+const validateStr = async (str) => {
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("request is not null",req.originalUrl))
+        throw new Error("request is not null")
     }else if(str.length > 100){
-        throw res.status(400).send(errorModel(str + " have not more 100 characters",req.originalUrl))
+        throw new Error(str + " have not more than 100 characters")
     }else{
         return str.trim()
     }
 }
 
-const validateEmail = (str,req,res) => {
+const validateEmail = async (str) => {
     regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     if(str === undefined || str === null || str === ""){
-        throw res.status(400).send(errorModel("request is not null",req.originalUrl))
+        throw new Error("user is not null")
     }else if(str.length > 100){
-        throw res.status(400).send(errorModel(str + " have not more 20 characters",req.originalUrl))
+        throw new Error(str + " have not more 20 characters")
     }else if(!String(str).match(regex)){
-        throw res.status(400).send(errorModel(str + " is not email format",req.originalUrl))
+        throw new Error(str + " is not email format")
     }else{
         return str.trim()
     }
 }
 
-const validateDate = (date,req,res) => {
+const validateDate = async (date) => {
     if(date === undefined || date === null || date === ""){
-        throw res.status(400).send(errorModel(date + " is not null",req.originalUrl))
-    }else if(!(new Date(date) instanceof Date && !isNaN(new Date(date)))){
-        throw res.status(400).send(errorModel(date + " is not date format",req.originalUrl))
+        throw new Error(date + " is not null")
+    }else if(!date instanceof Date && isNaN(date)){
+        throw new Error(date + " is not date format")
     }else{
         return date
     }
