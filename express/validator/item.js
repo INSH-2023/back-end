@@ -1,10 +1,10 @@
-const errorModel = require('../response/errorModel')
+const { EmptyResultError } = require('sequelize')
 const Item = require('../config/db').items
 
 const foundId = async (req,res) => {
     let item = await Item.findOne({ where: { itemId: req.params.id } })
     if(item === null) {
-        await res.status(404).json(errorModel("item " + req.params.id + " does not exist", req.originalUrl))
+        throw new EmptyResultError("item id " + req.params.id + " does not exist")
     } else {
         return item
     }
@@ -43,13 +43,12 @@ const validateSW = async (str) => {
 const validateDate = async (date) => {
     if(date === undefined || date === null || date === ""){
         throw new Error(date + " is not null")
-    }else if(!date instanceof Date && isNaN(date)){
+    }else if(!(!date instanceof Date && isNaN(date))){
         throw new Error(date + " is not date format")
     }else{
         return date
     }
 }
-
 
 module.exports.foundId = foundId
 module.exports.validateStr = validateStr

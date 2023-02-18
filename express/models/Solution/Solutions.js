@@ -19,7 +19,13 @@ module.exports = (sequelize, DataTypes) => {
         },
         tag: {
             type: DataTypes.STRING(500),
-            allowNull: true
+            allowNull: true,
+            get() {
+                return this.getDataValue('tag').split(',')
+            },
+            set(val) {
+               this.setDataValue('tag',val.join(','));
+            }
         }
     }, {
         timestamps: false

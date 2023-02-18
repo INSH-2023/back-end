@@ -1,10 +1,10 @@
-const errorModel = require('../response/errorModel')
+const { EmptyResultError } = require('sequelize')
 const Problem = require('../config/db').problems
 
 const foundId = async (req,res) => {
     let problem = await Problem.findOne({ where: { problemId: req.params.id } })
     if(problem === null) {
-        await res.status(404).json(errorModel("problem " + req.params.id + " does not exist", req.originalUrl))
+        throw new EmptyResultError("problem id " + req.params.id + " does not exist")
     } else {
         return problem
     }

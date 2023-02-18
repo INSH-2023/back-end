@@ -2,6 +2,7 @@ const express = require('express')
 const User = require('../../config/db').users
 const validator = require('../../validator/user')
 const errorModel = require('../../response/errorModel')
+const { EmptyResultError } = require('sequelize')
 const router = express.Router()
 
 // get users
@@ -12,15 +13,19 @@ router.get('/', async (req, res)=> {
 
 // get user by id
 router.get('/:id', async (req, res)=>{
-    // get user by id
-    let user = await validator.foundId(req, res)
-    res.send(user)
+    try {
+        // get user by id
+        let user = await validator.foundId(req, res)
+        res.send(user)
+    } catch (err) {
+        res.status(404).json(errorModel(err.message,req.originalUrl))
+    }
 })
 
 // create user
 router.post('/', async (req, res) => {
-    // validate body
     try {
+        // validate body
         let newUser = {
             emp_code: await validator.validateNumber(req.body.emp_code),
             full_name: await validator.validateStr(req.body.full_name,req,res),
@@ -49,11 +54,11 @@ router.post('/', async (req, res) => {
 
 // update user by id
 router.put('/:id', async (req,res)=> {
-    // get user by id
-    let user = await validator.foundId(req, res)
-
-    // validate body
     try {
+        // get user by id
+        let user = await validator.foundId(req, res)
+
+        // validate body
         let newUser = {
             emp_code: await validator.validateNumber(req.body.emp_code),
             full_name: await validator.validateStr(req.body.full_name,req,res),
@@ -76,18 +81,26 @@ router.put('/:id', async (req,res)=> {
         await User.update(newUser, { where: { userId: user.userId }})
         res.json({msg: "user id : " + req.params.id + " have been updated"})
     } catch(err) {
-        res.status(400).json(errorModel(err.message,req.originalUrl))
+        if (err instanceof EmptyResultError) {
+            res.status(404).json(errorModel(err.message,req.originalUrl))
+        } else {
+            res.status(400).json(errorModel(err.message,req.originalUrl))
+        }
     }
 })
 
 // delete user by id
 router.delete('/:id', async (req,res)=>{
-    // get user by id
-    let user = await validator.foundId(req, res)
+    try {
+        // get user by id
+        let user = await validator.foundId(req, res)
     
-    // delete user
-    await User.destroy({ where: { userId: user.userId }} )
-    res.send({msg: "item id : " + req.params.id + " have been deleted"})
+        // delete user
+        await User.destroy({ where: { userId: user.userId }} )
+        res.send({msg: "item id : " + req.params.id + " have been deleted"})
+    } catch (err) {
+        res.status(404).json(errorModel(err.message,req.originalUrl))
+    }
 })
 
 module.exports = router

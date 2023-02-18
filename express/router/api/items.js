@@ -3,6 +3,7 @@ const Item = require('../../config/db').items
 const validator = require('../../validator/item')
 const errorModel = require('../../response/errorModel')
 const router = express.Router()
+const { EmptyResultError } = require('sequelize')
 
 // get items
 router.get('/', async (req, res)=> {
@@ -13,15 +14,19 @@ router.get('/', async (req, res)=> {
 
 // get item by id
 router.get('/:id', async (req, res)=>{
-    // get item by id
-    let item = await validator.foundId(req, res)
-    res.send(item)
+    try {
+        // get item by id
+        let item = await validator.foundId(req, res)
+        res.send(item)
+    } catch (err) {
+        res.status(404).json(errorModel(err.message,req.originalUrl))
+    }
 })
 
 // create item
 router.post('/', async (req, res)=>{
-    // validate body
     try {
+        // validate body
         let newItem = {
             name: await validator.validateStr(req.body.name),
             number: await validator.validateStr(req.body.number),
@@ -42,10 +47,11 @@ router.post('/', async (req, res)=>{
 
 // update item by id
 router.put('/:id', async (req,res)=> {
-    // get item by id
-    let item = await validator.foundId(req, res)
-    // validate body
     try {
+        // get item by id
+        let item = await validator.foundId(req, res)
+
+        // validate body
         let newItem = {
             name: await validator.validateStr(req.body.name),
             number: await validator.validateStr(req.body.number),
@@ -60,18 +66,26 @@ router.put('/:id', async (req,res)=> {
         await Item.update(newItem, { where: { itemId: item.itemId }})
         res.send({msg: "item id : " + req.params.id + " have been updated"})
     } catch(err) {
-        res.status(400).json(errorModel(err.message, req.originalUrl));
+        if (err instanceof EmptyResultError) {
+            res.status(404).json(errorModel(err.message,req.originalUrl))
+        } else {
+            res.status(400).json(errorModel(err.message,req.originalUrl))
+        }
     }
 })
 
 // delete item by id
 router.delete('/:id', async (req,res)=>{
-    // get item by id
-    let item = await validator.foundId(req, res)
+    try {
+        // get item by id
+        let item = await validator.foundId(req, res)
     
-    // delete item
-    await Item.destroy({ where: { itemId: item.itemId }} )
-    res.send({msg: "item id : " + req.params.id + " have been deleted"})
+        // delete item
+        await Item.destroy({ where: { itemId: item.itemId }} )
+        res.send({msg: "item id : " + req.params.id + " have been deleted"})
+    } catch (err) {
+        res.status(404).json(errorModel(err.message,req.originalUrl))
+    }
 })
 
 

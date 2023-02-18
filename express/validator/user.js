@@ -1,11 +1,11 @@
-const errorModel = require('../response/errorModel')
+const { EmptyResultError } = require('sequelize')
 const ROLE = require('../models/Role')
 const Users = require('../config/db').users
 
 const foundId = async (req,res) => {
     let user = await Users.scope('withoutPassword').findOne({ where: {userId: req.params.id}})
     if(user === null) {
-        await res.status(404).json(errorModel("user " + req.params.id + " does not exist", req.originalUrl))
+        throw new EmptyResultError("user id " + req.params.id + " does not exist")
     } else {
         return user
     }
