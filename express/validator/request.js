@@ -36,8 +36,10 @@ const validateEmail = async (str) => {
 const validateDate = async (date) => {
     if(date === undefined || date === null || date === ""){
         throw new Error(date + " is not null")
-    }else if(!(!date instanceof Date && isNaN(date))){
-        throw new Error(date + " is not date format")
+    // }else if(!(!date instanceof  Date && isNaN(date))){
+    //     throw new Error(date + " is not date format" )
+    }else if(date instanceof  Date && !isNaN(date)){
+    throw new Error(date + " is not date format" )
     }else{
         return date
     }

@@ -4,7 +4,9 @@ const logger = require('./log/log')
 const cors = require('cors')
 
 const app = express()
+// const PORT = process.env.PORT || 5000;
 const PORT = process.env.PORT || 5000;
+
 
 // listen port
 app.listen(PORT, ()=> console.log("ACK"))
@@ -21,7 +23,9 @@ app.get('/file', (req, res)=>{
 })
 
 const corOptions = {
-    origin: 'http://localhost:3000'
+    // origin: 'http://localhost:3000'
+    origin: 'http://localhost:5173'
+
 }
 
 // body parser middleware
