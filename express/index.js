@@ -1,49 +1,32 @@
-const express = require('express')
-const path = require('path')
-const logger = require('./log/log')
-const cors = require('cors')
-
-const app = express()
-// const PORT = process.env.PORT || 5000;
-const PORT = process.env.PORT || 5000;
+// เหมือนกับ import 
+const express =require("express")
+const path =require("path")
+const logger =require('./middleware/logger')
+const cors =require('cors')
 
 
-// listen port
-app.listen(PORT, ()=> console.log("ACK"))
+const app =express()
 
-// get log from middleware
+
+// Init Middleware
 app.use(logger)
+app.use(cors())
 
-// set static folder
-app.use(express.static(path.join(__dirname, "public", "index.html")))
 
-// get file
-app.get('/file', (req, res)=>{
-    res.sendFile(path.join(__dirname, "public", "index.html"))
-})
-
-const corOptions = {
-    // origin: 'http://localhost:3000'
-    origin: 'http://localhost:5173'
-
-}
-
-// body parser middleware
-app.use(cors(corOptions))
+// Body parse middleware สำหรับแปลงค่าเพื่อสำหรับแสดงผล request ที่ส่งเข้ามา
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: false}))
 
-// use users router
-app.use('/api/users', require('./router/api/users'))
+// route ไปยังไฟล์ที่สามารถ req,res ได้
+app.use('/api/users',require('./routes/api/user.js'))
+app.use('/api/requests',require('./routes/api/request.js'))
+app.use('/api/items',require('./routes/api/item.js'))
+app.use('/api/problems',require('./routes/api/problem.js'))
+app.use('/api/solutions',require('./routes/api/solution.js'))
 
-// use requests router
-app.use('/api/requests', require('./router/api/requests'))
 
-// use items router
-app.use('/api/items', require('./router/api/items'))
 
-// use problems router
-app.use('/api/problems', require('./router/api/problems'))
 
-// use solution router
-app.use('/api/solutions', require('./router/api/solutions'))
+const PORT =process.env.PORT || 5000
+
+app.listen(PORT,()=>console.log(`server is run on port ${PORT}`))
