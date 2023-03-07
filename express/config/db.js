@@ -5,10 +5,10 @@ if (process.env.NODE_ENV !== 'production') {
 const {Sequelize, DataTypes} = require('sequelize')
 
 const sequelize = new Sequelize(
-    process.env.MYSQL_DATABASE,
-    process.env.MYSQL_USER,
-    process.env.MYSQL_PASSWORD, {
-        host: process.env.MYSQL_HOST,
+    process.env.MYSQLDB_DATABASE||'moral_it_device',
+    process.env.MYSQLDB_USER||'root',
+    process.env.MYSQLDB_PASSWORD||'Moral122022', {
+    host: process.env.MYSQLDB_HOST||'localhost',
         dialect: 'mysql',
         operatorsAliases: false,
         pool: {
