@@ -11,7 +11,7 @@ router.get('/',(req,res)=>{
 
         try {
             connection.query(
-            'SELECT * FROM moral_it_device.requests',
+            'SELECT * FROM moral_it_device.request',
                 (err,results)=>{
                     if(err){
                         console.log(err)    

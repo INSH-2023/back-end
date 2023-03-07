@@ -102,7 +102,7 @@ router.get('/',(req,res)=>{
     
     try {
         connectMysql.query(
-            'SELECT * FROM moral_it_device.users',
+            'SELECT * FROM moral_it_device.user',
             (err,results)=>{
                 if(err){
                     console.log(err)

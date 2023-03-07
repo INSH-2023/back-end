@@ -19,12 +19,10 @@ const connection =mysql.createConnection(db_config);
 // mysql connection
 const handleDisconnect=()=>{
     let connection =mysql.createConnection(db_config)
-    let status =undefined
     // ถ้าเชื่อมแล้ว server restart หรือว่า server down
     connection.connect(err=>{
         if(err){
             console.log('error when connecting to db : ',err)
-            status=false
             setTimeout(handleDisconnect,2000)
         }
     })
@@ -33,28 +31,19 @@ const handleDisconnect=()=>{
     connection.on('Error',(err)=>{
         console.log('db error',err)
         if(err.code ==='PROTOCOL_CONNECTION_LOST'){
-            status=undefined
             handleDisconnect()
         }
         else{
-            status=false
             throw err
         }
     })
 
-    return status
+  
 }
 
 
 
-// connection.connect(err=>{
-//     if(err){
-//         console.log('Error to connecting to mysql = ',err)
-//         return
-//     }    
-//     console.log('mysql successful connected !')
-// })
+
 
 module.exports= connection
-// exports.handleDisconnect=handleDisconnect
-// exports.connection=connection
+
