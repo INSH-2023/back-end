@@ -14,16 +14,24 @@ const db_config={
     idleTimeout: 60000
 }
 
-const connection =mysql.createConnection(db_config);
+let connection =mysql.createConnection(db_config);
 
 // mysql connection
-const handleDisconnect=()=>{
-    let connection =mysql.createConnection(db_config)
+const handdleConnection=()=>{
+
+    
+
+    let status =false
+
+    const connection =mysql.createConnection(db_config)
+
+    
     // ถ้าเชื่อมแล้ว server restart หรือว่า server down
     connection.connect(err=>{
         if(err){
             console.log('error when connecting to db : ',err)
-            setTimeout(handleDisconnect,2000)
+            status=true
+            setTimeout(handdleConnection,2000)
         }
     })
 
@@ -31,19 +39,33 @@ const handleDisconnect=()=>{
     connection.on('Error',(err)=>{
         console.log('db error',err)
         if(err.code ==='PROTOCOL_CONNECTION_LOST'){
-            handleDisconnect()
+            status=true
+            handdleConnection()
         }
         else{
+            status=true
             throw err
         }
     })
 
-  
+    return status
 }
 
 
 
 
 
-module.exports= connection
+// handleDisconnect()
 
+// connection.connect(err=>{
+//     if(err){
+//         console.log('Error to connecting to mysql = ',err)
+//         return
+//     }    
+//     console.log('mysql successful connected !')
+// })
+
+module.exports.handdleConnection=handdleConnection
+module.exports.connection=connection
+// exports.handleDisconnect=handleDisconnect
+// exports.connection=connection

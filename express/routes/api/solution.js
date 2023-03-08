@@ -9,7 +9,7 @@ const connectMysql=require('../../mysql/db_config')
 router.get('/',(req,res)=>{
     try {
         connectMysql.query(
-            'SELECT * FROM moral_it_device.solution',
+            'SELECT * FROM moral_it_device.solutions',
             (err,results)=>{
                 if(err){
                     console.log(err)
