@@ -247,5 +247,9 @@ router.put('/:id',async(req,res)=>{
     }
 })
 
+router.put('/',(req,res)=>{
+    res.status(400).json(errorModel('bad request !! 🤨,need param data to update!! ',req.originalUrl))
+})
+
 
 module.exports=router
