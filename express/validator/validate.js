@@ -84,7 +84,7 @@ const updateData=(req,data,table)=>{
                 }
             }
             text = text.substring(0,text.length-1)
-            
+
             let statement=`UPDATE ${table} SET ${text} WHERE ${table}Id=${id}`
 
             console.log(' ')
@@ -216,11 +216,11 @@ const checkUndefindData=async(data,table)=>{
 const validateDate =  (date,table,name) => {
  
     if(date === undefined || date === null || date === ""){
-        throw new Error(dat[0] + " is not null")
+        throw new Error(date + " is not null")
     }else{
         let dat=date.split(" ")
 
-        if(dat.length<2){
+        if(dat.length<2||(dat[0] === undefined || dat[0] === null || dat[0] === "")||(dat[1] === undefined || dat[1] === null || dat[1] === "")){
             throw new Error(`invalid date form !!`)
         }
         else if((dat[0] instanceof  Date && !isNaN(date[0])) ||(dat[1] instanceof Date && !isNaN(dat[1])) ){
