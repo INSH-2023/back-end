@@ -8,9 +8,9 @@ const connMSQL=require('../mysql/db_config')
 
 const foundId = async (req,table) => {
     let id =parseInt(req.params.id)
-    console.log('this is params id :',id)
+    // console.log('this is params id :',id)
     let statement =`SELECT * FROM moral_it_device.${table} where userId=${id}`
-    console.log(statement)
+    // console.log(statement)
     return statement
 }
 
