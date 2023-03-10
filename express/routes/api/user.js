@@ -177,7 +177,7 @@ router.delete('/:id',async(req,res)=>{
     }
 })
 
-// 
+// delete data
 router.delete('/',(req,res)=>{
     res.status(400).json(errorModel("bad request !! 😒,need params data to delete !!",req.originalUrl))
 })
