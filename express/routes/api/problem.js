@@ -7,7 +7,7 @@ const connMSQL=require('../../mysql/db_config')
 const errorModel =require('../../response/errorModel')
 
 const table ="problem"
-// get problem
+// get data
 router.get('/',async(req,res)=>{
 
     try {
@@ -19,7 +19,7 @@ router.get('/',async(req,res)=>{
                         console.log(err)
                         throw new Error(`Query ${table} error : `,err)
                     }
-                    res.status(200).json(results)
+                    return res.status(200).json(results)
                 }
             )
         }else{
@@ -33,7 +33,7 @@ router.get('/',async(req,res)=>{
 })
 
 
-// get problem by id
+// get data by id
 router.get('/:id',async(req,res)=>{
 
     try {
@@ -51,9 +51,9 @@ router.get('/:id',async(req,res)=>{
 
                     if(results.length==0){
                         console.log(`${table} id  ${req.params.id} does not exist`)
-                        res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
                     }else{
-                        res.status(200).json(results)
+                        return res.status(200).json(results)
                     }
                 }
             )
@@ -66,7 +66,6 @@ router.get('/:id',async(req,res)=>{
     }
 
 })
-
 
 // create problem
 router.post('/',async(req,res)=>{
