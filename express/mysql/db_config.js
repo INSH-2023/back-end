@@ -1,4 +1,5 @@
 const mysql =require('mysql2')
+const pool = require('mysql2/promise')
 
 // mysql config
 const db_config={
@@ -52,7 +53,25 @@ const handdleConnection=()=>{
 }
 
 
+const testinsg_pool=async()=>{
+    let testing_data=undefined
+    pool.createPool(db_config).getConnection()
+    .then(conn=>{
+        const res=conn.query('select * from user')
+        conn.release()
+        return res
+    })
+    .then(result=>{
+        testing_data=result
+        console.log(result[0])
 
+    })
+    .catch(err=>{
+        console.log(err)
+    })
+
+    console.log(testing_data)
+}
 
 
 // handleDisconnect()
@@ -67,5 +86,6 @@ const handdleConnection=()=>{
 
 module.exports.handdleConnection=handdleConnection
 module.exports.connection=connection
+module.exports.testinsg_pool=testinsg_pool
 // exports.handleDisconnect=handleDisconnect
 // exports.connection=connection
