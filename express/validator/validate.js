@@ -8,8 +8,9 @@ const ROLE = require('../model/Role')
 //find data
 const foundId =  (req,table) => {
     let id =parseInt(req.params.id)
+    let statement
     console.log('this is params id :',id)
-    let statement =`SELECT * FROM moral_it_device.${table} where ${table}Id=${id}`
+    statement =`SELECT * FROM moral_it_device.${table} where ${table}Id=${id}`
     console.log(statement)
     return statement
 }
@@ -104,14 +105,25 @@ const updateData=(req,data,table)=>{
 // validation
 const validateStr =  (str,l,table,name) => {
     let text =str
-    if(text === undefined || text === null || text === ""){
-        throw new Error(`${name} is  null`)
-    }else if(text.length > l){
-        throw new Error(`${name} :${text}  have  more than ${l} characters`)
+    if(name=='request_other'||name=='request_message'){
+        if(text.length > l){
+            throw new Error(`${name} :${text}  have  more than ${l} characters`)
+        }else{
+            console.log(`validator string / ${table} ${name} : ${text}`)
+            text=""
+            return text
+        } 
     }else{
-        console.log(`validator string / ${table} ${name} : ${text}`)
-        return text.toString().trim()
+        if(text === undefined || text === null || text === ""){
+            throw new Error(`${name} is  null`)
+        }else if(text.length > l){
+            throw new Error(`${name} :${text}  have  more than ${l} characters`)
+        }else{
+            console.log(`validator string / ${table} ${name} : ${text}`)
+            return text.toString().trim()
+        } 
     }
+    
 }
 
 
@@ -203,7 +215,7 @@ const modifyNumber=(number)=>number<10?'0'+number:number
 const checkUndefindData=async(data,table)=>{
     let status=false
     for(let d of await data){
-        if(d.value==undefined||d.value.length==0||d.value==null){
+        if(d.value==undefined||d.value==null){
             status=true
         }
     }
