@@ -9,11 +9,11 @@ const errorModel =require('../../response/errorModel')
 const table ="problem"
 // get data
 router.get('/',async(req,res)=>{
-
+    console.log('header',req.headers.subject_type)
     try {
         if(!connMSQL.handdleConnection()){
             connMSQL.connection.query(
-                `SELECT * FROM moral_it_device.${table}`,
+                `SELECT * FROM moral_it_device.${table} where problem_type='${req.headers.subject_type}';`,
                 (err,results)=>{
                     if(err){
                         console.log(err)
@@ -35,40 +35,41 @@ router.get('/',async(req,res)=>{
 
 // get data by id
 router.get('/:id',async(req,res)=>{
+    res.status(400).json(errorModel('bad request !! 😒,create data dont need params data !!',req.originalUrl))
+    // try {
+    //     if(!connMSQL.handdleConnection()){
+    //          connMSQL.connection.query(
 
-    try {
-        if(!connMSQL.handdleConnection()){
-             connMSQL.connection.query(
+    //             //this statement
+    //             validator.foundId(req,table),
 
-                //this statement
-                validator.foundId(req,table),
+    //             (err,results)=>{
+    //                 if(err){
+    //                     console.log(err)
+    //                     return res.status(400).json(errorModel(err.message,req.originalUrl))
+    //                 }
 
-                (err,results)=>{
-                    if(err){
-                        console.log(err)
-                        throw new Error(`find ${table} by id err :`,err)
-                    }
-
-                    if(results.length==0){
-                        console.log(`${table} id  ${req.params.id} does not exist`)
-                        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                    }else{
-                        return res.status(200).json(results)
-                    }
-                }
-            )
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
-        } 
-    } catch (error) {
-        res.status(500).json(errorModel(error.message,req.originalUrl))
-    }
+    //                 if(results.length==0){
+    //                     console.log(`${table} type  ${req.params.id} does not exist`)
+    //                     return res.status(404).json(errorModel(`${table} type  ${req.params.id} does not exist`,req.originalUrl))
+    //                 }else{
+    //                     return res.status(200).json(results)
+    //                 }
+    //             }
+    //         )
+    //     }else{
+    //         console.log(`Cannot connect to mysql server !!`) 
+    //         throw new Error('connection error something :',err)
+    //     } 
+    // } catch (error) {
+    //     res.status(500).json(errorModel(error.message,req.originalUrl))
+    // }
 
 })
 
 // create problem
 router.post('/',async(req,res)=>{
+    console.log(req.body)
     let data
     let status=undefined
     try{
@@ -137,7 +138,7 @@ router.delete('/:id',async(req,res)=>{
                 (err,results)=>{
                     if(err){
                         console.log(err)
-                        throw new Error(`cannot delete ${table} by id ${req.params.id} :`,err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
                     }
                         
                     console.log(results)
