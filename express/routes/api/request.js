@@ -1,6 +1,5 @@
 const express =require('express')
 const router =express.Router()
-const users =require("../../data/Users")
 const uuid =require("uuid")
 const validator = require('../../validator/validate')
 const connMSQL=require('../../mysql/db_config')
@@ -92,8 +91,10 @@ router.post('/',async(req,res)=>{
             {prop:"request_sn"              ,value: validator.validateStr(await req.body.request_sn,50,table,'request_sn'),type:'str'},
             {prop:"request_brand"           ,value: validator.validateStr(await req.body.request_brand,100,table,'request_brand'),type:'str'},
             {prop:"request_type_matchine"   ,value: validator.validateStr(await req.body.request_type_matchine,50,table,'request_type_matchine'),type:'str'},
-            {prop:"request_other"           ,value: validator.validateStr(await req.body.request_other,150,table,'request_other'),type:'str'},
+            {prop:"request_other"           ,value: await req.body.request_other,type:'str'},
             {prop:"request_problems"        ,value: validator.validateStr(await req.body.request_problems,150,table,'request_problems'),type:'str'},
+            // {prop:"request_message"        ,value: validator.validateStr(await req.body.request_message,150,table,'request_message'),type:'str'},
+            {prop:"request_message"        ,value: await req.body.request_message,type:'str'},
         
         ]
         // console.log('testing',await req.body.role)
@@ -135,6 +136,8 @@ router.post('/',async(req,res)=>{
         } catch (error) {
             res.status(500).json(errorModel(error.message,req.originalUrl))
         }
+    }else{
+        return res.status(400).json(errorModel('data not valid',req.originalUrl))
     }
 })
 
@@ -189,22 +192,23 @@ router.put('/:id',async(req,res)=>{
     let status=undefined
     try{
         data=[
-            {prop:"request_first_name"      ,value: validator.validateStr(await req.body.request_first_name,100,table,'request_first_name'),type:'str'},
-            {prop:"request_last_name"       ,value: validator.validateStr(await req.body.request_last_name,100,table,'request_last_name'),type:'str'},
-            {prop:"request_email"           ,value: validator.validateEmail(await req.body.request_email,100,table,'request_email'),type:'str'},
-            {prop:"request_group"           ,value: validator.validateStr(await req.body.request_group,100,table,'request_group'),type:'str'},
-            {prop:"request_service_type"    ,value: validator.validateStr(await req.body.request_service_type,100,table,'request_service_type'),type:'str'},
-            {prop:"request_subject"         ,value: validator.validateStr(await req.body.request_subject,100,table,'request_subject'),type:'str'},
+            // {prop:"request_first_name"      ,value: validator.validateStr(await req.body.request_first_name,100,table,'request_first_name'),type:'str'},
+            // {prop:"request_last_name"       ,value: validator.validateStr(await req.body.request_last_name,100,table,'request_last_name'),type:'str'},
+            // {prop:"request_email"           ,value: validator.validateEmail(await req.body.request_email,100,table,'request_email'),type:'str'},
+            // {prop:"request_group"           ,value: validator.validateStr(await req.body.request_group,100,table,'request_group'),type:'str'},
+            // {prop:"request_service_type"    ,value: validator.validateStr(await req.body.request_service_type,100,table,'request_service_type'),type:'str'},
+            // {prop:"request_subject"         ,value: validator.validateStr(await req.body.request_subject,100,table,'request_subject'),type:'str'},
             {prop:"request_status"          ,value: validator.validateStr(await req.body.request_status,100,table,'request_status'),type:'str'},
-            {prop:"request_req_date"        ,value: validator.validateDate(await req.body.request_req_date,table,'request_req_date'),type:'str'},
+            // {prop:"request_req_date"        ,value: validator.validateDate(await req.body.request_req_date,table,'request_req_date'),type:'str'},
             {prop:"request_assign"          ,value: validator.validateStr(await req.body.request_assign,100,table,'request_assign'),type:'str'},
-            {prop:"request_use_type"        ,value: validator.validateStr(await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
-            {prop:"request_sn"              ,value: validator.validateStr(await req.body.request_sn,50,table,'request_sn'),type:'str'},
-            {prop:"request_brand"           ,value: validator.validateStr(await req.body.request_brand,100,table,'request_brand'),type:'str'},
-            {prop:"request_type_matchine"   ,value: validator.validateStr(await req.body.request_type_matchine,50,table,'request_type_matchine'),type:'str'},
-            {prop:"request_other"           ,value: validator.validateStr(await req.body.request_other,150,table,'request_other'),type:'str'},
-            {prop:"request_problems"        ,value: validator.validateStr(await req.body.request_problems,150,table,'request_problems'),type:'str'},
-        
+            // {prop:"request_use_type"        ,value: validator.validateStr(await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
+            // {prop:"request_sn"              ,value: validator.validateStr(await req.body.request_sn,50,table,'request_sn'),type:'str'},
+            // {prop:"request_brand"           ,value: validator.validateStr(await req.body.request_brand,100,table,'request_brand'),type:'str'},
+            // {prop:"request_type_matchine"   ,value: validator.validateStr(await req.body.request_type_matchine,50,table,'request_type_matchine'),type:'str'},
+            // {prop:"request_other"           ,value: validator.validateStr(await req.body.request_other,150,table,'request_other'),type:'str'},
+            // {prop:"request_problems"        ,value: validator.validateStr(await req.body.request_problems,150,table,'request_problems'),type:'str'},
+            // {prop:"request_message"         ,value: validator.validateStr(await req.body.request_message,150,table,'request_message'),type:'str'},
+
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(data,table))

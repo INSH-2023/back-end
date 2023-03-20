@@ -79,18 +79,18 @@ router.post('/',async(req,res)=>{
     try{
         data=[
             // {prop:"userId",value: uuid.v4(),type:'int'},
-            {prop:"user_emp_code",value: validator.validateNumber(await req.body.emp_code,table,'emp_code'),type:'int'},
-            {prop:"user_first_name",value: validator.validateStr(await req.body.first_name,100,table,'first_name'),type:'str'},
-            {prop:"user_last_name",value: validator.validateStr(await req.body.last_name,100,table,'last_name'),type:'str'},
-            {prop:"user_role",value: validator.validateRole(await req.body.role,table,'role'),type:'str'},
-            {prop:"user_group",value: validator.validateStr(await req.body.group,100,table,'group'),type:'str'},
-            {prop:"user_office",value: validator.validateStr(await req.body.office,100,table,'office'),type:'str'},
-            {prop:"user_status",value: validator.validateStr(await req.body.status,100,table,'status'),type:'str'},
-            {prop:"user_position",value: validator.validateStr(await req.body.position,100,table,'position'),type:'str'},
-            {prop:"user_email",value: validator.validateEmail(await req.body.email,100,table,'email'),type:'str'},
-            {prop:"user_password",value: validator.validatePassword(await req.body.password,table,'password'),type:'str'},
-            {prop:"user_createdAt",value: validator.currentDate(table,'createdAt'),type:'str'},
-            {prop:"user_updatedAt",value: validator.currentDate(table,'updatedAt'),type:'str'}
+            {prop:"user_emp_code",value: validator.validateNumber(await req.body.user_emp_code,table,'user_emp_code'),type:'int'},
+            {prop:"user_first_name",value: validator.validateStr(await req.body.user_first_name,100,table,'user_first_name'),type:'str'},
+            {prop:"user_last_name",value: validator.validateStr(await req.body.user_last_name,100,table,'user_last_name'),type:'str'},
+            {prop:"user_role",value: validator.validateRole(await req.body.user_role,table,'user_role'),type:'str'},
+            {prop:"user_group",value: validator.validateStr(await req.body.user_group,100,table,'user_group'),type:'str'},
+            {prop:"user_office",value: validator.validateStr(await req.body.user_office,100,table,'user_office'),type:'str'},
+            {prop:"user_status",value: validator.validateStr(await req.body.user_status,100,table,'user_status'),type:'str'},
+            {prop:"user_position",value: validator.validateStr(await req.body.user_position,100,table,'user_position'),type:'str'},
+            {prop:"user_email",value: validator.validateEmail(await req.body.user_email,100,table,'user_email'),type:'str'},
+            {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'},
+            {prop:"user_createdAt",value: validator.currentDate(table,'user_createdAt'),type:'str'},
+            {prop:"user_updatedAt",value: validator.currentDate(table,'user_updatedAt'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(data,table))
@@ -189,15 +189,15 @@ router.put('/:id',async(req,res)=>{
         data=[
             // {prop:"userId",value: uuid.v4(),type:'int'},
             // {prop:"user_emp_code",value: validator.validateNumber(await req.body.emp_code,table,'emp_code'),type:'int'},
-            {prop:"user_first_name",value: validator.validateStr(await req.body.first_name,100,table,'first_name'),type:'str'},
-            {prop:"user_last_name",value: validator.validateStr(await req.body.last_name,100,table,'last_name'),type:'str'},
-            {prop:"user_role",value: validator.validateRole(await req.body.role,table,'role'),type:'str'},
-            {prop:"user_group",value: validator.validateStr(await req.body.group,100,table,'group'),type:'str'},
-            {prop:"user_office",value: validator.validateStr(await req.body.office,100,table,'office'),type:'str'},
-            {prop:"user_status",value: validator.validateStr(await req.body.status,100,table,'status'),type:'str'},
-            {prop:"user_position",value: validator.validateStr(await req.body.position,100,table,'position'),type:'str'},
-            {prop:"user_email",value: validator.validateEmail(await req.body.email,100,table,'email'),type:'str'},
-            {prop:"user_password",value: validator.validatePassword(await req.body.password,table,'password'),type:'str'},
+            {prop:"user_first_name",value: validator.validateStr(await req.body.user_first_name,100,table,'user_first_name'),type:'str'},
+            {prop:"user_last_name",value: validator.validateStr(await req.body.user_last_name,100,table,'user_last_name'),type:'str'},
+            {prop:"user_role",value: validator.validateRole(await req.body.user_role,table,'user_role'),type:'str'},
+            {prop:"user_group",value: validator.validateStr(await req.body.user_group,100,table,'user_group'),type:'str'},
+            {prop:"user_office",value: validator.validateStr(await req.body.user_office,100,table,'user_office'),type:'str'},
+            {prop:"user_status",value: validator.validateStr(await req.body.user_status,100,table,'user_status'),type:'str'},
+            {prop:"user_position",value: validator.validateStr(await req.body.user_position,100,table,'user_position'),type:'str'},
+            {prop:"user_email",value: validator.validateEmail(await req.body.user_email,100,table,'user_email'),type:'str'},
+            {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'},
             {prop:"user_updatedAt",value: validator.currentDate(table,'updatedAt'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
