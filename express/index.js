@@ -23,6 +23,7 @@ app.use('/api/requests',require('./routes/api/request.js'))
 app.use('/api/items',require('./routes/api/item.js'))
 app.use('/api/problems',require('./routes/api/problem.js'))
 app.use('/api/solutions',require('./routes/api/solution.js'))
+app.use('/api/authentication',require('./routes/api/authen.js'))
 
 
 
