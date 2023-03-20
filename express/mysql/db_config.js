@@ -53,24 +53,24 @@ const handdleConnection=()=>{
 }
 
 
-const testinsg_pool=async()=>{
+const connection_pool=async(statement)=>{
     let testing_data=undefined
-    pool.createPool(db_config).getConnection()
+    testing_data=await pool.createPool(db_config).getConnection()
     .then(conn=>{
-        const res=conn.query('select * from user')
+        const res=conn.query(statement)
         conn.release()
         return res
     })
     .then(result=>{
-        testing_data=result
-        console.log(result[0])
-
+        // console.log(result[0])
+        return  result[0]
     })
     .catch(err=>{
-        console.log(err)
+        console.log(`error something to get data :${err}`)
+        throw err
     })
 
-    console.log(testing_data)
+    return testing_data
 }
 
 
@@ -86,6 +86,6 @@ const testinsg_pool=async()=>{
 
 module.exports.handdleConnection=handdleConnection
 module.exports.connection=connection
-module.exports.testinsg_pool=testinsg_pool
+module.exports.connection_pool=connection_pool
 // exports.handleDisconnect=handleDisconnect
 // exports.connection=connection
