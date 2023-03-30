@@ -160,8 +160,6 @@ router.post('/:id',(req,res)=>{
 
 // delete
 router.delete('/:id',async(req,res)=>{
-
-
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
