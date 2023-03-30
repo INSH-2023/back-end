@@ -89,8 +89,8 @@ router.post('/',async(req,res)=>{
             {prop:"user_position",value: validator.validateStr(await req.body.user_position,100,table,'user_position'),type:'str'},
             {prop:"user_email",value: validator.validateEmail(await req.body.user_email,100,table,'user_email'),type:'str'},
             {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'},
-            {prop:"user_createdAt",value: validator.currentDate(table,'user_createdAt'),type:'str'},
-            {prop:"user_updatedAt",value: validator.currentDate(table,'user_updatedAt'),type:'str'}
+            // {prop:"user_createdAt",value: validator.currentDate(table,'user_createdAt'),type:'str'},
+            // {prop:"user_updatedAt",value: validator.currentDate(table,'user_updatedAt'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(data,table))
@@ -198,7 +198,7 @@ router.put('/:id',async(req,res)=>{
             {prop:"user_position",value: validator.validateStr(await req.body.user_position,100,table,'user_position'),type:'str'},
             {prop:"user_email",value: validator.validateEmail(await req.body.user_email,100,table,'user_email'),type:'str'},
             {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'},
-            {prop:"user_updatedAt",value: validator.currentDate(table,'updatedAt'),type:'str'}
+            // {prop:"user_updatedAt",value: validator.currentDate(table,'updatedAt'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(data,table))

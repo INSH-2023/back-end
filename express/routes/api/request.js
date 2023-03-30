@@ -99,7 +99,7 @@ router.post('/',async(req,res)=>{
             // {prop:"request_req_date"        ,value: 'CURRENT_TIMESTAMP()',type:'date'},
             {prop:"request_assign"          ,value: validator.validateStr(await req.body.request_assign,100,table,'request_assign'),type:'str'},
             {prop:"request_use_type"        ,value: validator.validateStr(await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
-            {prop:"request_sn"              ,value: await req.body.request_other,type:'str'},
+            {prop:"request_sn"              ,value: await req.body.request_sn,type:'str'},
             {prop:"request_brand"           ,value: await req.body.request_brand,type:'str'},
             {prop:"request_type_matchine"   ,value: await req.body.request_type_matchine,type:'str'},
             {prop:"request_other"           ,value: await req.body.request_other,type:'str'},
