@@ -6,13 +6,47 @@ const ROLE = require('../enum/Role')
 
 // make statement
 //find data
-const foundId =  (req,table) => {
+const foundId =  (req,
+    table=undefined,
+    select=undefined,
+    where=undefined,
+    join=undefined,
+    on=undefined ) => {
     let id =parseInt(req.params.id)
     let statement
     console.log('this is params id :',id)
-    statement =`SELECT * FROM moral_it_device.${table} where ${table}Id=${id}`
-    console.log(statement)
-    return statement
+    if(select!=undefined||where!=undefined||(join!=undefined&&on!=undefined)){
+        
+        if(select!=undefined &&select.length > 0){
+            
+            statement=`SELECT ${select} FROM moral_it_device.${table} `
+        }else{
+            statement=`SELECT * FROM moral_it_device.${table} `
+        }
+
+        if(where!=undefined && where.length != 0){
+            statement+=` WHERE ${where} `
+        }
+
+        if(join!=undefined && join.length !=0 && on.length!=0){
+            statement+=` JOIN ${join} on ${on}`
+        }
+
+        if(statement.length==0 ||statement==undefined ||statement==null){
+            throw new Error('cannot create script')
+        }
+        console.log(statement)
+        return statement
+
+    }else{
+        statement=''
+        statement =`SELECT * FROM moral_it_device.${table} where ${table}Id=${id}`
+        console.log(statement)
+        return statement
+
+    }
+    console.log('cannot create statement')
+    
 }
 
 // create data
@@ -33,7 +67,7 @@ const createData= (data,table)=>{
             if(v.type=='str'){
                 text=text+','+"'"+v.value+"'"
             }else
-            if(v.type=='int'){
+            if(v.type=='int'||v.type=='date'){
                 text=text+','+v.value
             }
         }

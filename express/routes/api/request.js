@@ -15,8 +15,18 @@ router.get('/',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
+            // let data=[]
+            // data = await connMSQL.connection_pool(
+            // `SELECT request_first_name,request_last_name,request_email,request_group,request_service_type,request_subject,request_status,DATE_FORMAT(request_req_date,"%Y-%m-%d %H:%i:%s") as request_req_date,request_assign,request_use_type,request_sn,request_brand,request_type_matchine,request_other,request_problems,request_message
+            //  FROM moral_it_device.${table}`)
+            // if(data.length==0){
+            //     return res.status(400).json(errorModel(err.message,req.originalUrl))
+            // }else{
+            //     return res.status(200).json(data)
+            // }
             connMSQL.connection.query(
-                `SELECT * FROM moral_it_device.${table}`,
+                `SELECT requestId,request_first_name,request_last_name,request_email,request_group,request_service_type,request_subject,request_status,DATE_FORMAT(request_req_date,"%Y-%m-%d %H:%i:%s") as request_req_date,request_assign,request_use_type,request_sn,request_brand,request_type_matchine,request_other,request_problems,request_message
+                FROM moral_it_device.request`,
                 (err,results)=>{
                     if(err){
                         console.log(err)
@@ -50,7 +60,7 @@ router.get('/:id',async(req,res)=>{
                 (err,results)=>{
                     if(err){
                         console.log(err)
-                        throw new Error(`find ${table} by id err :`,err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
                     }
 
                     if(results.length==0){
@@ -85,12 +95,13 @@ router.post('/',async(req,res)=>{
             {prop:"request_service_type"    ,value: validator.validateStr(await req.body.request_service_type,100,table,'request_service_type'),type:'str'},
             {prop:"request_subject"         ,value: validator.validateStr(await req.body.request_subject,100,table,'request_subject'),type:'str'},
             {prop:"request_status"          ,value: validator.validateStr(await req.body.request_status,100,table,'request_status'),type:'str'},
-            {prop:"request_req_date"        ,value: validator.validateDate(await req.body.request_req_date,table,'request_req_date'),type:'str'},
+            // {prop:"request_req_date"        ,value: validator.validateDate(await req.body.request_req_date,table,'request_req_date'),type:'str'},
+            // {prop:"request_req_date"        ,value: 'CURRENT_TIMESTAMP()',type:'date'},
             {prop:"request_assign"          ,value: validator.validateStr(await req.body.request_assign,100,table,'request_assign'),type:'str'},
             {prop:"request_use_type"        ,value: validator.validateStr(await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
-            {prop:"request_sn"              ,value: validator.validateStr(await req.body.request_sn,50,table,'request_sn'),type:'str'},
-            {prop:"request_brand"           ,value: validator.validateStr(await req.body.request_brand,100,table,'request_brand'),type:'str'},
-            {prop:"request_type_matchine"   ,value: validator.validateStr(await req.body.request_type_matchine,50,table,'request_type_matchine'),type:'str'},
+            {prop:"request_sn"              ,value: await req.body.request_sn,type:'str'},
+            {prop:"request_brand"           ,value: await req.body.request_brand,type:'str'},
+            {prop:"request_type_matchine"   ,value: await req.body.request_type_matchine,type:'str'},
             {prop:"request_other"           ,value: await req.body.request_other,type:'str'},
             {prop:"request_problems"        ,value: validator.validateStr(await req.body.request_problems,150,table,'request_problems'),type:'str'},
             // {prop:"request_message"        ,value: validator.validateStr(await req.body.request_message,150,table,'request_message'),type:'str'},

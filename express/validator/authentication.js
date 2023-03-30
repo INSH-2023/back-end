@@ -5,18 +5,20 @@ const logIn=async(req)=>{
     let return_data=[]
     let {email:email,password:password}= req.body
     
-    let statement =`SELECT userId,user_email,user_password FROM moral_it_device.user WHERE user_email="${email}"`
+    let statement =`SELECT userId,user_emp_code,user_email,user_role,user_password FROM moral_it_device.user WHERE user_email="${email}"`
 
-    let [sqlD] =await connMSQL.connection_pool(statement)
+    let sqlD={}
+    let [{userId,user_emp_code,user_email,user_role,user_password}]=await connMSQL.connection_pool(statement)
 
-    // console.log('from sql :', sqlD)
+    console.log('from sql :', sqlD)
     // console.log(`data : ${email} / ${password}`)
     
     if(sqlD==null||sqlD==undefined){
         status = false
     }else{
-        if(sqlD.user_email.toLowerCase().trim()==email.toLowerCase().trim() && sqlD.user_password==password){
+        if(user_email.toLowerCase().trim()==email.toLowerCase().trim() && user_password==password){
             status=true
+            sqlD={userId:userId,user_emp_code,user_email, user_role:user_role}
         }else{
             status = false
         }
