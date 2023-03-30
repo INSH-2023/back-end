@@ -21,7 +21,7 @@ router.get('/',async(req,res)=>{
                 (err,results)=>{
                     if(err){
                         console.log(err)
-                        throw new Error(`Query ${table} error : `,err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
                     }
                     return res.status(200).json(results)
                 }
@@ -45,12 +45,12 @@ router.get('/:id',async(req,res)=>{
              connMSQL.connection.query(
 
                 //this statement
-                validator.foundId(req,table),
+                validator.foundId(req,table,'*',`user_emp_code=${req.params.id}`),
 
                 (err,results)=>{
                     if(err){
                         console.log(err)
-                        throw new Error(`find ${table} by id err :`,err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
                     }
 
                     if(results.length==0){
