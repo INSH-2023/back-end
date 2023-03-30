@@ -54,7 +54,7 @@ const handdleConnection=()=>{
 
 
 const connection_pool=async(statement)=>{
-    let testing_data={status_pool:undefined,data:[]}
+    let testing_data={status_pool:undefined,data:[],msg:''}
     try {
         
         testing_data.data = await pool.createPool(db_config).getConnection()
@@ -77,6 +77,7 @@ const connection_pool=async(statement)=>{
     } catch (error) {
         console.log(error)
         testing_data.status_pool=false
+        testing_data.msg=error
     }
 
     return testing_data
