@@ -14,11 +14,13 @@ router.get('/',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             connMSQL.connection.query(
-                `SELECT * FROM moral_it_device.${table}`,
+                // `SELECT * FROM moral_it_device.${table}`,
+                `SELECT item_name,item_number,item_type,user_first_name,user_last_name,user_email,user_group FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code=item.user_emp_code;
+                `,
                 (err,results)=>{
                     if(err){
                         console.log(err)
-                        throw new Error(`Query ${table} error : `,err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
                     }
                     res.status(200).json(results)
                 }
@@ -36,18 +38,19 @@ router.get('/',async(req,res)=>{
 
 // get item by id
 router.get('/:id',async(req,res)=>{
-
     try {
         if(!connMSQL.handdleConnection()){
              connMSQL.connection.query(
 
                 //this statement
-                validator.foundId(req,table),
+                `SELECT item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};`
+                ,
+                // validator.foundId(req,table),
 
                 (err,results)=>{
                     if(err){
                         console.log(err)
-                        throw new Error(`find ${table} by id err :`,err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
                     }
 
                     if(results.length==0){
