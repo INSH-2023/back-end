@@ -60,7 +60,7 @@ const createData= (data,table)=>{
         
         let text=''        
         // format 
-        fields =data.reduce((value,cValue)=>value+","+cValue.prop,"").substring(1)
+        fields = data.reduce((value,cValue)=>value+","+cValue.prop,"").substring(1)
         // console.log(fields)
         // format value
         for(let v of data){
@@ -93,7 +93,6 @@ const deleteData=(req,table)=>{
         // console.log(id)
         // console.log(table)
         let statement =`DELETE FROM ${table} WHERE ${table}Id = ${id}`
-        console.log(statement)
         return statement        
     }
 
@@ -129,37 +128,34 @@ const updateData=(req,data,table)=>{
         }else{
             console.log("data is undefind cannot get fields")
         }
-
-
     }
 }
 
 
 
 // validation
-const validateStr =  (str,l,table,name) => {
-    let text =str
-    if(name=='request_other'||name=='request_message'){
-        if(text.length > l){
+const validateStrNotNull = (str,l,table,name) => {
+    let text = str
+    if(text == null || text == undefined) {
+        throw new Error(`${name} is null or undefined`)
+    }
+    else if(text.length > l){
             throw new Error(`${name} :${text}  have  more than ${l} characters`)
-        }else{
-            console.log(`validator string / ${table} ${name} : ${text}`)
-            text=""
-            return text
-        } 
     }else{
-        if(text === undefined || text === null || text === ""){
-            throw new Error(`${name} is  null`)
-        }else if(text.length > l){
-            throw new Error(`${name} :${text}  have  more than ${l} characters`)
-        }else{
             console.log(`validator string / ${table} ${name} : ${text}`)
             return text.toString().trim()
-        } 
-    }
-    
+    } 
 }
 
+const validateStrNull = (str,l,table,name) => {
+    let text = str
+    if(text.length > l || isNaN(text)){
+        throw new Error(`${name} :${text}  have  more than ${l} characters`)
+    } else {
+        console.log(`validator string / ${table} ${name} : ${text}`)
+        return text == null ? null : text.toString().trim()
+    } 
+}
 
 const validateNumber =  (int,table,name) => {
     if(int === undefined || int === null){
@@ -176,7 +172,6 @@ const validateNumber =  (int,table,name) => {
         return parseInt(number)
     }
 }
-
 
 const validateEmail =  (str,l,table,name) => {
     let text = str
@@ -273,7 +268,8 @@ const validateDate =  (date,table,name) => {
 }
 
 module.exports.foundId = foundId
-module.exports.validateStr = validateStr
+module.exports.validateStrNotNull = validateStrNotNull
+module.exports.validateStrNull = validateStrNull
 module.exports.validateNumber = validateNumber
 module.exports.validateEmail = validateEmail
 module.exports.validatePassword = validatePassword

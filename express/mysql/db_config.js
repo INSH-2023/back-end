@@ -73,7 +73,6 @@ const connection_pool=async(statement)=>{
     return testing_data
 }
 
-
 // handleDisconnect()
 
 // connection.connect(err=>{
