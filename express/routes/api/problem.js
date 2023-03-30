@@ -12,7 +12,18 @@ router.get('/',async(req,res)=>{
     console.log('header',req.headers.subject_type)
     try {
         if(!connMSQL.handdleConnection()){
-            if (req.headers.subject_type == undefined) {
+            if ( req.headers.subject_type == undefined || req.headers.subject_type == null ) {
+                connMSQL.connection.query(
+                    `SELECT * FROM moral_it_device.${table};`,
+                    (err,results)=>{
+                    if(err){
+                        console.log(err)
+                        throw new Error(`Query ${table} error : `,err)
+                    }
+                    return res.status(200).json(results)
+                }
+                )
+            } else {
                 connMSQL.connection.query(
                     `SELECT * FROM moral_it_device.${table} where problem_type='${req.headers.subject_type}';`,
                     (err,results)=>{
@@ -24,8 +35,7 @@ router.get('/',async(req,res)=>{
                 }
                 )
             }
-
-        }else{
+        } else {
             console.log(`Cannot connect to mysql server !!`) 
             throw new Error('connection error something :',err)
         }

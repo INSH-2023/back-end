@@ -36,6 +36,30 @@ router.get('/',async(req,res)=>{
     }
 })
 
+// get user data by admin
+router.get('/role/:role',async(req,res)=>{
+    // connMSQL.testinsg_pool()
+    try {
+        if(!connMSQL.handdleConnection()){
+            connMSQL.connection.query(
+                `SELECT * FROM moral_it_device.${table} WHERE user_role ='${req.params.role}'`,
+                (err,results)=>{
+                    if(err){
+                        console.log(err)
+                        return res.status(400).json(errorModel(err.message,req.originalUrl))
+                    }
+                    return res.status(200).json(results)
+                }
+            )
+        }else{
+            console.log(`Cannot connect to mysql server !!`) 
+            throw new Error('connection error something :',err)
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(errorModel(error.message,req.originalUrl))
+    }
+})
 
 // get data by id
 router.get('/:id',async(req,res)=>{
