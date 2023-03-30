@@ -5,7 +5,7 @@ const pool = require('mysql2/promise')
 const db_config={
     host: process.env.MYSQLDB_HOST||'localhost',
     user: process.env.MYSQLDB_USER||'root',
-    password: process.env.MYSQLDB_PASSWORD||'Moral122022',
+    password: process.env.MYSQLDB_PASSWORD||'(Pheeraprt0123)',
     database: process.env.MYSQLDB_DATABASE||'moral_it_device',
     port:process.env.MYSQLDB_PORT||3306,
     // option
@@ -54,21 +54,30 @@ const handdleConnection=()=>{
 
 
 const connection_pool=async(statement)=>{
-    let testing_data=undefined
-    testing_data=await pool.createPool(db_config).getConnection()
-    .then(conn=>{
-        const res=conn.query(statement)
-        conn.release()
-        return res
-    })
-    .then(result=>{
-        // console.log(result[0])
-        return  result[0]
-    })
-    .catch(err=>{
-        console.log(`error something to get data :${err}`)
-        throw err
-    })
+    let testing_data={status_pool:undefined,data:[]}
+    try {
+        
+        testing_data.data = await pool.createPool(db_config).getConnection()
+            .then(conn=>{
+                const res=conn.query(statement)
+                conn.release()
+                return res
+            })
+            .then(result=>{
+                // console.log(result[0])
+                return  result[0]
+            })
+            .catch(err=>{
+                console.log(`error something to get data :${err}`)
+                throw err
+            })
+
+        testing_data.status_pool=true
+
+    } catch (error) {
+        console.log(error)
+        testing_data.status_pool=false
+    }
 
     return testing_data
 }
