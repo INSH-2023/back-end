@@ -64,7 +64,7 @@ const connection_pool=async(statement)=>{
                 return res
             })
             .then(result=>{
-                // console.log(result[0])
+                // console.log(result[1])
                 return  result[0]
             })
             .catch(err=>{
@@ -78,6 +78,7 @@ const connection_pool=async(statement)=>{
         console.log(error)
         testing_data.status_pool=false
         testing_data.msg=error
+        throw new Error(error)
     }
 
     return testing_data
