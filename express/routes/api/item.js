@@ -13,18 +13,26 @@ router.get('/',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
-            connMSQL.connection.query(
-                // `SELECT * FROM moral_it_device.${table}`,
-                `SELECT item_name,item_number,item_type,user_first_name,user_last_name,user_email,user_group FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code=item.user_emp_code;
-                `,
-                (err,results)=>{
-                    if(err){
-                        console.log(err)
-                        return res.status(400).json(errorModel(err.message,req.originalUrl))
-                    }
-                    res.status(200).json(results)
-                }
-            )
+            
+            let {status_pool,data} = await connMSQL.connection_pool(`SELECT item_name,item_number,item_type,user_first_name,user_last_name,user_email,user_group FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code=item.user_emp_code;`)
+            if(status_pool){
+                return res.status(400).json(errorModel(err.message,req.originalUrl))
+
+            }else{
+                return res.status(200).json(data)
+            }
+            // connMSQL.connection.query(
+            //     // `SELECT * FROM moral_it_device.${table}`,
+            //     `SELECT item_name,item_number,item_type,user_first_name,user_last_name,user_email,user_group FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code=item.user_emp_code;
+            //     `,
+            //     (err,results)=>{
+            //         if(err){
+            //             console.log(err)
+            //             return res.status(400).json(errorModel(err.message,req.originalUrl))
+            //         }
+            //         res.status(200).json(results)
+            //     }
+            // )
         }else{
             console.log(`Cannot connect to mysql server !!`) 
             throw new Error('connection error something :',err)
@@ -40,27 +48,35 @@ router.get('/',async(req,res)=>{
 router.get('/:id',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
-             connMSQL.connection.query(
+            let {status_pool,data} = await connMSQL.connection_pool(`SELECT item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};` )
+            if(status_pool){
+                return res.status(400).json(errorModel(err.message,req.originalUrl))
 
-                //this statement
-                `SELECT item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};`
-                ,
-                // validator.foundId(req,table),
+            }else{
+                return res.status(200).json(data)
+            }
+        //    console.log(data) 
+           //  connMSQL.connection.query(
 
-                (err,results)=>{
-                    if(err){
-                        console.log(err)
-                        return res.status(400).json(errorModel(err.message,req.originalUrl))
-                    }
+            //     //this statement
+            //     `SELECT item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};`
+            //     ,
+            //     // validator.foundId(req,table),
 
-                    if(results.length==0){
-                        console.log(`${table} id  ${req.params.id} does not exist`)
-                        res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                    }else{
-                        res.status(200).json(results)
-                    }
-                }
-            )
+            //     (err,results)=>{
+            //         if(err){
+            //             console.log(err)
+            //             return res.status(400).json(errorModel(err.message,req.originalUrl))
+            //         }
+
+            //         if(results.length==0){
+            //             console.log(`${table} id  ${req.params.id} does not exist`)
+            //             res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            //         }else{
+            //             res.status(200).json(results)
+            //         }
+            //     }
+            // )
         }else{
             console.log(`Cannot connect to mysql server !!`) 
             throw new Error('connection error something :',err)
