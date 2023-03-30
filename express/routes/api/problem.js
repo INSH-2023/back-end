@@ -15,10 +15,11 @@ router.get('/',async(req,res)=>{
             if ( req.headers.subject_type == undefined || req.headers.subject_type == null ) {
                 let {status_pool,data} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table};`)
                 if(status_pool){
-                    return res.status(400).json(errorModel(err.message,req.originalUrl))
-    
+                   
+                return res.status(200).json(data)
                 }else{
-                    return res.status(200).json(data)
+                    return res.status(400).json(errorModel(err.message,req.originalUrl))
+                    
                 }
                 // connMSQL.connection.query(
                 //     `SELECT * FROM moral_it_device.${table};`,
@@ -33,10 +34,10 @@ router.get('/',async(req,res)=>{
             } else {
                 let {status_pool,data} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} where problem_type='${req.headers.subject_type}';`)
                 if(status_pool){
-                    return res.status(400).json(errorModel(err.message,req.originalUrl))
+                    return res.status(200).json(data)
     
                 }else{
-                    return res.status(200).json(data)
+                    return res.status(400).json(errorModel(err.message,req.originalUrl))
                 }
 
                 // connMSQL.connection.query(
@@ -122,10 +123,10 @@ router.post('/',async(req,res)=>{
             if(!connMSQL.handdleConnection()){
                 let {status_pool,data} = await connMSQL.connection_pool(validator.createData(data,table,res))
                 if(status_pool){
-                    return res.status(400).json(errorModel(err.message,req.originalUrl))
-    
-                }else{
+                    
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+                }else{
+                    return res.status(400).json(errorModel(err.message,req.originalUrl))
                 }
                 // connMSQL.connection.query(
                         
@@ -166,10 +167,9 @@ router.delete('/:id',async(req,res)=>{
         if(!connMSQL.handdleConnection()){
             let {status_pool,data} = await connMSQL.connection_pool(validator.deleteData(req,table))
                 if(status_pool){
-                    return res.status(400).json(errorModel(`${table} id: ${req.params.id} does not exist`,req.originalUrl))
-    
-                }else{
                     return res.status(200).json({message:`delete ${table} id ${req.params.id} success!!`,status:'200'})
+                }else{
+                    return res.status(400).json(errorModel(`${table} id: ${req.params.id} does not exist`,req.originalUrl))
                 }
 
             // connMSQL.connection.query(
@@ -233,10 +233,10 @@ router.put('/:id',async(req,res)=>{
             if(!connMSQL.handdleConnection()){
                 let {status_pool,data} = await connMSQL.connection_pool(validator.updateData(req,data,table))
                 if(status_pool){
-                    return res.status(400).json(errorModel(`${table} id: ${req.params.id} does not exist`,req.originalUrl))
-    
-                }else{
                     return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
+                    
+                }else{
+                    return res.status(400).json(errorModel(`${table} id: ${req.params.id} does not exist`,req.originalUrl))
                 }
 
                 // connMSQL.connection.query(
