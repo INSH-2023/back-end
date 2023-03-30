@@ -16,10 +16,9 @@ router.get('/',async(req,res)=>{
             
             let {status_pool,data} = await connMSQL.connection_pool(`SELECT item_name,item_number,item_type,user_first_name,user_last_name,user_email,user_group FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code=item.user_emp_code;`)
             if(status_pool){
-                return res.status(400).json(errorModel(err.message,req.originalUrl))
-
-            }else{
                 return res.status(200).json(data)
+            }else{
+                return res.status(400).json(errorModel(`cannot GET data by something ${table}`,req.originalUrl))
             }
             // connMSQL.connection.query(
             //     // `SELECT * FROM moral_it_device.${table}`,
@@ -35,7 +34,7 @@ router.get('/',async(req,res)=>{
             // )
         }else{
             console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
+            throw new Error('connection error something')
         }
     } catch (error) {
         console.log(error)
@@ -50,10 +49,9 @@ router.get('/:id',async(req,res)=>{
         if(!connMSQL.handdleConnection()){
             let {status_pool,data} = await connMSQL.connection_pool(`SELECT item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};` )
             if(status_pool){
-                return res.status(400).json(errorModel(err.message,req.originalUrl))
-
-            }else{
                 return res.status(200).json(data)
+            }else{
+                return res.status(400).json(errorModel(`cannot GET data by something ${table}`,req.originalUrl))
             }
         //    console.log(data) 
            //  connMSQL.connection.query(
@@ -79,17 +77,12 @@ router.get('/:id',async(req,res)=>{
             // )
         }else{
             console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
+            throw new Error('connection error something')
         } 
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
 
 })
-
-
-
-
-
 
 module.exports=router
