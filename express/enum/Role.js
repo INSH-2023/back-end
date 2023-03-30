@@ -1,7 +1,7 @@
-const Role = Object.freeze({
+const role = Object.freeze({
     Admin_it: 'admin_it',
     Admin_pr: 'admin_pr',
     User: 'user'
 })
 
-module.exports = Role
+module.exports = role

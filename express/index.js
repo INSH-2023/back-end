@@ -25,9 +25,6 @@ app.use('/api/problems',require('./routes/api/problem.js'))
 app.use('/api/solutions',require('./routes/api/solution.js'))
 app.use('/api/authentication',require('./routes/api/authen.js'))
 
-
-
-
 const PORT =process.env.PORT || 5000
 
 app.listen(PORT,()=>console.log(`server is run on port ${PORT}`))

@@ -1,5 +1,5 @@
 // const { EmptyResultError } = require('sequelize')
-const ROLE = require('../model/Role')
+const ROLE = require('../enum/Role')
 
 // const Users = require('../config/db').users
 
@@ -185,10 +185,6 @@ const validateRole =  (str,table,name) => {
     }
 }
 
-
-
-
-
 const currentDate =(table,name)=>{
     const date= new Date()
     let now_utc=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),date.getHours(),date.getMinutes(),date.getSeconds())
@@ -200,9 +196,7 @@ const currentDate =(table,name)=>{
 
 }
 
-
 const modifyNumber=(number)=>number<10?'0'+number:number
-
 
 // const validateUnique = (newUser,user,req) => {
 //     if (req.params.id != user.userId) {
@@ -222,8 +216,6 @@ const checkUndefindData=async(data,table)=>{
     console.log(`validate data payload is bad ? / ${table} : `,status==true?'bad':'good')
     return status
 }
-
-
 
 const validateDate =  (date,table,name) => {
  

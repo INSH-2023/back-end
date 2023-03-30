@@ -3,9 +3,6 @@
 const connMSQL=require('../mysql/db_config')
 // const {handleDisconnect,connection}=require('../mysql/db_config')
 
-
-
-
 const foundId = async (req,table) => {
     let id =parseInt(req.params.id)
     // console.log('this is params id :',id)
