@@ -64,7 +64,7 @@ const connection_pool=async(statement)=>{
                 return res
             })
             .then(result=>{
-                console.log(result[0])
+                // console.log(result[0])
                 console.log('connection status : good')
                 return  result[0]
             })

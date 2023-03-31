@@ -79,11 +79,11 @@ router.get('/role/:role',async(req,res)=>{
 // })
 
 // get data by id
-router.get('/:id',async(req,res)=>{
+router.get('/emp-code/:id',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`user_emp_code=${req.params.id}`))
             if(status_p && users.length!=0){
                 return res.status(200).json(users)
             }else 

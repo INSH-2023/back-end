@@ -6,7 +6,8 @@ const ROLE = require('../enum/Role')
 
 // make statement
 //find data
-const foundId =  (req,
+const foundId =  (
+    req='',
     table='',
     select='',
     where='',
@@ -14,8 +15,8 @@ const foundId =  (req,
     on='' ) => {
     let id =parseInt(req.params.id)
     let statement=''
-    console.log('this is params id :',id)
-    if(select.length!=0||where.length!=0||(join.length!=0&&on.length!=0)){
+    // console.log('this is params id :',id)
+    if(select.length!=0||where.length!=0){
         
         if(select.length!=0 ){
             
@@ -23,7 +24,7 @@ const foundId =  (req,
         }else{
             statement=`SELECT * FROM moral_it_device.${table} `
         }
-
+        
         if(where.length!=0){
             statement+=` WHERE ${where} `
         }
@@ -31,8 +32,8 @@ const foundId =  (req,
         if(join.length!=0 && on.length!=0){
             statement+=` JOIN ${join} on ${on}`
         }
-
-        if(statement.length!=0 ){
+// console.log(statement)
+        if(statement.length ==0 ){
             throw new Error('cannot create script')
         }
         console.log(statement)
