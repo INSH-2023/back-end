@@ -53,7 +53,7 @@ router.get('/:id',async(req,res)=>{
 router.get('/emp-code/:id',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(`SELECT item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};` )
+            let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(`SELECT itemId,item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};` )
             if(status_p && items.length!=0){
                 return res.status(200).json(items)
             }else

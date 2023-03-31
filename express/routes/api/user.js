@@ -77,8 +77,29 @@ router.get('/role/:role',async(req,res)=>{
 //         return res.status(500).json(errorModel(error.message,req.originalUrl))
 //     }
 // })
+router.get('/:id',async(req,res)=>{
 
-// get data by id
+    try {
+        if(!connMSQL.handdleConnection()){
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
+            if(status_p && users.length!=0){
+                return res.status(200).json(users)
+            }else 
+            if(status_p && users.length==0){
+                // console.log(msg)
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            }
+        }else{
+            console.log(`Cannot connect to mysql server !!`) 
+            throw new Error('connection error something')
+        } 
+    } catch (error) {
+        res.status(500).json(errorModel(error.message,req.originalUrl))
+    }
+
+})
+
+// get data by emp code
 router.get('/emp-code/:id',async(req,res)=>{
 
     try {
