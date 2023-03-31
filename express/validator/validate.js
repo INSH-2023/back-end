@@ -18,7 +18,6 @@ const foundId =  (req,
     if(select!=undefined||where!=undefined||(join!=undefined&&on!=undefined)){
         
         if(select!=undefined &&select.length > 0){
-            
             statement=`SELECT ${select} FROM moral_it_device.${table} `
         }else{
             statement=`SELECT * FROM moral_it_device.${table} `
@@ -46,7 +45,6 @@ const foundId =  (req,
 
     }
     console.log('cannot create statement')
-    
 }
 
 // create data
@@ -100,6 +98,7 @@ const deleteData=(req,table)=>{
 
 // update date
 const updateData=(req,data,table)=>{
+    
     if(req.params.id==null||req.params.id==undefined||req.params.id==""){
         throw new Error('please input id to update data !!')
     }else{
@@ -108,8 +107,9 @@ const updateData=(req,data,table)=>{
         if(data!=undefined){
         
             let text=''
-
+            
             for(let v of data){
+                console.log(v)
                 if(v.type=='str'){
                     text=text+ `${v.prop} = '${v.value}' ,`
                 }else

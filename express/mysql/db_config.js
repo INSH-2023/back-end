@@ -5,7 +5,7 @@ const pool = require('mysql2/promise')
 const db_config={
     host: process.env.MYSQLDB_HOST||'localhost',
     user: process.env.MYSQLDB_USER||'root',
-    password: process.env.MYSQLDB_PASSWORD||'Moral122022',
+    password: process.env.MYSQLDB_PASSWORD||'abcd1234',
     database: process.env.MYSQLDB_DATABASE||'moral_it_device',
     port:process.env.MYSQLDB_PORT||3306,
     // option
@@ -78,6 +78,7 @@ const connection_pool=async(statement)=>{
         console.log(error)
         testing_data.status_pool=false
         testing_data.msg=error
+        throw new Error(error)
     }
 
     return testing_data
