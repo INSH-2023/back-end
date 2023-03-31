@@ -12,7 +12,7 @@ router.post('/',async(req,res)=>{
             // console.log(req.body)
             // validator.logIn(req)
             let [status,data]=await validator.logIn(req)
-            if(await status==true){
+            if(status==true){
                 res.status(200).json({"message":'login successful !!',"data":data})
             }else{
                 res.status(404).json(errorModel('this account does not exist !!',req.originalUrl))
