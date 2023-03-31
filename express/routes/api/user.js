@@ -110,6 +110,9 @@ router.post('/',async(req,res)=>{
                 await connMSQL.connection_pool(validator.createData(input,table,res))
                 // error
                 return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+            } else {
+                console.log(`Cannot connect to mysql server !!`) 
+                throw new Error('connection error something :',err)
             }
         } catch (error) {
             res.status(400).json(errorModel(error.message,req.originalUrl))
@@ -123,7 +126,6 @@ router.post('/:id',(req,res)=>{
 
 // delete
 router.delete('/:id',async(req,res)=>{
-
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -137,7 +139,7 @@ router.delete('/:id',async(req,res)=>{
         }else{
                 console.log(`Cannot connect to mysql server !!`) 
                 throw new Error('connection error something :',err)
-        } 
+        }
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }

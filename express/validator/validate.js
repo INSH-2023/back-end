@@ -107,9 +107,8 @@ const updateData=(req,data,table)=>{
         if(data!=undefined){
         
             let text=''
-            
+
             for(let v of data){
-                console.log(v)
                 if(v.type=='str'){
                     text=text+ `${v.prop} = '${v.value}' ,`
                 }else
@@ -131,8 +130,6 @@ const updateData=(req,data,table)=>{
     }
 }
 
-
-
 // validation
 const validateStrNotNull = (str,l,table,name) => {
     let text = str
@@ -140,7 +137,7 @@ const validateStrNotNull = (str,l,table,name) => {
         throw new Error(`${name} is null or undefined`)
     }
     else if(text.length > l){
-            throw new Error(`${name} :${text}  have  more than ${l} characters`)
+            throw new Error(`${name} :${text} have more than ${l} characters`)
     }else{
             console.log(`validator string / ${table} ${name} : ${text}`)
             return text.toString().trim()
@@ -149,8 +146,8 @@ const validateStrNotNull = (str,l,table,name) => {
 
 const validateStrNull = (str,l,table,name) => {
     let text = str
-    if(text.length > l || isNaN(text)){
-        throw new Error(`${name} :${text}  have  more than ${l} characters`)
+    if(text.length > l){
+        throw new Error(`${name} :${text} have more than ${l} characters`)
     } else {
         console.log(`validator string / ${table} ${name} : ${text}`)
         return text == null ? null : text.toString().trim()
