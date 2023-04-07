@@ -69,9 +69,7 @@ router.get('/:id',async(req,res)=>{
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
-
 })
-
 
 // create user
 router.post('/',async(req,res)=>{

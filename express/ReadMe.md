@@ -21,3 +21,6 @@ npm i mysql
 
 <!-- ติดตั้ง cross origin สำหรับเชื่อมกับ back-end -->
 npm i cors
+
+<!-- ติดตั้ง multer สำหรับจัดการ file แบบ multipart-->
+npm i multer
