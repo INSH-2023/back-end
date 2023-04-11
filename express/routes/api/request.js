@@ -9,10 +9,18 @@ const table='request'
 
 // get data
 router.get('/',async(req,res)=>{
-
+    // can sorted data
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool,data} = await connMSQL.connection_pool(`SELECT requestId,request_first_name,request_last_name,request_email,request_group,request_service_type,request_subject,request_status,DATE_FORMAT(request_req_date,"%Y-%m-%d %H:%i:%s") as request_req_date,request_assign,request_use_type,request_sn,request_brand,request_type_matchine,request_other,request_problems,request_message FROM moral_it_device.request`)
+            let columns = ['first_name','last_name','email','group','service_type','subject','status',
+            'req_date','assign','use_type','sn','brand','type_matchine','other','problems','message']
+            let {status_pool,data} = await connMSQL.connection_pool(
+                `SELECT requestId,request_first_name,request_last_name,request_email,request_group,
+                request_service_type,request_subject,request_status,DATE_FORMAT(request_req_date,"%Y-%m-%d %H:%i:%s") 
+                as request_req_date,request_assign,request_use_type,request_sn,request_brand,request_type_matchine,
+                request_other,request_problems,request_message FROM moral_it_device.request 
+                order by request${columns.includes(req.query.sort)
+                ? '_' + req.query.sort : 'Id'} ${req.query.sortType == 'desc' ? 'desc': 'asc'}`)
             return res.status(200).json(data)
         } else {
             console.log(`Cannot connect to mysql server !!`) 
@@ -24,18 +32,18 @@ router.get('/',async(req,res)=>{
     }
 })
 
-
 // get data by id
 router.get('/:id',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table))
-                if(data.length==0){
-                    // console.log(`${table} id  ${req.params.id} does not exist`)
-                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                } else {
-                    return res.status(200).json(data) 
-                }
+            if (data.length == 0) {
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            }else if(!status_pool){
+                return res.status(400).json(errorModel(`cannot GET data by something ${table}`,req.originalUrl))
+            }else{
+                return res.status(200).json(data)
+            }
         } else {
             console.log(`Cannot connect to mysql server !!`) 
             throw new Error('connection error something :',err)
@@ -107,7 +115,6 @@ router.delete('/:id',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`requestId=${req.params.id}`))
-            console.log(data)
             if (data.length == 0) {
                 return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`,req.originalUrl))
             } else {

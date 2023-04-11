@@ -17,8 +17,6 @@ router.post('/',async(req,res)=>{
             }else{
                 res.status(404).json(errorModel('this account does not exist !!',req.originalUrl))
             }
-
-
         }else{
             console.log(`Cannot connect to mysql server !!`) 
             throw new Error('connection error something :',err)

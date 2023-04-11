@@ -1,46 +1,38 @@
 const express =require('express')
 const router =express.Router()
-// const users =require("../../data/Users")
-const uuid =require("uuid")
 const validator = require('../../validator/validate')
 const connMSQL=require('../../mysql/db_config')
 const errorModel =require('../../response/errorModel')
-const Role = require('../../enum/Role')
 
+const viewTable='userview'
 const table='user'
-
-let statement_update=undefined
-let statement_delete=undefined
 
 // get data
 router.get('/',async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         if(!connMSQL.handdleConnection()){
-            // get user when pool
-            let {status_pool,data} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table}`)
-            return res.status(200).json(data)
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
-        }
-    } catch (error) {
-        console.log(error)
-        return res.status(400).json(errorModel(error.message,req.originalUrl))
-    }
-})
-
-// get user data by admin
-router.get('/role/:role',async(req,res)=>{
-    // connMSQL.testinsg_pool()
-    try {
-        if(!connMSQL.handdleConnection()){
-            // get user with roles
-            let {status_pool,data} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_role ='${req.params.role}'`)
-            if (data.length==0) {
-                return res.status(404).json(errorModel(`${table} role ${req.params.role} does not exist`,req.originalUrl))
+            let results
+            if (isNaN(req.query.role)) {
+                // get user when pool
+                results = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable}`)
+            } else {
+                results = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable} WHERE user_role ='${req.query.role}'`)
             }
-            return res.status(200).json(data)
+            if (!results.status_pool) {
+
+                return res.status(400).json(errorModel(`cannot GET data by something ${table}`,req.originalUrl))
+            }else{
+                results.data.forEach(user => {
+                    user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
+                        timeZone: 'Asia/Bangkok',
+                    })
+                    user.user_updatedAt =user.user_updatedAt.toLocaleString('th-TH', {
+                        timeZone: 'Asia/Bangkok',
+                    })
+                })
+                return res.status(200).json(results.data)
+            }
         }else{
             console.log(`Cannot connect to mysql server !!`) 
             throw new Error('connection error something :',err)
@@ -56,10 +48,18 @@ router.get('/:id',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
+            let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
             if(data.length==0){
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }else{
+                data.forEach(user => {
+                    user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
+                        timeZone: 'Asia/Bangkok',
+                    })
+                    user.user_updatedAt =user.user_updatedAt.toLocaleString('th-TH', {
+                        timeZone: 'Asia/Bangkok',
+                    })
+                })
                 return res.status(200).json(data)
             }
         }else{
