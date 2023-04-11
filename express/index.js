@@ -21,6 +21,7 @@ app.use('/api/problems',require('./routes/api/problem.js'))
 app.use('/api/solutions',require('./routes/api/solution.js'))
 app.use('/api/authentication',require('./routes/api/authen.js'))
 app.use('/api/solutions/files',require('./routes/api/solutionFile.js'))
+app.use('/api/image',require('./routes/api/images.js'))
 
 const PORT = process.env.PORT || 5000
 
