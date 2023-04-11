@@ -13,7 +13,8 @@ const db_config={
     waitForConnections: true,
     connectionLimit: 10,
     maxIdle: 50, // max idle connections, the default value is the same as `connectionLimit`
-    idleTimeout: 60000
+    idleTimeout: 60000,
+    queueLimit: 0
 }
 
 let connection =mysql.createConnection(db_config);

@@ -21,7 +21,7 @@ router.post('/',async(req,res)=>{
 
         }else{
             console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
+            throw new Error('connection error something :')
         }
         // validator.login(data)
     } catch (error) {
