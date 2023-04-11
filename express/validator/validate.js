@@ -6,32 +6,33 @@ const ROLE = require('../enum/Role')
 
 // make statement
 //find data
-const foundId =  (req,
-    table=undefined,
-    select=undefined,
-    where=undefined,
-    join=undefined,
-    on=undefined ) => {
+const foundId =  (
+    req='',
+    table='',
+    select='',
+    where='',
+    join='',
+    on='' ) => {
     let id =parseInt(req.params.id)
-    let statement
-    console.log('this is params id :',id)
-    if(select!=undefined||where!=undefined||(join!=undefined&&on!=undefined)){
-        
+    let statement=''
+    // console.log('this is params id :',id)
+    console.log(select)
+    if(select.length!=0||where.length!=0){
         if(select!=undefined &&select.length > 0){
             statement=`SELECT ${select} FROM moral_it_device.${table} `
         }else{
             statement=`SELECT * FROM moral_it_device.${table} `
         }
-
-        if(where!=undefined && where.length != 0){
+        
+        if(where.length!=0){
             statement+=` WHERE ${where} `
         }
 
-        if(join!=undefined && join.length !=0 && on.length!=0){
+        if(join.length!=0 && on.length!=0){
             statement+=` JOIN ${join} on ${on}`
         }
-
-        if(statement.length==0 ||statement==undefined ||statement==null){
+// console.log(statement)
+        if(statement.length ==0 ){
             throw new Error('cannot create script')
         }
         console.log(statement)
@@ -131,26 +132,26 @@ const updateData=(req,data,table)=>{
 }
 
 // validation
-const validateStrNotNull = (str,l,table,name) => {
-    let text = str
-    if(text == null || text == undefined) {
-        throw new Error(`${name} is null or undefined`)
+const validateStrNotNull = (str='',l,table,name) => {
+    // let text = str
+    if(str == null || str == undefined || str.length==0) {
+        throw new Error(`${name} is null `)
     }
-    else if(text.length > l){
-            throw new Error(`${name} :${text} have more than ${l} characters`)
+    else if(str.length > l){
+        throw new Error(`${name} :${str}  have  more than ${l} characters`)
     }else{
-            console.log(`validator string / ${table} ${name} : ${text}`)
-            return text.toString().trim()
+        console.log(`validator string / ${table} ${name} : ${str}`)
+        return str.toString().trim()
     } 
 }
 
-const validateStrNull = (str,l,table,name) => {
-    let text = str
-    if(text.length > l){
-        throw new Error(`${name} :${text} have more than ${l} characters`)
+const validateStrNull = (str='',l,table,name) => {
+    // let text = str
+    if(str.length > l ){
+        throw new Error(`${name} :${str}  have  more than ${l} characters`)
     } else {
-        console.log(`validator string / ${table} ${name} : ${text}`)
-        return text == null ? null : text.toString().trim()
+        console.log(`validator string / ${table} ${name} : ${str}`)
+        return str == null ? null : str.toString().trim()
     } 
 }
 
@@ -170,44 +171,44 @@ const validateNumber =  (int,table,name) => {
     }
 }
 
-const validateEmail =  (str,l,table,name) => {
-    let text = str
+const validateEmail =  (str='',l,table,name) => {
+    // let text = str
     regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     
-    if(text === undefined || text === null || text === ""){
+    if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
-    }else if(text.length > 100){
-        throw new Error(text + ` have  more than ${l} characters`)
-    }else if(!String(text).match(regex)){
-        throw new Error(text + " is not email format")
+    }else if(str.length > 100){
+        throw new Error(str + ` have  more than ${l} characters`)
+    }else if(!String(str).match(regex)){
+        throw new Error(str + " is not email format")
     }else{
-        console.log(`validate email / ${table} ${name} : ${text}`)
-        return text.toString().trim()
+        console.log(`validate email / ${table} ${name} : ${str}`)
+        return str.toString().trim()
     }
 }
 
 
-const validatePassword =  (str,table,name) => {
-    let text =str
-    if(text === undefined || text === null || text === ""){
+const validatePassword =  (str='',table,name) => {
+    // let text =str
+    if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
-    }else if(text.length > 16 || text.length < 8){
-        throw new Error(text + " password need have between 8 and 16 characters")
+    }else if(str.length > 16 || str.length < 8){
+        throw new Error(str + " password need have between 8 and 16 characters")
     }else{
         console.log(`validate password / ${table} ${name}`)
-        return text.toString().trim()
+        return str.toString().trim()
     }
 }
 
-const validateRole =  (str,table,name) => {
-    let text = str
-    if(text === undefined || text === null || text === ""){
+const validateRole =  (str='',table,name) => {
+    // let text = str
+    if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
-    }else if(text != ROLE.Admin_it && text != ROLE.Admin_pr && text != ROLE.User){
+    }else if(str != ROLE.Admin_it && str != ROLE.Admin_pr && str != ROLE.User){
         throw new Error("role is user , admin_it and admin_pr only")
     }else{
-        console.log(`validate role / ${table} ${name} : ${text}`)
-        return text.toString().trim()
+        console.log(`validate role / ${table} ${name} : ${str}`)
+        return str.toString().trim()
     }
 }
 

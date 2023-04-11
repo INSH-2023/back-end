@@ -11,7 +11,7 @@ const db_config={
     // option
     waitForConnections: true,
     connectionLimit: 10,
-    maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
+    maxIdle: 50, // max idle connections, the default value is the same as `connectionLimit`
     idleTimeout: 60000
 }
 
@@ -65,11 +65,14 @@ const connection_pool=async(statement)=>{
             })
             .then(result=>{
                 // console.log(result[0])
+                console.log('connection status : good')
                 return  result[0]
             })
             .catch(err=>{
                 console.log(`error something to get data :${err}`)
+                console.log('connection status : bad')
                 throw err
+                
             })
 
         testing_data.status_pool=true

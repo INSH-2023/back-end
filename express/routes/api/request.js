@@ -36,17 +36,17 @@ router.get('/',async(req,res)=>{
 router.get('/:id',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table))
-            if (data.length == 0) {
+            let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table))
+            if(status_p &&requests.length!=0){
+                return res.status(200).json(requests)
+            }else
+            if(status_p&&requests.length==0){
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-            }else if(!status_pool){
-                return res.status(400).json(errorModel(`cannot GET data by something ${table}`,req.originalUrl))
-            }else{
-                return res.status(200).json(data)
+
             }
-        } else {
+        }else{
             console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
+            throw new Error('connection error something')
         } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
@@ -79,11 +79,11 @@ router.post('/',async(req,res)=>{
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(input,table))
         // validator.createData(data,table)
-    } catch(err) {
+        } catch(err) {
         console.log(err)
         status=false
         // console.log(status)
-        res.status(400).json(errorModel(err.message,req.originalUrl))
+        return res.status(400).json(errorModel(err.message,req.originalUrl))
     }
 
     if(status==true){
@@ -106,7 +106,7 @@ router.post('/',async(req,res)=>{
 
 // create data
 router.post('/:id',(req,res)=>{
-    res.status(400).json(errorModel('bad request !! 😒,create data dont need params data !!',req.originalUrl))
+    res.status(405).json(errorModel('method not allow',req.originalUrl))
 })
 
 // delete
@@ -114,17 +114,21 @@ router.delete('/:id',async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`requestId=${req.params.id}`))
-            if (data.length == 0) {
-                return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`,req.originalUrl))
-            } else {
-                await connMSQL.connection_pool(validator.deleteData(req,table))
+            let {status_pool:status_p,data:requests,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table))
+            if(status_p&&requests.affectedRows!=0){
+                console.log(msg)
                 return res.status(200).json({message:`delete ${table} id ${req.params.id} success!!`,status:'200'})
+
+            }else
+            if(status_p&&requests.affectedRows==0){
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+
             }
-        } else {
+        }else{
                 console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something :',err)
-        } 
+                throw new Error('connection error something ')
+        }
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
@@ -177,7 +181,7 @@ router.put('/:id',async(req,res)=>{
 
 // update data
 router.put('/',(req,res)=>{
-    res.status(400).json(errorModel('bad request !! 🤨,need param data to update!! ',req.originalUrl))
+    res.status(405).json(errorModel('method not allow',req.originalUrl))
 })
 
 module.exports=router

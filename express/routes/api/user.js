@@ -7,23 +7,37 @@ const errorModel =require('../../response/errorModel')
 const viewTable='userview'
 const table='user'
 
+
 // get data
 router.get('/',async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         if(!connMSQL.handdleConnection()){
-            let results
-            if (isNaN(req.query.role)) {
-                // get user when pool
-                results = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable}`)
-            } else {
-                results = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable} WHERE user_role ='${req.query.role}'`)
+            // get user when pool
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table}`)
+            
+            if(status_p){
+                return res.status(200).json(users)
             }
-            if (!results.status_pool) {
+        }else{
+            console.log(`Cannot connect to mysql server !!`) 
+            throw new Error('connection error something')
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(errorModel(error.message,req.originalUrl))
+    }
+})
 
-                return res.status(400).json(errorModel(`cannot GET data by something ${table}`,req.originalUrl))
-            }else{
-                results.data.forEach(user => {
+// get user data by admin
+router.get('/role/:role',async(req,res)=>{
+    // connMSQL.testinsg_pool()
+    try {
+        if(!connMSQL.handdleConnection()){
+            // get user with roles
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_role ='${req.params.role}'`)
+            if (status_p && users.length!=0) {
+                users.forEach(user => {
                     user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
                         timeZone: 'Asia/Bangkok',
                     })
@@ -31,11 +45,16 @@ router.get('/',async(req,res)=>{
                         timeZone: 'Asia/Bangkok',
                     })
                 })
-                return res.status(200).json(results.data)
+                return res.status(200).json(users)
+            }else 
+            if(status_p && users.length==0){
+                console.log(msg)
+                return res.status(404).json(errorModel(`${table} role ${req.params.role} does not exist`,req.originalUrl))
             }
+     
         }else{
             console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
+            throw new Error('connection error something')
         }
     } catch (error) {
         console.log(error)
@@ -43,16 +62,13 @@ router.get('/',async(req,res)=>{
     }
 })
 
-// get data by id
 router.get('/:id',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
-            if(data.length==0){
-                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-            }else{
-                data.forEach(user => {
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
+            if(status_p && users.length!=0){
+                users.forEach(user => {
                     user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
                         timeZone: 'Asia/Bangkok',
                     })
@@ -60,11 +76,38 @@ router.get('/:id',async(req,res)=>{
                         timeZone: 'Asia/Bangkok',
                     })
                 })
-                return res.status(200).json(data)
+                return res.status(200).json(users)
+            }else 
+            if(status_p && users.length==0){
+                // console.log(msg)
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }
         }else{
             console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
+            throw new Error('connection error something')
+        } 
+    } catch (error) {
+        res.status(500).json(errorModel(error.message,req.originalUrl))
+    }
+
+})
+
+// get data by emp code
+router.get('/emp-code/:id',async(req,res)=>{
+
+    try {
+        if(!connMSQL.handdleConnection()){
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`user_emp_code=${req.params.id}`))
+            if(status_p && users.length!=0){
+                return res.status(200).json(users)
+            }else 
+            if(status_p && users.length==0){
+                // console.log(msg)
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            }
+        }else{
+            console.log(`Cannot connect to mysql server !!`) 
+            throw new Error('connection error something')
         } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
@@ -87,9 +130,7 @@ router.post('/',async(req,res)=>{
             {prop:"user_status",value: validator.validateStrNotNull(await req.body.user_status,100,table,'user_status'),type:'str'},
             {prop:"user_position",value: validator.validateStrNotNull(await req.body.user_position,100,table,'user_position'),type:'str'},
             {prop:"user_email",value: validator.validateEmail(await req.body.user_email,100,table,'user_email'),type:'str'},
-            {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'},
-            // {prop:"user_createdAt",value: validator.currentDate(table,'user_createdAt'),type:'str'},
-            // {prop:"user_updatedAt",value: validator.currentDate(table,'user_updatedAt'),type:'str'}
+            {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(input,table))
@@ -103,17 +144,24 @@ router.post('/',async(req,res)=>{
     }
 
     if(status==true){
+
         try {
             if(!connMSQL.handdleConnection()){
-                await connMSQL.connection_pool(validator.createData(input,table,res))
+                let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
+                
+                // console.log(users)
                 // error
-                return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-            } else {
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something :',err)
+                if(status_p){
+                    return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+
+                } else
+                if(status_p==false&&msg.errno==1062){
+                    return res.status(400).json(errorModel("Duplicate data",req.originalUrl))
+                }                   
             }
         } catch (error) {
-            res.status(400).json(errorModel(error.message,req.originalUrl))
+
+            res.status(500).json(errorModel(error.message,req.originalUrl))
         }
     }
 })
@@ -127,17 +175,22 @@ router.delete('/:id',async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
-            if(data.length==0){
-                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-            }else{
-                await connMSQL.connection_pool(validator.deleteData(req,table))
+            // delete
+            let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table))
+
+            if(status_p&&users.affectedRows!=0){
                 return res.status(200).json({message:`delete ${table} id ${req.params.id} success!!`,status:'200'})
+
+            }else
+            if(status_p&&users.affectedRows==0){
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+
             }
         }else{
                 console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something :',err)
-        }
+                throw new Error('connection error something')
+        } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
@@ -145,7 +198,7 @@ router.delete('/:id',async(req,res)=>{
 
 // delete data
 router.delete('/',(req,res)=>{
-    res.status(405).json(errorModel("method not allow !! 😒,need params data to delete !!",req.originalUrl))
+    res.status(405).json(errorModel("method not allow !! 😒",req.originalUrl))
 })
 
 
@@ -182,14 +235,18 @@ router.put('/:id',async(req,res)=>{
         // update data
         try {
             if(!connMSQL.handdleConnection()){
-                let {status_pool,data} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
-                if (data.length == 0) {
-                    return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`,req.originalUrl))
-                } else {
-                    await connMSQL.connection_pool(validator.updateData(req,input,table))
-                    return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
-                }
-            }
+                let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.updateData(req,input,table))
+                
+                    if(status_p&&users.affectedRows!=0){
+                        return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
+                    }else
+                    if(status_p&&users.affectedRows==0){
+                        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                    }
+            }else{
+                console.log(`Cannot connect to mysql server !!`) 
+                throw new Error('connection error something')
+            } 
         } catch (error) {
             res.status(400).json(errorModel(error.message,req.originalUrl))
         }
