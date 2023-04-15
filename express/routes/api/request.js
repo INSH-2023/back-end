@@ -42,7 +42,6 @@ router.get('/:id',async(req,res)=>{
             }else
             if(status_p&&requests.length==0){
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-
             }
         }else{
             console.log(`Cannot connect to mysql server !!`) 

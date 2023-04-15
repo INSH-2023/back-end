@@ -14,7 +14,7 @@ router.get('/',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             // get user when pool
-            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table}`)
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable}`)
             
             if(status_p){
                 return res.status(200).json(users)
@@ -35,7 +35,7 @@ router.get('/role/:role',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             // get user with roles
-            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_role ='${req.params.role}'`)
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable} WHERE user_role ='${req.params.role}'`)
             if (status_p && users.length!=0) {
                 users.forEach(user => {
                     user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
@@ -66,7 +66,7 @@ router.get('/:id',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`userId=${req.params.id}`))
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
             if(status_p && users.length!=0){
                 users.forEach(user => {
                     user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
@@ -97,7 +97,7 @@ router.get('/emp-code/:id',async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
-            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`user_emp_code=${req.params.id}`))
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`user_emp_code=${req.params.id}`))
             if(status_p && users.length!=0){
                 return res.status(200).json(users)
             }else 

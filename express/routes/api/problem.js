@@ -37,7 +37,6 @@ router.get('/type/:type',async(req,res)=>{
             }else
             if(status_p && problems.length==0){
                 return res.status(404).json(errorModel(`${table} type ${req.params.type} does not exist`,req.originalUrl))
-                // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }
         }
     }catch(error){
