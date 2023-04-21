@@ -8,7 +8,7 @@ const table='user'
 router.post('/',async(req,res)=>{
 
     try {
-        if(!connMSQL.handdleConnection()){
+        // if(!connMSQL.handdleConnection()){
             // console.log(req.body)
             // validator.logIn(req)
             let [status,data]=await validator.logIn(req)
@@ -19,10 +19,10 @@ router.post('/',async(req,res)=>{
             }
 
 
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :')
-        }
+        // }else{
+        //     console.log(`Cannot connect to mysql server !!`) 
+        //     throw new Error('connection error something :')
+        // }
         // validator.login(data)
     } catch (error) {
         console.log(error)

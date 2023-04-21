@@ -12,7 +12,7 @@ const table='solution'
 router.get('/',async(req,res)=>{
 
     try {
-        if(!connMSQL.handdleConnection()){
+        // if(!connMSQL.handdleConnection()){
             connMSQL.connection.query(
                 `SELECT * FROM moral_it_device.${table}`,
                 (err,results)=>{
@@ -23,10 +23,10 @@ router.get('/',async(req,res)=>{
                     res.status(200).json(results)
                 }
             )
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
-        }
+        // }else{
+        //     console.log(`Cannot connect to mysql server !!`) 
+        //     throw new Error('connection error something :',err)
+        // }
     } catch (error) {
         console.log(error)
         return res.status(500).json(errorModel(error.message,req.originalUrl))
@@ -38,7 +38,7 @@ router.get('/',async(req,res)=>{
 router.get('/:id',async(req,res)=>{
 
     try {
-        if(!connMSQL.handdleConnection()){
+        // if(!connMSQL.handdleConnection()){
              connMSQL.connection.query(
 
                 //this statement
@@ -58,10 +58,10 @@ router.get('/:id',async(req,res)=>{
                     }
                 }
             )
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
-        } 
+        // }else{
+        //     console.log(`Cannot connect to mysql server !!`) 
+        //     throw new Error('connection error something :',err)
+        // } 
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
