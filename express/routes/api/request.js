@@ -136,10 +136,11 @@ router.post('/',async(req,res)=>{
             // if(!connMSQL.handdleConnection()){
                 let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
                 if(status_p){
-                    console.log('helloworld')
-                    sendMail.sendMailTesting('request',res,sub,sendMail.report_html(type_of_use,type_machine,brand_name,problems,other,message),email)
-                    return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+                    // console.log('helloworld')
+                    res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 
+                sendMail.sendMailTesting('request',res,sub,sendMail.report_html(type_of_use,type_machine,brand_name,problems,other,message),email)
+
                 // else if(status_p==false&&msg.errno==1062){
                 //     return res.status(400).json(errorModel("Duplicate data",req.originalUrl))
                 // } 
@@ -164,7 +165,7 @@ router.post('/',async(req,res)=>{
             //     throw new Error('connection error something')
             // } 
         } catch (error) {
-            res.status(500).json(errorModel(error.message,req.originalUrl))
+            return res.status(500).json(errorModel(error.message,req.originalUrl))
         }
     }else{
         return res.status(400).json(errorModel('data not valid',req.originalUrl))
