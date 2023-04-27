@@ -2,9 +2,9 @@ const express =require('express')
 const router =express.Router()
 const uuid =require("uuid")
 const validator = require('../../validator/validate')
-const connMSQL=require('../../mysql/db_config')
+const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
-
+const sendMail=require('../../config/mailer_config')
 const table='request'
 
 
@@ -124,10 +124,20 @@ router.post('/',async(req,res)=>{
 
     if(status==true){
         try {
+            let sub ='This is summary report!!'
+            let type_of_use=await req.body.request_use_type
+            let type_machine=await req.body.request_type_matchine
+            let brand_name=await req.body.request_brand
+            let problems=await req.body.request_problems
+            let other =await req.body.request_other
+            let message =await req.body.request_message
+            let email =await req.body.request_email
 
             // if(!connMSQL.handdleConnection()){
                 let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
                 if(status_p){
+                    console.log('helloworld')
+                    sendMail.sendMailTesting('request',res,sub,sendMail.report_html(type_of_use,type_machine,brand_name,problems,other,message),email)
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 
                 // else if(status_p==false&&msg.errno==1062){

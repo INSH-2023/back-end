@@ -2,7 +2,7 @@ const express =require('express')
 const router =express.Router()
 const errorModel =require('../../response/errorModel')
 const validator = require('../../validator/authentication.js')
-const connMSQL =require('../../mysql/db_config')
+const connMSQL =require('../../config/db_config')
 
 const table='user'
 router.post('/',async(req,res)=>{

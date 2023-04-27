@@ -1,4 +1,4 @@
-const connMSQL =require('../mysql/db_config')
+const connMSQL =require('../config/db_config')
 
 const logIn=async(req)=>{
     let status =undefined
