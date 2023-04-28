@@ -125,6 +125,7 @@ router.post('/',async(req,res)=>{
     if(status==true){
         try {
             let sub ='This is summary report!!'
+            let subject=await req.body.request_subject
             let type_of_use=await req.body.request_use_type
             let type_machine=await req.body.request_type_matchine
             let brand_name=await req.body.request_brand
@@ -137,9 +138,9 @@ router.post('/',async(req,res)=>{
                 let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
                 if(status_p){
                     // console.log('helloworld')
-                    res.status(200).json({message:`create ${table} success!!`,status:'200'})
+                    sendMail.sendMailTesting('request',res,sub,sendMail.report_html(subject,type_of_use,type_machine,brand_name,problems,other,message),email)
+                    return res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 
-                sendMail.sendMailTesting('request',res,sub,sendMail.report_html(type_of_use,type_machine,brand_name,problems,other,message),email)
 
                 // else if(status_p==false&&msg.errno==1062){
                 //     return res.status(400).json(errorModel("Duplicate data",req.originalUrl))

@@ -1,9 +1,87 @@
 const nodemailer=require('nodemailer')
 
-let report_html=(tOfUse='',tOfMachine='',brand='',problem='',other='',msg='')=>{
- if(tOfUse.length==0||tOfMachine.length==0||brand.length==0||problem.length==0){
+let report_html=(subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',msg='')=>{
+ if(subj.length==0||tOfUse.length==0||problem.length==0){
     throw 'cannot make template for e-mail !!'
  }
+
+ let info_subj=`
+ <tr>
+ <th style="text-align: right;">
+    หัวข้อของปัญหา :
+ </th>
+ <td style="text-align: left;">
+    ${subj}
+ </td>
+</tr>
+ `
+
+ let info_machine=`
+ <tr>
+   <th style="text-align: right;">
+      ประเภทของอุปกรณ์ :
+   </th>
+   <td style="text-align: left;">
+      ${tOfMachine}
+   </td>
+</tr>
+ `
+
+ let info_use=`
+ <tr >
+   <th style="text-align: right;">
+      ประเภทการใช้งาน :
+   </th>
+   <td style="text-align: left;">
+      ${tOfUse=='or'?'อุปกรณ์ขององค์กร':'อุปกรณ์ส่วนตัว'}
+   </td>
+</tr>
+ `
+
+let info_brand=`
+<tr>
+   <th style="text-align: right;">
+      ยี่ห้อ :
+   </th>
+   <td style="text-align: left;">
+      ${brand}
+   </td>
+</tr>
+`
+
+ let info_problems=`
+ <div style="margin:10px 15px 0px 15px;">
+   <h5 style="display: block;text-align: left;font-weight: bold;">
+      ปัญหาที่พบ :
+   </h5>
+   <p style="text-align: left;margin-left:20px">
+      ${problem}
+   </p>
+</div>
+ `
+
+ let info_other=`
+ <div style="margin:10px 15px 0px 15px;">
+   <h5 style="display: block;text-align: left;font-weight: bold;">
+      ปัญหาอื่นๆ ที่พบเจอ :
+   </h5>
+   <p style="text-align: left;margin-left:20px">
+      ${other}
+   </p>
+</div>
+ `
+ 
+ let info_message=`
+ <div style="margin:10px 15px 0px 15px;">
+   <h5 style="display: block;text-align: left;font-weight: bold;">
+      เพิ่มเติม :
+   </h5>
+   <p style="text-align: left;margin-left:20px">
+      ${msg}
+   </p>
+</div>
+ `
+
 return `
 <div style='width:100%;font-size:15px'>        
   
@@ -12,57 +90,17 @@ return `
 
         <hr style="width: 60%;margin:auto;border-top: 2px solid gray;">
         <table style="width:fit-content;margin:15px auto 15px auto;">
-           <tr>
-              <th style="text-align: right;">
-                 ประเภทของอุปกรณ์ :
-              </th>
-              <td style="text-align: left;">
-                 ${tOfMachine}
-              </td>
-           </tr>
-           <tr >
-              <th style="text-align: right;">
-                 ประเภทการใช้งาน :
-              </th>
-              <td style="text-align: left;">
-                 ${tOfUse}
-              </td>
-           </tr>
-           <tr>
-              <th style="text-align: right;">
-                 ยี่ห้อ :
-              </th>
-              <td style="text-align: left;">
-                 ${brand}
-              </td>
-           </tr>
-        </table>
+            ${subj.length==0?'':info_subj}
+            ${tOfUse.length==0?'':info_use}
+            ${tOfMachine.length==0?'':info_machine}
+            ${brand.length==0?'':info_brand}
+         </table>
         <hr style="width: 60%;margin:auto;border-top: 2px solid gray">
         <div style="width:fit-content;margin-top: 15px;margin:auto;text-align: left;">
-              <div style="margin:10px 15px 0px 15px;">
-                 <h5 style="display: block;text-align: left;font-weight: bold;">
-                    ปัญหาที่พบ :
-                 </h5>
-                 <p style="text-align: left;margin-left:20px">
-                    ${problem}
-                 </p>
-              </div>
-              <div style="margin:10px 15px 0px 15px;">
-                 <h5 style="display: block;text-align: left;font-weight: bold;">
-                    ปัญหาอื่นๆ ที่พบเจอ :
-                 </h5>
-                 <p style="text-align: left;margin-left:20px">
-                    ${other}
-                 </p>
-              </div>
-              <div style="margin:10px 15px 0px 15px;">
-                 <h5 style="display: block;text-align: left;font-weight: bold;">
-                    เพิ่มเติม :
-                 </h5>
-                 <p style="text-align: left;margin-left:20px">
-                    ${msg}
-                 </p>
-              </div>
+              ${info_problems}
+              ${other.length==0? '':info_other}
+              ${msg.length==0?'':info_message}
+              
         </div>
      </div>
   </div> 
@@ -138,11 +176,11 @@ const sendMailTesting=(positionName=undefined,res=undefined,sub=undefined,html=u
             console.log(`${positionName} => send mail to ${to}`)
             if(info==undefined||info==false){
                 console.log('cannot send mail !!')
-                return res.status(500).json(errorModel(error,req.originalUrl))
+               //  return res.status(500).json(errorModel(error,req.originalUrl))
                 // return status=false   
             }else{
                 console.log('mail sended!! :',info.messageId)
-                return res.status(201).json({msg:'email sended!!'})
+               //  return res.status(201).json({msg:'email sended!!'})
                 // return status= true
             }    
             // console.log(nodemailer.getTestMessageUrl(info))
