@@ -2,9 +2,9 @@ const express =require('express')
 const router =express.Router()
 const uuid =require("uuid")
 const validator = require('../../validator/validate')
-const connMSQL=require('../../mysql/db_config')
+const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
-
+const sendMail=require('../../config/mailer_config')
 const table='request'
 
 // get data

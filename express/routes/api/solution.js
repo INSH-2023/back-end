@@ -1,7 +1,7 @@
 const express =require('express')
 const router =express.Router()
 const validator = require('../../validator/validate')
-const connMSQL=require('../../mysql/db_config')
+const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
 
 const table='solution'

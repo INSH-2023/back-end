@@ -174,7 +174,6 @@ const validateNumber =  (int,table,name) => {
 const validateEmail =  (str='',l,table,name) => {
     // let text = str
     regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    
     if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
     }else if(str.length > 100){
@@ -192,8 +191,8 @@ const validatePassword =  (str='',table,name) => {
     // let text =str
     if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
-    }else if(str.length > 16 || str.length < 8){
-        throw new Error(str + " password need have between 8 and 16 characters")
+    }else if(str.length > 14 || str.length < 8){
+        throw new Error(str + ` password need have between 8 and 14 characters`)
     }else{
         console.log(`validate password / ${table} ${name}`)
         return str.toString().trim()
@@ -206,6 +205,9 @@ const validateRole =  (str='',table,name) => {
         throw new Error(`${name} is null`)
     }else if(str != ROLE.Admin_it && str != ROLE.Admin_pr && str != ROLE.User){
         throw new Error("role is user , admin_it and admin_pr only")
+    }else
+    if(str.length > 10){
+        throw new Error("role is more then 10 charecter!!")
     }else{
         console.log(`validate role / ${table} ${name} : ${str}`)
         return str.toString().trim()
