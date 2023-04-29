@@ -64,55 +64,145 @@ router.get('/:id',async(req,res)=>{
     }
 })
 
-// // create solution
-// router.post('/',async(req,res)=>{
-//     let input
-//     let status=undefined
-//     try{
-//         input=[
-//             {prop:"request_first_name"      ,value: validator.validateStrNotNull(await req.body.request_first_name,100,table,'request_first_name'),type:'str'},
-//             {prop:"request_last_name"       ,value: validator.validateStrNotNull(await req.body.request_last_name,100,table,'request_last_name'),type:'str'},
-//             {prop:"request_email"           ,value: validator.validateEmail(await req.body.request_email,100,table,'request_email'),type:'str'},
-//             {prop:"request_group"           ,value: validator.validateStrNotNull(await req.body.request_group,100,table,'request_group'),type:'str'},
-//             {prop:"request_service_type"    ,value: validator.validateStrNotNull(await req.body.request_service_type,100,table,'request_service_type'),type:'str'},
-//             {prop:"request_subject"         ,value: validator.validateStrNotNull(await req.body.request_subject,100,table,'request_subject'),type:'str'},
-//             {prop:"request_status"          ,value: validator.validateStrNotNull(await req.body.request_status,100,table,'request_status'),type:'str'},
-//             {prop:"request_req_date"        ,value: 'CURRENT_TIMESTAMP()',type:'date'},
-//             {prop:"request_assign"          ,value: validator.validateStrNotNull(await req.body.request_assign,100,table,'request_assign'),type:'str'},
-//             {prop:"request_use_type"        ,value: validator.validateStrNotNull(await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
-//             {prop:"request_sn"              ,value: validator.validateStrNull(await req.body.request_sn,50,table,'request_sn'),type:'str'},
-//             {prop:"request_brand"           ,value: validator.validateStrNull(await req.body.request_brand,100,table,'request_brand'),type:'str'},
-//             {prop:"request_type_matchine"   ,value: validator.validateStrNull(await req.body.request_type_matchine,50,table,'request_matchine'),type:'str'},
-//             {prop:"request_other"           ,value: validator.validateStrNull(await req.body.request_other,150,table,'request_other'),type:'str'},
-//             {prop:"request_problems"        ,value: validator.validateStrNotNull(await req.body.request_problems,150,table,'request_problems'),type:'str'},
-//             {prop:"request_message"        ,value: validator.validateStrNull(await req.body.request_message,150,table,'request_message'),type:'str'}
-//         ]
-//         // console.log('testing',await req.body.role)
-//         status=!(await validator.checkUndefindData(input,table))
-//         // validator.createData(data,table)
-//         } catch(err) {
-//         console.log(err)
-//         status=false
-//         // console.log(status)
-//         return res.status(400).json(errorModel(err.message,req.originalUrl))
-//     }
+// create solution
+router.post('/',async(req,res)=>{
+    let input
+    let status=undefined
+    try{
+        input=[
+            {prop:"solution_title" ,value: validator.validateStrNotNull(await req.body.solution_title,100,table,'solution_title'),type:'str'},
+            {prop:"solution_icon" ,value: validator.validateStrNotNull(await req.body.solution_icon,100,table,'solution_icon'),type:'str'},
+            {prop:"solution_text" ,value: validator.validateStrNotNull(await req.body.solution_text,100,table,'solution_text'),type:'str'},
+            {prop:"solution_tag" ,value: validator.validateTag(await req.body.solution_tag,100,table,'solution_tag'), type: 'str'},
+        ]
+        steps = validator.validateStep(await req.body.solution_steps,table,'solution_steps')
+        // console.log('testing',await req.body.role)
+        status=!(await validator.checkUndefindData(input,table))
+        } catch(err) {
+        console.log(err)
+        status=false
+        // console.log(status)
+        return res.status(400).json(errorModel(err.message,req.originalUrl))
+    }
 
-//     if(status==true){
-//         try {
-//             if(!connMSQL.handdleConnection()){
-//                 await connMSQL.connection_pool(validator.createData(input,table,res))
-//                 // error
-//                 return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-//             } else {
-//                 console.log(`Cannot connect to mysql server !!`) 
-//                 throw new Error('connection error something :',err)
-//             }
-//         } catch (error) {
-//             res.status(400).json(errorModel(error.message,req.originalUrl))
-//         }
-//     } else {
-//         return res.status(400).json(errorModel('data not valid',req.originalUrl))
-//     }
-// })
+    if(status==true){
+        try {
+            if(!connMSQL.handdleConnection()){
+
+                let {status_pool,data} = await connMSQL.connection_pool(validator.createData(input,table,res))
+
+                // create step
+                steps.forEach(async (step) => {
+                    let stepInput = [
+                        {prop:"solution_Id" ,value: data.insertId, type: 'int'},
+                        {prop:"step_", value: step.step , type:'int'},
+                        {prop:"step_name", value: step.step_name, type: 'str'},
+                        {prop:"step_description", value: step.step_description, type: 'str'}
+                    ]
+                    await connMSQL.connection_pool(validator.createData(stepInput,'step_solution',res))
+                })
+                // error
+                return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+            } else {
+                console.log(`Cannot connect to mysql server !!`) 
+                throw new Error('connection error something :',err)
+            }
+        } catch (error) {
+            res.status(400).json(errorModel(error.message,req.originalUrl))
+        }
+    } else {
+        return res.status(400).json(errorModel('data not valid',req.originalUrl))
+    }
+})
+
+// delete solution
+router.delete('/:id',async(req,res)=>{
+    // delete data
+    try {
+        if(!connMSQL.handdleConnection()){
+            // delete
+            await connMSQL.connection_pool(validator.deleteData(req,'step_solution','solution_Id'))
+            let {status_pool:status_p,data:sol,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table,'solutionId'))
+
+            if(status_p&&sol.affectedRows!=0){
+                return res.status(200).json({message:`delete ${table} id ${req.params.id} success!!`,status:'200'})
+
+            }else
+            if(status_p&&sol.affectedRows==0){
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+
+            }
+        }else{
+                console.log(`Cannot connect to mysql server !!`) 
+                throw new Error('connection error something')
+        } 
+    } catch (error) {
+        res.status(400).json(errorModel(error.message,req.originalUrl))
+    }
+})
+
+// update solution
+router.put('/:id',async(req,res)=>{
+    let input
+    let status=undefined
+    try{
+        input=[
+            {prop:"solution_title" ,value: validator.validateStrNotNull(await req.body.solution_title,100,table,'solution_title'),type:'str'},
+            {prop:"solution_icon" ,value: validator.validateStrNotNull(await req.body.solution_icon,100,table,'solution_icon'),type:'str'},
+            {prop:"solution_text" ,value: validator.validateStrNotNull(await req.body.solution_text,100,table,'solution_text'),type:'str'},
+            {prop:"solution_tag" ,value: validator.validateTag(await req.body.solution_tag,100,table,'solution_tag'), type: 'str'},
+        ]
+        steps = validator.validateStep(await req.body.solution_steps,table,'solution_steps')
+        // console.log('testing',await req.body.role)
+        status=!(await validator.checkUndefindData(input,table))
+        } catch(err) {
+        console.log(err)
+        status=false
+        // console.log(status)
+        return res.status(400).json(errorModel(err.message,req.originalUrl))
+    }
+
+    if(status==true){
+        try {
+            if(!connMSQL.handdleConnection()){
+
+                let {status_pool:status_p,data} = await connMSQL.connection_pool(validator.updateData(req,input,table))
+
+                // update steps
+                await connMSQL.connection_pool(validator.deleteData(req,'step_solution','solution_Id'))
+                steps.forEach(async (step) => {
+                    let stepInput = [
+                        {prop:"solution_Id" ,value: req.params.id, type: 'int'},
+                        {prop:"step_", value: step.step , type:'int'},
+                        {prop:"step_name", value: step.step_name, type: 'str'},
+                        {prop:"step_description", value: step.step_description, type: 'str'}
+                    ]
+                    await connMSQL.connection_pool(validator.createData(stepInput,'step_solution',res))
+                })
+
+                if(status_p&&data.affectedRows!=0){
+                    return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
+                }else
+                if(status_p&&data.affectedRows==0){
+                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                }else
+                if(status_p==false){
+                    return res.status(400).json(errorModel('bad request!!',req.originalUrl))
+                }
+
+                // error
+                return res.status(200).json({message:`update ${table} success!!`,status:'200'})
+            } else {
+                console.log(`Cannot connect to mysql server !!`) 
+                throw new Error('connection error something :',err)
+            }
+        } catch (error) {
+            res.status(400).json(errorModel(error.message,req.originalUrl))
+        }
+    } else {
+        return res.status(400).json(errorModel('data not valid',req.originalUrl))
+    }
+})
 
 module.exports=router

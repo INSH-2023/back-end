@@ -60,7 +60,7 @@ const createData= (data,table)=>{
         let text=''        
         // format 
         fields = data.reduce((value,cValue)=>value+","+cValue.prop,"").substring(1)
-        // console.log(fields)
+        console.log(data)
         // format value
         for(let v of data){
             if(v.type=='str'){
@@ -84,14 +84,14 @@ const createData= (data,table)=>{
 }
 
 // delete data
-const deleteData=(req,table)=>{
+const deleteData=(req,table,field)=>{
     if(req.params.id==null||req.params.id==undefined||req.params.id==""){
         throw new Error('please input id to delete data !!')
     }else{
         let id =parseInt(req.params.id)
         // console.log(id)
         // console.log(table)
-        let statement =`DELETE FROM ${table} WHERE ${table}Id = ${id}`
+        let statement =`DELETE FROM ${table} WHERE ${field} = ${id}`
         return statement        
     }
 
@@ -267,6 +267,51 @@ const validateDate =  (date,table,name) => {
 
 }
 
+const validateTag = (arr = [], l, table, name) => {
+    if(arr.length == 0) {
+        return []
+    } else {
+        arr.forEach(item => {
+            // validate string length in each item 
+            if(item.length > l){
+                throw new Error(item + ` have  more than ${l} characters`)
+            }}
+        )
+        // remove duplicate
+        set = new Set(arr)
+        console.log(`validate tag / ${table} ${name}`)
+        return Array.from(set).join(',');
+    }
+}
+
+const validateStep = (arr = [], table, name) => {
+    if(arr.length == 0) {
+        return []
+    } else {
+        i = 1
+        arr.forEach(step => {
+            // validate string length in each item 
+            if(step.step_name === undefined || step.step_name === null || step.step_name.length==0){
+                throw new Error(`step name is null`)
+            } else if(step.step_name.length > 100) {
+                throw new Error(item + ` in step name have  more than 100 characters`)
+            } else if(step.step_description != undefined) {
+                if (step.step_description.length > 500) {
+                    throw new Error(item + ` in step description have  more than 500 characters`)
+                }
+            } else if(step.step_description != undefined) {
+                step.step_description = null
+            }
+            // input step
+            step.step = i
+            i++
+        })
+
+        console.log(`validate tag / ${table} ${name}`)
+        return arr;
+    }
+}
+
 module.exports.foundId = foundId
 module.exports.validateStrNotNull = validateStrNotNull
 module.exports.validateStrNull = validateStrNull
@@ -280,3 +325,5 @@ module.exports.checkUndefindData=checkUndefindData
 module.exports.validateDate=validateDate
 module.exports.deleteData=deleteData
 module.exports.updateData=updateData
+module.exports.validateTag=validateTag
+module.exports.validateStep=validateStep

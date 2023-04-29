@@ -176,7 +176,7 @@ router.delete('/:id',async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             // delete
-            let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table))
+            let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table,"userId"))
 
             if(status_p&&users.affectedRows!=0){
                 return res.status(200).json({message:`delete ${table} id ${req.params.id} success!!`,status:'200'})
