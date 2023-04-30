@@ -1,34 +1,32 @@
 const express =require('express')
 const router =express.Router()
-const errorModel =require('../../response/errorModel')
-const validator = require('../../validator/authentication.js')
 const connMSQL =require('../../config/db_config')
+const {getToken, getUserEmail, getUserRole, refreshToken} = require('../../validator/authentication')
 
 const table='user'
 router.post('/',async(req,res)=>{
-
-    try {
-        if(!connMSQL.handdleConnection()){
-            // console.log(req.body)
-            // validator.logIn(req)
-            let [status,data]=await validator.logIn(req)
-            if(status==true){
-                res.status(200).json({"message":'login successful !!',"data":data})
-            }else{
-                res.status(404).json(errorModel('this account does not exist !!',req.originalUrl))
-            }
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
-        }
-        // validator.login(data)
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json(errorModel(error.message,req.originalUrl))
-
-        
+    const { email, password } = req.body;
+    let {status_pool:status_p,data:user,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_email ='${email}'`)
+    if (user[0].user_password !== password) {
+      return res.status(401).json({
+        error: "user email or password is invalid please login again",
+      });
     }
-    
+    delete user[0].user_password;
+    const token = getToken(user[0],"30m");
+    res.cookie("token", token);
+    res.cookie("email",getUserEmail(token));
+    res.cookie("role",getUserRole(token));
+    res.status(200).json({"message": "login successfully"})
+})
+
+router.get('/refresh', async(req,res)=>{
+    let jwttoken = req.cookies.token;
+    let token = refreshToken(jwttoken,"24h")
+    res.cookie("token", token);
+    res.cookie("email",getUserEmail(token));
+    res.cookie("role",getUserEmail(token));
+    res.status(200).send({"message": "refresh successfully"})
 })
 
 module.exports=router

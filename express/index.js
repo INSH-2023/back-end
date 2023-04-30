@@ -2,6 +2,8 @@
 const express =require("express")
 const logger =require('./middleware/logger')
 const cors =require('cors')
+const cookieParser = require('cookie-parser')
+
 
 // var corsOptions = {
 //     origin: process.env.CLIENT_HOST||'http://localhost:5173',
@@ -14,9 +16,13 @@ const app =express()
 app.use(logger)
 app.use(cors())
 
+app.use(cookieParser())
+
 // Body parse middleware สำหรับแปลงค่าเพื่อสำหรับแสดงผล request ที่ส่งเข้ามา
 app.use(express.json())
 app.use(express.urlencoded({ extended: false}))
+
+// ต้องเข้าหน้า log in ก่อนทำการใส่ bearer token ได้
 
 // route ไปยังไฟล์ที่สามารถ req,res ได้
 app.use('/api/users',require('./routes/api/user.js'))

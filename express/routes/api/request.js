@@ -6,9 +6,10 @@ const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
 const sendMail=require('../../config/mailer_config')
 const table='request'
+const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
 
 // get data
-router.get('/',async(req,res)=>{
+router.get('/',cookieJwtAuth,async(req,res)=>{
     // can sorted data
     try {
         if(!connMSQL.handdleConnection()){

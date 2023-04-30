@@ -22,5 +22,8 @@ npm i mysql
 <!-- ติดตั้ง cross origin สำหรับเชื่อมกับ back-end -->
 npm i cors
 
-<!-- ติดตั้ง multer สำหรับจัดการ file แบบ multipart-->
+<!-- ติดตั้ง multer สำหรับจัดการ file แบบ multipart -->
 npm i multer
+
+<!-- ติดตั้ง jwt ใช้ในการทำงานเป็น third party ในการ authen -->
+npm i jsonwebtoken cookie-parser bcrypt

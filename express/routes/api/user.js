@@ -6,10 +6,10 @@ const errorModel =require('../../response/errorModel')
 
 const viewTable='userview'
 const table='user'
-
+const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
 
 // get data
-router.get('/',async(req,res)=>{
+router.get('/', cookieJwtAuth, async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
@@ -30,7 +30,7 @@ router.get('/',async(req,res)=>{
 })
 
 // get user data by admin
-router.get('/role/:role',async(req,res)=>{
+router.get('/role/:role', cookieJwtAuth, async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
@@ -62,7 +62,7 @@ router.get('/role/:role',async(req,res)=>{
     }
 })
 
-router.get('/:id',async(req,res)=>{
+router.get('/:id', cookieJwtAuth, async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
@@ -93,7 +93,7 @@ router.get('/:id',async(req,res)=>{
 })
 
 // get data by emp code
-router.get('/emp-code/:id',async(req,res)=>{
+router.get('/emp-code/:id', cookieJwtAuth, async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
@@ -115,7 +115,7 @@ router.get('/emp-code/:id',async(req,res)=>{
 })
 
 // create user
-router.post('/',async(req,res)=>{
+router.post('/', cookieJwtAuth, async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -166,7 +166,7 @@ router.post('/',async(req,res)=>{
     }
 })
 
-router.post('/:id',(req,res)=>{
+router.post('/:id', cookieJwtAuth, (req,res)=>{
     res.status(405).json(errorModel('method not allow !! 😒,create data dont need params data !!',req.originalUrl))
 })
 
@@ -203,7 +203,7 @@ router.delete('/',(req,res)=>{
 
 
 // update data
-router.put('/:id',async(req,res)=>{
+router.put('/:id', cookieJwtAuth, async(req,res)=>{
     let input
     let status=undefined
     try{

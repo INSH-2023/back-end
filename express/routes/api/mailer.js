@@ -3,9 +3,9 @@ const router =express.Router()
 const errorModel=require('../../response/errorModel')
 const sendMail=require('../../config/mailer_config')
 const line=require('../../config/lineChat_config')
+const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
 
-
-router.get('/',(req,res)=>{
+router.get('/',cookieJwtAuth,(req,res)=>{
     // let sub ='This is summary report!!'
     //         let type_of_use='Testing'
     //         let type_machine='Testing'

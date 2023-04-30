@@ -5,10 +5,11 @@ const router =express.Router()
 const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
+const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
 
 const table ="problem"
 // get data
-router.get('/',async(req,res)=>{
+router.get('/',cookieJwtAuth,async(req,res)=>{
     // console.log('header',req.headers.subject_type)
     try {
         // if(!connMSQL.handdleConnection()){
