@@ -63,7 +63,6 @@ router.get('/role/:role', cookieJwtAuth, async(req,res)=>{
 })
 
 router.get('/:id', cookieJwtAuth, async(req,res)=>{
-
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
@@ -89,7 +88,6 @@ router.get('/:id', cookieJwtAuth, async(req,res)=>{
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
-
 })
 
 // get data by emp code
@@ -130,7 +128,7 @@ router.post('/', cookieJwtAuth, async(req,res)=>{
             {prop:"user_status",value: validator.validateStrNotNull(await req.body.user_status,10,table,'user_status'),type:'str'},
             {prop:"user_position",value: validator.validateStrNotNull(await req.body.user_position,50,table,'user_position'),type:'str'},
             {prop:"user_email",value: validator.validateEmail(await req.body.user_email,50,table,'user_email'),type:'str'},
-            {prop:"user_password",value: validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'}
+            {prop:"user_password",value: await validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(input,table))
@@ -147,7 +145,7 @@ router.post('/', cookieJwtAuth, async(req,res)=>{
 
         try {
             // if(!connMSQL.handdleConnection()){
-                let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
+                let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.createData(input,table,res))
                 
                 // console.log(users)
                 // error

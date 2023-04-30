@@ -3,6 +3,9 @@ const ROLE = require('../enum/Role')
 
 // const Users = require('../config/db').users
 
+// require bcrypt
+const bcrypt = require("bcrypt")
+const saltRounds = 10
 
 // make statement
 //find data
@@ -126,7 +129,7 @@ const updateData=(req,data,table)=>{
             console.log(' ')
             return statement
         }else{
-            console.log("data is undefind cannot get fields")
+            console.log("data is undefined cannot get fields")
         }
     }
 }
@@ -186,16 +189,15 @@ const validateEmail =  (str='',l,table,name) => {
     }
 }
 
-
-const validatePassword =  (str='',table,name) => {
-    // let text =str
+const validatePassword =  async (str='',table,name) => {
     if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
     }else if(str.length > 14 || str.length < 8){
         throw new Error(str + ` password need have between 8 and 14 characters`)
     }else{
         console.log(`validate password / ${table} ${name}`)
-        return str.toString().trim()
+        const hash = await bcrypt.hash(str.toString().trim(), saltRounds);
+        return hash
     }
 }
 
