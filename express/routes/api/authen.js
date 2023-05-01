@@ -18,12 +18,12 @@ router.post('/',async(req,res)=>{
     console.log(user[0])
     const token = getToken({
       "user_name":user[0].user_first_name+" "+user[0].user_last_name,
-      "user_email":user[0].email,
+      "user_email":user[0].user_email,
       "user_role":user[0].user_role,
     },"30m");
     const refreshtoken = getToken({
       "user_name":user[0].user_first_name+" "+user[0].user_last_name,
-      "user_email":user[0].email,
+      "user_email":user[0].user_email,
       "user_role":user[0].user_role,
     },"24h");
     res.cookie("token", token);

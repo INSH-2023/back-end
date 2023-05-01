@@ -34,10 +34,7 @@ exports.cookieJwtAuth = (req, res, next) => {
         return res.status(403).json(errorModel(err1.message,req.originalUrl))
       }
       let token = refreshToken(jwtToken,"30m")
-      console.log(token)
-      let refreshtoken = refreshToken(jwtRefreshToken,"24h")
       res.cookie("token", token);
-      res.cookie("refreshToken", refreshtoken);
       res.cookie("email",getUserEmail(token));
       res.cookie("role",getUserRole(token));
       return res.status(401).json(errorModel(err.message,req.originalUrl))
