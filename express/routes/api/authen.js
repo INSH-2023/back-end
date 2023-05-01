@@ -15,17 +15,31 @@ router.post('/',async(req,res)=>{
       });
     }
     delete user[0].user_password;
-    const token = getToken(user[0],"30m");
+    console.log(user[0])
+    const token = getToken({
+      "user_name":user[0].user_first_name+" "+user[0].user_last_name,
+      "user_email":user[0].email,
+      "user_role":user[0].user_role,
+    },"30m");
+    const refreshtoken = getToken({
+      "user_name":user[0].user_first_name+" "+user[0].user_last_name,
+      "user_email":user[0].email,
+      "user_role":user[0].user_role,
+    },"24h");
     res.cookie("token", token);
+    res.cookie("refreshToken", refreshtoken);
     res.cookie("email",getUserEmail(token));
     res.cookie("role",getUserRole(token));
     res.status(200).json({"message": "login successfully"})
 })
 
 router.get('/refresh', async(req,res)=>{
-    let jwttoken = req.cookies.token;
-    let token = refreshToken(jwttoken,"24h")
+    let jwtToken = req.cookies.token;
+    let jwtRefreshToken = req.cookies.refreshToken;
+    let token = refreshToken(jwtToken,"30m")
+    let refreshtoken = refreshToken(jwtRefreshToken,"24h")
     res.cookie("token", token);
+    res.cookie("refreshToken", refreshtoken);
     res.cookie("email",getUserEmail(token));
     res.cookie("role",getUserEmail(token));
     res.status(200).send({"message": "refresh successfully"})
