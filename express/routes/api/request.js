@@ -5,6 +5,8 @@ const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
 const sendMail=require('../../config/mailer_config')
+const line =require('../../config/lineChat_config')
+
 const table='request'
 
 
@@ -139,6 +141,7 @@ router.post('/',async(req,res)=>{
                 if(status_p){
                     // console.log('helloworld')
                     sendMail.sendMailTesting('request',res,sub,sendMail.report_html(subject,type_of_use,type_machine,brand_name,problems,other,message),email)
+                    // await line.send(email,subject,type_of_use,type_machine,brand_name,problems,other,message)
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 
 
