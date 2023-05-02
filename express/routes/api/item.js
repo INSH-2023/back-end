@@ -35,7 +35,7 @@ router.get('/',cookieJwtAuth,async(req,res)=>{
 
 
 // get item by id
-router.get('/:id',async(req,res)=>{
+router.get('/:id',cookieJwtAuth,async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(`SELECT itemId,item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE item.itemId = ${req.params.id};` )
@@ -55,7 +55,7 @@ router.get('/:id',async(req,res)=>{
 
 })
 
-router.get('/emp-code/:id',async(req,res)=>{
+router.get('/emp-code/:id',cookieJwtAuth,async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(`SELECT itemId,item_name,item_number,item_type,user.user_emp_code FROM moral_it_device.item as item join moral_it_device.user as user on user.user_emp_code = item.user_emp_code WHERE user.user_emp_code = ${req.params.id};` )

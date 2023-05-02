@@ -29,7 +29,7 @@ router.get('/',cookieJwtAuth,async(req,res)=>{
     }
 })
 
-router.get('/type/:type',async(req,res)=>{
+router.get('/type/:type',cookieJwtAuth,async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} where problem_type='${req.params.type}';`)
@@ -47,7 +47,7 @@ router.get('/type/:type',async(req,res)=>{
 })
 
 // create problem
-router.post('/',async(req,res)=>{
+router.post('/',cookieJwtAuth,async(req,res)=>{
     console.log(req.body)
     let data
     let status=undefined
@@ -87,7 +87,7 @@ router.post('/',async(req,res)=>{
 })
 
 // delete
-router.delete('/:id',async(req,res)=>{
+router.delete('/:id',cookieJwtAuth,async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -110,7 +110,7 @@ router.delete('/:id',async(req,res)=>{
 })
 
 // update data
-router.put('/:id',async(req,res)=>{
+router.put('/:id',cookieJwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{

@@ -27,12 +27,14 @@ exports.cookieJwtAuth = (req, res, next) => {
         // check refresh token
         user = jwt.verify(jwtRefreshToken, process.env.TOKEN_SECRET);
       } catch (err1) {
+        // if refresh token expired that remove cookie on session and go to login page
         res.clearCookie("token");
         res.clearCookie("refreshToken");
         res.clearCookie("email");
         res.clearCookie("role");
         return res.status(403).json(errorModel(err1.message,req.originalUrl))
       }
+      // if refresh token is not expired that refresh your access token and can use continually until refresh token expired
       let token = refreshToken(jwtToken,"30m")
       res.cookie("token", token);
       res.cookie("email",getUserEmail(token));
@@ -40,3 +42,13 @@ exports.cookieJwtAuth = (req, res, next) => {
       return res.status(401).json(errorModel(err.message,req.originalUrl))
     }
 };
+
+exports.verifyRole = (...roles) => {
+  return (req,res,next) => {
+    const reqRole = getUserRole(req.cookies.token);
+    if (!reqRole) return res.status(403).json(errorModel("the role is null",req.originalUrl));
+    const result = [...roles].includes(reqRole);
+    if (!result) return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
+    next();
+  }
+}

@@ -5,6 +5,7 @@ const {getToken, getUserEmail, getUserRole, refreshToken} = require('../../valid
 
 const table='user'
 const bcrypt = require('bcrypt')
+const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
 
 router.post('/',async(req,res)=>{
     const { email, password } = req.body;
@@ -33,7 +34,7 @@ router.post('/',async(req,res)=>{
     res.status(200).json({"message": "login successfully"})
 })
 
-router.get('/refresh', async(req,res)=>{
+router.get('/refresh',cookieJwtAuth, async(req,res)=>{
     let jwtToken = req.cookies.token;
     let jwtRefreshToken = req.cookies.refreshToken;
     let token = refreshToken(jwtToken,"30m")

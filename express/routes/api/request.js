@@ -34,7 +34,7 @@ router.get('/',cookieJwtAuth,async(req,res)=>{
 })
 
 // get data by id
-router.get('/:id',async(req,res)=>{
+router.get('/:id',cookieJwtAuth,async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table))
@@ -54,7 +54,7 @@ router.get('/:id',async(req,res)=>{
 })
 
 // create request
-router.post('/',async(req,res)=>{
+router.post('/',cookieJwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -110,7 +110,7 @@ router.post('/:id',(req,res)=>{
 })
 
 // delete
-router.delete('/:id',async(req,res)=>{
+router.delete('/:id',cookieJwtAuth,async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -140,7 +140,7 @@ router.delete('/',(req,res)=>{
 })
 
 // update data
-router.put('/:id',async(req,res)=>{
+router.put('/:id',cookieJwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{
