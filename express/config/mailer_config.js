@@ -7,99 +7,88 @@ let report_html=(subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',ms
 
  let info_subj=`
  <tr>
- <th style="text-align: right;">
-    หัวข้อของปัญหา :
+ <th style="width:50%;text-align: right;">
+    Subject :
  </th>
- <td style="text-align: left;">
-    ${subj}
+ <td style="width:50%;text-align: left;">
+    ${subj.length==0?'-':subj}
  </td>
 </tr>
  `
 
  let info_machine=`
  <tr>
-   <th style="text-align: right;">
-      ประเภทของอุปกรณ์ :
+   <th style="width:50%;text-align: right;">
+      Type of machine :
    </th>
-   <td style="text-align: left;">
-      ${tOfMachine}
+   <td style="width:50%;text-align: left;">
+      ${tOfMachine.length==0?'-':tOfMachine}
    </td>
 </tr>
  `
 
  let info_use=`
  <tr >
-   <th style="text-align: right;">
-      ประเภทการใช้งาน :
+   <th style="width:50%;text-align: right;">
+      Type of use :
    </th>
-   <td style="text-align: left;">
+   <td style="width:50%;text-align: left;">
       ${tOfUse=='or'?'อุปกรณ์ขององค์กร':'อุปกรณ์ส่วนตัว'}
    </td>
 </tr>
  `
 
 let info_brand=`
-<tr>
-   <th style="text-align: right;">
-      ยี่ห้อ :
-   </th>
-   <td style="text-align: left;">
-      ${brand}
-   </td>
-</tr>
+<div style="margin:10px 15px 0px 15px;">
+   <h5 style="display: block;text-align: left;font-weight: bold;">
+      Brand : ${brand.length==0?'-':brand}
+   </h5>
+</div>
 `
 
  let info_problems=`
  <div style="margin:10px 15px 0px 15px;">
    <h5 style="display: block;text-align: left;font-weight: bold;">
-      ปัญหาที่พบ :
+      ปัญหาที่พบ : ${problem.length==0?'-':problem}
    </h5>
-   <p style="text-align: left;margin-left:20px">
-      ${problem}
-   </p>
 </div>
  `
 
  let info_other=`
  <div style="margin:10px 15px 0px 15px;">
    <h5 style="display: block;text-align: left;font-weight: bold;">
-      ปัญหาอื่นๆ ที่พบเจอ :
+      ปัญหาอื่นๆ ที่พบเจอ : ${other.length==0?'-':other}
    </h5>
-   <p style="text-align: left;margin-left:20px">
-      ${other}
-   </p>
 </div>
  `
  
  let info_message=`
  <div style="margin:10px 15px 0px 15px;">
    <h5 style="display: block;text-align: left;font-weight: bold;">
-      เพิ่มเติม :
+      เพิ่มเติม : ${msg.length==0?'-':msg}
    </h5>
-   <p style="text-align: left;margin-left:20px">
-      ${msg}
-   </p>
 </div>
  `
 
 return `
-<div style='width:100%;font-size:15px'>        
+<div style='width:100%;height:fit-content;font-size:15px'>        
   
      <div style="=width:90%;margin:auto;">
      <h5 style='width:fit-content;margin:auto;margin-top:10px;margin-bottom:10px;font-size: 23px;font-weight: bold;'>คำร้องของคุณ</h5>
 
         <hr style="width: 60%;margin:auto;border-top: 2px solid gray;">
-        <table style="width:fit-content;margin:15px auto 15px auto;">
-            ${subj.length==0?'':info_subj}
-            ${tOfUse.length==0?'':info_use}
-            ${tOfMachine.length==0?'':info_machine}
-            ${brand.length==0?'':info_brand}
+        <table style="width:100%;margin:15px auto 15px auto;">
+            ${info_subj}
+            ${info_use}
+            ${info_machine}
+            
          </table>
         <hr style="width: 60%;margin:auto;border-top: 2px solid gray">
-        <div style="width:fit-content;margin-top: 15px;margin:auto;text-align: left;">
-              ${info_problems}
-              ${other.length==0? '':info_other}
-              ${msg.length==0?'':info_message}
+        <div style="width:80%;margin-top: 15px;margin:auto;text-align: left;">
+               ${info_brand}
+               ${info_problems}
+               ${info_other}
+               ${info_message}
               
         </div>
      </div>
@@ -179,7 +168,7 @@ const sendMailTesting=(positionName=undefined,res=undefined,sub=undefined,html=u
                //  return res.status(500).json(errorModel(error,req.originalUrl))
                 // return status=false   
             }else{
-                console.log('mail sended!! :',info.messageId)
+                console.log(`mail sended to ${to}!! :`,info.messageId)
                //  return res.status(201).json({msg:'email sended!!'})
                 // return status= true
             }    
