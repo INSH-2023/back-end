@@ -66,7 +66,7 @@ const createData= (data,table)=>{
         // format value
         for(let v of data){
             if(v.type=='str'){
-                text=text+','+"'"+v.value+"'"
+                text=text+','+`"`+v.value+`"`
             }else
             if(v.type=='int'||v.type=='date'){
                 text=text+','+v.value
