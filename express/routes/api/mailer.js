@@ -5,7 +5,7 @@ const sendMail=require('../../config/mailer_config')
 const line=require('../../config/lineChat_config')
 
 
-router.get('/',(req,res)=>{
+router.get('/',async(req,res)=>{
     // let sub ='This is summary report!!'
     //         let type_of_use='Testing'
     //         let type_machine='Testing'
@@ -23,6 +23,11 @@ router.get('/',(req,res)=>{
     //     return res.status(500).json(errorModel(error,req.originalUrl))
 
     // }
-    line.send()
+    try {
+       await line.send('pheeraprt0123@gmail.com','hardware','or','PC','Nike kick','bad,sad hello','Testing','Bruh')
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+    
 })
 module.exports=router
