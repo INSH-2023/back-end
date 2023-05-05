@@ -27,11 +27,16 @@ router.post('/',async(req,res)=>{
       "user_email":user[0].user_email,
       "user_role":user[0].user_role,
     },"24h");
-    res.cookie("token", token);
-    res.cookie("refreshToken", refreshtoken);
-    res.cookie("email",getUserEmail(token));
-    res.cookie("role",getUserRole(token));
-    res.status(200).json({"message": "login successfully"})
+    const cookieSession={
+      maxAge : 24 * 60 * 60 * 1000, 
+      secure: process.env.NODE_ENV !== "development", 
+      httpOnly: true
+    }
+    res.cookie("token", token, cookieSession);
+    res.cookie("refreshToken", refreshtoken, cookieSession);
+    res.cookie("email",getUserEmail(token), cookieSession);
+    res.cookie("role",getUserRole(token), cookieSession);
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUserEmail(token), "role": getUserRole(token)})
 })
 
 router.get('/refresh',cookieJwtAuth, async(req,res)=>{
@@ -43,7 +48,7 @@ router.get('/refresh',cookieJwtAuth, async(req,res)=>{
     res.cookie("refreshToken", refreshtoken);
     res.cookie("email",getUserEmail(token));
     res.cookie("role",getUserEmail(token));
-    res.status(200).send({"message": "refresh successfully"})
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUserEmail(token), "role": getUserRole(token)})
 })
 
 module.exports=router

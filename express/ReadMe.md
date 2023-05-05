@@ -16,8 +16,8 @@ npm i moment
 <!-- package เสริมที่สามารถทำการ gen id ให้แบบไม่ซ้ำกัน -->
 npm i uuid
 
-<!-- ติดตั้ง mysql -->
-npm i mysql
+<!-- ติดตั้ง mysql2 -->
+npm i mysql2
 
 <!-- ติดตั้ง cross origin สำหรับเชื่อมกับ back-end -->
 npm i cors
@@ -26,4 +26,10 @@ npm i cors
 npm i multer
 
 <!-- ติดตั้ง jwt ใช้ในการทำงานเป็น third party ในการ authen -->
-npm i jsonwebtoken cookie-parser bcrypt
+npm i jsonwebtoken bcrypt
+
+<!-- ติดตั้ง cookie ให้เก็บข้อมูลในการ authen -->
+npm i cookie-parser cookie-session
+
+<!-- ตั้ง node เป็น dev mode-->
+SET NODE_ENV=development
