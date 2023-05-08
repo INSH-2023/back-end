@@ -141,7 +141,7 @@ router.post('/',async(req,res)=>{
                 if(status_p){
                     // console.log('helloworld')
                     sendMail.sendMailTesting('request',res,sub,sendMail.report_html(subject,type_of_use,type_machine,brand_name,problems,other,message),email)
-                    // await line.send(email,subject,type_of_use,type_machine,brand_name,problems,other,message)
+                    await line.send(email,subject,type_of_use,type_machine,brand_name,problems,other,message)
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 
 
