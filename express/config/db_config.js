@@ -1,5 +1,6 @@
 const mysql =require('mysql2')
 const pool = require('mysql2/promise')
+require('dotenv').config().parsed
 
 // mysql config
 const db_config={

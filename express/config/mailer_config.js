@@ -1,4 +1,5 @@
 const nodemailer=require('nodemailer')
+require('dotenv').config().parsed
 
 let report_html=(subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',msg='')=>{
  if(subj.length==0||tOfUse.length==0||problem.length==0){
@@ -96,7 +97,7 @@ return `
 `
 
 }
-const sendMailTesting=(positionName=undefined,res=undefined,sub=undefined,html=undefined,to=undefined)=>{
+const sendMail=async (positionName=undefined,res=undefined,sub=undefined,html=undefined,to=undefined)=>{
     let status=undefined
 
     if(positionName==undefined||res==undefined||sub==undefined||html==undefined||to==undefined){
@@ -139,8 +140,8 @@ const sendMailTesting=(positionName=undefined,res=undefined,sub=undefined,html=u
     let config = {
         service:'gmail',
         auth:{
-            user:process.env.MAILER_GMAIL||'moralceter.test@gmail.com',
-            pass:process.env.MAILER_PASSWORD||'svdzfbrzelinxvdy'
+            user:process.env.MAILER_GMAIL,
+            pass:process.env.MAILER_PASSWORD
         }
     }
 
@@ -181,5 +182,5 @@ const sendMailTesting=(positionName=undefined,res=undefined,sub=undefined,html=u
     }
 }
 
-module.exports.sendMailTesting=sendMailTesting
+module.exports.sendMail=sendMail
 module.exports.report_html=report_html
