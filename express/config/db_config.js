@@ -64,11 +64,13 @@ const connection_pool=async(statement)=>{
             .then(conn=>{
                 const res=conn.query(statement)
                 conn.release()
+                conn.end()
                 return res
             })
             .then(result=>{
                 // console.log(result[0])
                 console.log('connection status : good')
+                
                 return  result[0]
             })
             .catch(err=>{
@@ -79,7 +81,7 @@ const connection_pool=async(statement)=>{
             })
 
         testing_data.status_pool=true
-
+            
     } catch (error) {
         console.log(error)
         testing_data.status_pool=false
