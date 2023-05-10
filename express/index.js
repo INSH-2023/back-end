@@ -5,8 +5,8 @@ const logger =require('./middleware/logger')
 const cors =require('cors')
 require('dotenv').config().parsed
 let corsOptions = {
-    origin: process.env.CLIENT_HOST||'http://10.1.1.167:5000/',
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    // origin: process.env.CLIENT_HOST||'http://localhost:5173',
+    // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
 const app =express()
