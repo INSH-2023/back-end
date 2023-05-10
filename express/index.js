@@ -3,17 +3,18 @@ const express =require("express")
 const path =require("path")
 const logger =require('./middleware/logger')
 const cors =require('cors')
-// var corsOptions = {
-//     origin: process.env.CLIENT_HOST||'http://localhost:5173',
-//     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
+require('dotenv').config().parsed
+let corsOptions = {
+    origin: process.env.CLIENT_HOST||'http://10.1.1.167:5000/',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 
 const app =express()
 
 
 // Init Middleware
 app.use(logger)
-app.use(cors())
+app.use(cors(corsOptions))
 
 
 // Body parse middleware สำหรับแปลงค่าเพื่อสำหรับแสดงผล request ที่ส่งเข้ามา
@@ -31,5 +32,13 @@ app.use('/api/image',require('./routes/api/images'))
 app.use('/api/send-mail',require('./routes/api/mailer.js'))
 
 const PORT =process.env.PORT || 5000
+
+
+
+
+
+
+
+
 
 app.listen(PORT,()=>console.log(`server is run on port ${PORT}`))

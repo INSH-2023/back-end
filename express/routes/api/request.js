@@ -93,26 +93,27 @@ router.post('/',async(req,res)=>{
     let data
     let status=undefined
     try{
-
+        // data=await validator.validateRequestData(req)
         data=[
-            {prop:"request_first_name"      ,value: validator.validateStrNotNull(await req.body.request_first_name,100,table,'request_first_name'),type:'str'},
-            {prop:"request_last_name"       ,value: validator.validateStrNotNull(await req.body.request_last_name,100,table,'request_last_name'),type:'str'},
-            {prop:"request_email"           ,value: validator.validateEmail(await req.body.request_email,100,table,'request_email'),type:'str'},
-            {prop:"request_group"           ,value: validator.validateStrNotNull(await req.body.request_group,100,table,'request_group'),type:'str'},
-            {prop:"request_service_type"    ,value: validator.validateStrNotNull(await req.body.request_service_type,100,table,'request_service_type'),type:'str'},
-            {prop:"request_subject"         ,value: validator.validateStrNotNull(await req.body.request_subject,100,table,'request_subject'),type:'str'},
-            {prop:"request_status"          ,value: validator.validateStrNotNull(await req.body.request_status,100,table,'request_status'),type:'str'},
-            {prop:"request_assign"          ,value: validator.validateStrNotNull(await req.body.request_assign,100,table,'request_assign'),type:'str'},
-            {prop:"request_use_type"        ,value: validator.validateStrNotNull(await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
-            {prop:"request_sn"              ,value: validator.validateStrNull(await req.body.request_sn,50,table,'request_sn') ,type:'str'},
-            {prop:"request_brand"           ,value: validator.validateStrNull(await req.body.request_brand,100,table,'request_brand'),type:'str'},
-            {prop:"request_type_matchine"   ,value: validator.validateStrNull(await req.body.request_type_matchine,50,table,'request_type_matchine'),type:'str'},
-            {prop:"request_other"           ,value: validator.validateStrNull(await req.body.request_other,150,table,'request_other'),type:'str'},
-            {prop:"request_problems"        ,value: validator.validateStrNotNull(await req.body.request_problems,150,table,'request_problems'),type:'str'},
+            {prop:"request_first_name"      ,value:  validator.validateStrNotNull( await req.body.request_first_name,100,table,'request_first_name'),type:'str'},
+            {prop:"request_last_name"       ,value:  validator.validateStrNotNull( await req.body.request_last_name,100,table,'request_last_name'),type:'str'},
+            {prop:"request_email"           ,value:  validator.validateEmail( await req.body.request_email,100,table,'request_email'),type:'str'},
+            {prop:"request_group"           ,value:  validator.validateStrNotNull( await req.body.request_group,100,table,'request_group'),type:'str'},
+            {prop:"request_service_type"    ,value:  validator.validateStrNotNull( await req.body.request_service_type,100,table,'request_service_type'),type:'str'},
+            {prop:"request_subject"         ,value:  validator.validateStrNotNull( await req.body.request_subject,100,table,'request_subject'),type:'str'},
+            {prop:"request_status"          ,value:  validator.validateStrNotNull( await req.body.request_status,100,table,'request_status'),type:'str'},
+            {prop:"request_assign"          ,value:  validator.validateStrNotNull( await req.body.request_assign,100,table,'request_assign'),type:'str'},
+            {prop:"request_use_type"        ,value:  validator.validateStrNull( await req.body.request_use_type,5,table,'request_use_type'),type:'str'},
+            {prop:"request_sn"              ,value:  validator.validateStrNull( await req.body.request_sn,50,table,'request_sn') ,type:'str'},
+            {prop:"request_brand"           ,value:  validator.validateStrNull( await req.body.request_brand,100,table,'request_brand'),type:'str'},
+            {prop:"request_type_matchine"   ,value:  validator.validateStrNull( await req.body.request_type_matchine,50,table,'request_type_matchine'),type:'str'},
+            {prop:"request_other"           ,value:  validator.validateStrNull( await req.body.request_other,150,table,'request_other'),type:'str'},
+            {prop:"request_problems"        ,value:  validator.validateStrNotNull( await req.body.request_problems,150,table,'request_problems'),type:'str'},
             // {prop:"request_message"        ,value: validator.validateStr(await req.body.request_message,150,table,'request_message'),type:'str'},
-            {prop:"request_message"        ,value: validator.validateStrNull(await req.body.request_message,150,table,'request_message'),type:'str'},
+            {prop:"request_message"        ,value:  validator.validateStrNull( await req.body.request_message,150,table,'request_message'),type:'str'},
         
         ]
+        console.log(data)
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(data,table))
         // validator.createData(data,table)
@@ -127,6 +128,8 @@ router.post('/',async(req,res)=>{
     if(status==true){
         try {
             let sub ='This is summary report!!'
+            let service=await req.body.request_service_type
+            let fname=`${await req.body.request_first_name} ${await req.body.request_last_name}`
             let subject=await req.body.request_subject
             let type_of_use=await req.body.request_use_type
             let type_machine=await req.body.request_type_matchine
@@ -139,10 +142,8 @@ router.post('/',async(req,res)=>{
             // if(!connMSQL.handdleConnection()){
                 let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
                 if(status_p){
-                    // console.log('helloworld')
-                    await sendMail.sendMail('request',res,sub,sendMail.report_html(subject,type_of_use,type_machine,brand_name,problems,other,message),email)
-                    // console.log('helloworld')
-                    await line.send(email,subject,type_of_use,type_machine,brand_name,problems,other,message)
+                    await sendMail.sendMail('request',res,sub,sendMail.report_html(service,subject,type_of_use,type_machine,brand_name,problems,other,message),email)
+                    await line.send(service,fname,email,subject,type_of_use,type_machine,brand_name,problems,other,message)
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 
 

@@ -1,10 +1,21 @@
 const nodemailer=require('nodemailer')
 require('dotenv').config().parsed
 
-let report_html=(subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',msg='')=>{
- if(subj.length==0||tOfUse.length==0||problem.length==0){
+let report_html=(service='',subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',msg='')=>{
+ if(service.length==0,subj.length==0||problem.length==0){
     throw 'cannot make template for e-mail !!'
  }
+
+ let info_service=`
+ <tr>
+ <th style="width:50%;text-align: right;">
+    Subject :
+ </th>
+ <td style="width:50%;text-align: left;">
+    ${service.length==0?'-':service}
+ </td>
+</tr>
+ `
 
  let info_subj=`
  <tr>
@@ -17,18 +28,18 @@ let report_html=(subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',ms
 </tr>
  `
 
- let info_machine=`
+ let info_machine=tOfMachine.length==0?'':`
  <tr>
    <th style="width:50%;text-align: right;">
       Type of machine :
    </th>
    <td style="width:50%;text-align: left;">
-      ${tOfMachine.length==0?'-':tOfMachine}
+      ${tOfMachine}
    </td>
 </tr>
  `
 
- let info_use=`
+ let info_use=tOfUse.length==0?'':`
  <tr >
    <th style="width:50%;text-align: right;">
       Type of use :
@@ -39,10 +50,10 @@ let report_html=(subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',ms
 </tr>
  `
 
-let info_brand=`
+let info_brand=brand.length==0?'':`
 <div style="margin:10px 15px 0px 15px;">
    <h5 style="display: block;text-align: left;font-weight: bold;">
-      Brand : ${brand.length==0?'-':brand}
+      Brand : ${brand}
    </h5>
 </div>
 `
@@ -78,20 +89,21 @@ return `
      <h5 style='width:fit-content;margin:auto;margin-top:10px;margin-bottom:10px;font-size: 23px;font-weight: bold;'>คำร้องขอรับบริการของคุณ</h5>
 
         <hr style="width: 60%;margin:auto;border-top: 2px solid gray;">
-        <table style="width:100%;margin:15px auto 15px auto;">
-            ${info_subj}
-            ${info_use}
-            ${info_machine}
-            
+        <table style="width:100%;margin:15px auto 15px auto;">`
+            +info_service
+            +info_subj
+            +info_use
+            +info_machine
+         +`   
          </table>
         <hr style="width: 60%;margin:auto;border-top: 2px solid gray">
-        <div style="width:80%;margin-top: 15px;margin:auto;text-align: left;">
-               ${info_brand}
-               ${info_problems}
-               ${info_other}
-               ${info_message}
+        <div style="width:80%;margin-top: 15px;margin:auto;text-align: left;">`
+               +info_brand
+               +info_problems
+               +info_other
+               +info_message
               
-        </div>
+        +`</div>
      </div>
   </div> 
 `
