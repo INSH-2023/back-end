@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const errorModel =require('../response/errorModel')
-const {getUserRole,refreshToken} = require('../validator/authentication')
+const {getUser,refreshToken} = require('../validator/authentication')
 
 const dotenv = require('dotenv');
 
@@ -41,7 +41,7 @@ exports.JwtAuth = (req, res, next) => {
 
 exports.verifyRole = (...roles) => {
   return (req,res,next) => {
-    const reqRole = getUserRole(req.cookies.token);
+    const reqRole = getUser(req.cookies.token).user_role;
     if (!reqRole) return res.status(403).json(errorModel("the role is null",req.originalUrl));
     const result = [...roles].includes(reqRole);
     if (!result) return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));

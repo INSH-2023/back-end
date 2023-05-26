@@ -1,7 +1,7 @@
 const express =require('express')
 const router =express.Router()
 const connMSQL =require('../../config/db_config')
-const {getToken, getUserEmail, getUserRole, refreshToken} = require('../../validator/authentication')
+const {getToken, getUser, refreshToken} = require('../../validator/authentication')
 
 const table='user'
 const bcrypt = require('bcrypt')
@@ -29,9 +29,9 @@ router.post('/',async(req,res)=>{
     },"24h");
     res.cookie("token", token);
     res.cookie("refreshToken", refreshtoken);
-    res.cookie("email",getUserEmail(token));
-    res.cookie("role",getUserRole(token));
-    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUserEmail(token), "role": getUserRole(token)})
+    res.cookie("email",getUser(token).user_email);
+    res.cookie("role",getUser(token).user_role);
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUser(token).user_email, "role": getUser(token).user_role, "first_name": getUser(token).user_first_name, "last_name": getUser(token).user_last_name })
 })
 
 router.get('/refresh',JwtAuth, async(req,res)=>{
@@ -40,9 +40,11 @@ router.get('/refresh',JwtAuth, async(req,res)=>{
     let refreshtoken = refreshToken(jwtToken.substring(7),"24h")
     res.cookie("token", token);
     res.cookie("refreshToken", refreshtoken);
-    res.cookie("email",getUserEmail(token));
-    res.cookie("role",getUserEmail(token));
-    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUserEmail(token), "role": getUserRole(token)})
+    res.cookie("email",getUser(token).user_email);
+    res.cookie("role",getUser(token).user_role);
+    res.cookie("firstname",getUser(token).user_first_name)
+    res.cookie("lastname",getUser(token).user_last_name)
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUser(token).user_email, "role": getUser(token).user_role, "first_name": getUser(token).user_first_name, "last_name": getUser(token).user_last_name })
 })
 
 module.exports=router

@@ -21,25 +21,14 @@ const refreshToken = (jwttoken, date) => {
 }
 
 // convert to user email
-const getUserEmail = (jwttoken) => {
+const getUser = (jwttoken) => {
     let user = {}
     try {
         user = jwt.verify(jwttoken,process.env.TOKEN_SECRET)
     } catch (err) {
         throw new Error(err)
     }
-    return user.user_email
-}
-
-// convert to user role
-const getUserRole = (jwttoken) => {
-    let user = {}
-    try {
-        user = jwt.verify(jwttoken,process.env.TOKEN_SECRET)
-    } catch (err) {
-        throw new Error(err)
-    }
-    return user.user_role
+    return user
 }
 
 // check is expired
@@ -55,6 +44,5 @@ const isExpired = (jwttoken) => {
 
 module.exports.getToken = getToken
 module.exports.refreshToken = refreshToken
-module.exports.getUserEmail = getUserEmail
-module.exports.getUserRole = getUserRole
+module.exports.getUser=getUser
 module.exports.isExpired = isExpired
