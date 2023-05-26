@@ -18,12 +18,14 @@ router.post('/',async(req,res)=>{
     delete user[0].user_password;
     console.log(user[0])
     const token = getToken({
-      "user_name":user[0].user_first_name+" "+user[0].user_last_name,
+      "user_first_name":user[0].user_first_name,
+      "user_last_name":user[0].user_last_name,
       "user_email":user[0].user_email,
       "user_role":user[0].user_role,
     },"30m");
     const refreshtoken = getToken({
-      "user_name":user[0].user_first_name+" "+user[0].user_last_name,
+      "user_first_name":user[0].user_first_name,
+      "user_last_name":user[0].user_last_name,
       "user_email":user[0].user_email,
       "user_role":user[0].user_role,
     },"24h");
@@ -31,7 +33,9 @@ router.post('/',async(req,res)=>{
     res.cookie("refreshToken", refreshtoken);
     res.cookie("email",getUser(token).user_email);
     res.cookie("role",getUser(token).user_role);
-    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUser(token).user_email, "role": getUser(token).user_role, "first_name": getUser(token).user_first_name, "last_name": getUser(token).user_last_name })
+    res.cookie("firstname",getUser(token).user_first_name)
+    res.cookie("lastname",getUser(token).user_last_name)
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUser(token).user_email, "role": getUser(token).user_role, "firstname": getUser(token).user_first_name, "lastname": getUser(token).user_last_name })
 })
 
 router.get('/refresh',JwtAuth, async(req,res)=>{
