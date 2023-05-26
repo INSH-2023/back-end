@@ -5,7 +5,7 @@ const {getToken, getUserEmail, getUserRole, refreshToken} = require('../../valid
 
 const table='user'
 const bcrypt = require('bcrypt')
-const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
+const { JwtAuth } = require("../../middleware/jwtAuthen");
 
 router.post('/',async(req,res)=>{
     const { email, password } = req.body;
@@ -27,23 +27,17 @@ router.post('/',async(req,res)=>{
       "user_email":user[0].user_email,
       "user_role":user[0].user_role,
     },"24h");
-    const cookieSession={
-      maxAge : 24 * 60 * 60 * 1000, 
-      secure: process.env.NODE_ENV !== "development", 
-      httpOnly: true
-    }
-    res.cookie("token", token, cookieSession);
-    res.cookie("refreshToken", refreshtoken, cookieSession);
-    res.cookie("email",getUserEmail(token), cookieSession);
-    res.cookie("role",getUserRole(token), cookieSession);
+    res.cookie("token", token);
+    res.cookie("refreshToken", refreshtoken);
+    res.cookie("email",getUserEmail(token));
+    res.cookie("role",getUserRole(token));
     res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUserEmail(token), "role": getUserRole(token)})
 })
 
-router.get('/refresh',cookieJwtAuth, async(req,res)=>{
-    let jwtToken = req.cookies.token;
-    let jwtRefreshToken = req.cookies.refreshToken;
-    let token = refreshToken(jwtToken,"30m")
-    let refreshtoken = refreshToken(jwtRefreshToken,"24h")
+router.get('/refresh',JwtAuth, async(req,res)=>{
+  const jwtToken = req.headers.authorization || "Bearer " + req.cookies.token ;
+    let token = refreshToken(jwtToken.substring(7),"30m")
+    let refreshtoken = refreshToken(jwtToken.substring(7),"24h")
     res.cookie("token", token);
     res.cookie("refreshToken", refreshtoken);
     res.cookie("email",getUserEmail(token));

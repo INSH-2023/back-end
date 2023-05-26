@@ -4,7 +4,7 @@ path = require('path');
 const multer = require("multer")
 const errorModel =require('../../response/errorModel')
 const fs = require('fs')
-const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
+const { JwtAuth } = require("../../middleware/jwtAuthen");
 
 // allow multipart file
 const storage = multer.diskStorage({
@@ -33,7 +33,7 @@ const upload = multer(
 const getUpload = upload.single('file')
 
 // read solution image (not found case)
-router.get('/:solId/:step', cookieJwtAuth, async(req,res)=>{
+router.get('/:solId/:step', JwtAuth, async(req,res)=>{
     res.sendFile(path.resolve(__dirname + `../../../assets/image/solution/${req.params.solId}/${req.params.step}.png`), err => {
         return res.status(404).send(errorModel("File not found",req.originalUrl))
     })
@@ -41,7 +41,7 @@ router.get('/:solId/:step', cookieJwtAuth, async(req,res)=>{
 
 // upload solution image
 // condition (file size < 10 MB, file multipart, file upload per solution, file type image only, path storage property)
-router.post('/:solId/:step',cookieJwtAuth, async (req, res) => {
+router.post('/:solId/:step',JwtAuth, async (req, res) => {
     getUpload(req, res, err => {
         if (err) {
             return res.status(400).send(errorModel(err.message,req.originalUrl))

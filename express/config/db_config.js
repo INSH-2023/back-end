@@ -21,9 +21,6 @@ let connection =mysql.createConnection(db_config);
 
 // mysql connection
 const handdleConnection=()=>{
-
-    
-
     let status =false
 
     const connection =mysql.createConnection(db_config)

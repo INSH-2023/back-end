@@ -8,10 +8,10 @@ const sendMail=require('../../config/mailer_config')
 const line =require('../../config/lineChat_config')
 
 const table='request'
-const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
+const { JwtAuth } = require("../../middleware/jwtAuthen");
 
 // get data
-router.get('/',cookieJwtAuth,async(req,res)=>{
+router.get('/',JwtAuth,async(req,res)=>{
     // can sorted data
     try {
         if(!connMSQL.handdleConnection()){
@@ -36,7 +36,7 @@ router.get('/',cookieJwtAuth,async(req,res)=>{
 })
 
 // get data by id
-router.get('/:id',cookieJwtAuth,async(req,res)=>{
+router.get('/:id',JwtAuth,async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,table))
@@ -56,7 +56,7 @@ router.get('/:id',cookieJwtAuth,async(req,res)=>{
 })
 
 // create request
-router.post('/',cookieJwtAuth,async(req,res)=>{
+router.post('/',JwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -151,7 +151,7 @@ router.post('/:id',(req,res)=>{
 })
 
 // delete
-router.delete('/:id',cookieJwtAuth,async(req,res)=>{
+router.delete('/:id',JwtAuth,async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -181,7 +181,7 @@ router.delete('/',(req,res)=>{
 })
 
 // update data
-router.put('/:id',cookieJwtAuth,async(req,res)=>{
+router.put('/:id',JwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{

@@ -7,10 +7,10 @@ const ROLE = require('../../enum/Role')
 
 const viewTable='userview'
 const table='user'
-const { cookieJwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
+const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 
 // get data
-router.get('/', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
@@ -31,7 +31,7 @@ router.get('/', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(re
 })
 
 // get user data by admin
-router.get('/role/:role', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
@@ -63,7 +63,7 @@ router.get('/role/:role', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr)
     }
 })
 
-router.get('/:id', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
@@ -92,7 +92,7 @@ router.get('/:id', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async
 })
 
 // get data by emp code
-router.get('/emp-code/:id', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/emp-code/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
@@ -114,7 +114,7 @@ router.get('/emp-code/:id', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_p
 })
 
 // create user
-router.post('/', cookieJwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
+router.post('/', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -170,7 +170,7 @@ router.post('/:id', (req,res)=>{
 })
 
 // delete
-router.delete('/:id', cookieJwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -202,7 +202,7 @@ router.delete('/',(req,res)=>{
 
 
 // update data
-router.put('/:id', cookieJwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
     let input
     let status=undefined
     try{

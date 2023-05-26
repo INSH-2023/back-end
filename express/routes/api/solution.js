@@ -3,13 +3,13 @@ const router =express.Router()
 const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
-const { cookieJwtAuth } = require("../../middleware/jwtAuthen");
+const { JwtAuth } = require("../../middleware/jwtAuthen");
 
 const table='solution'
 const stepTable='step_solution'
 
 //get solution
-router.get('/',cookieJwtAuth,async(req,res)=>{
+router.get('/',JwtAuth,async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             // เรียกข้อมูลของ solution ออกมา
@@ -40,7 +40,7 @@ router.get('/',cookieJwtAuth,async(req,res)=>{
 
 
 // get solution by id
-router.get('/:id',cookieJwtAuth,async(req,res)=>{
+router.get('/:id',JwtAuth,async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:sp1, data:solution} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`solutionId=${req.params.id}`))
@@ -66,7 +66,7 @@ router.get('/:id',cookieJwtAuth,async(req,res)=>{
 })
 
 // create solution
-router.post('/',cookieJwtAuth,async(req,res)=>{
+router.post('/',JwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -117,7 +117,7 @@ router.post('/',cookieJwtAuth,async(req,res)=>{
 })
 
 // delete solution
-router.delete('/:id',cookieJwtAuth,async(req,res)=>{
+router.delete('/:id',JwtAuth,async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -144,7 +144,7 @@ router.delete('/:id',cookieJwtAuth,async(req,res)=>{
 })
 
 // update solution
-router.put('/:id',cookieJwtAuth,async(req,res)=>{
+router.put('/:id',JwtAuth,async(req,res)=>{
     let input
     let status=undefined
     try{
