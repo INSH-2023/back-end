@@ -18,6 +18,9 @@ exports.JwtAuth = (req, res, next) => {
     let user = jwt.verify(jwtToken.substring(7), process.env.TOKEN_SECRET);
     console.log(user)
     // if found that request on user
+    if (user.user_email === undefined || user.user_role === undefined) {
+      return res.status(401).json(errorModel("invalid token",req.originalUrl))
+    }
     req.user = user;
     next();
   } catch (err) {

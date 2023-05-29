@@ -6,7 +6,6 @@ const errorModel = require('../../response/errorModel')
 
 const table='user'
 const bcrypt = require('bcrypt')
-const { JwtAuth } = require("../../middleware/jwtAuthen");
 
 router.post('/',async(req,res)=>{
     const { email, password } = req.body;
@@ -23,7 +22,7 @@ router.post('/',async(req,res)=>{
       "user_last_name":user[0].user_last_name,
       "user_email":user[0].user_email,
       "user_role":user[0].user_role,
-    },"30m");
+    },"30s");
     const refreshtoken = getToken({
       "user_first_name":user[0].user_first_name,
       "user_last_name":user[0].user_last_name,
@@ -32,23 +31,23 @@ router.post('/',async(req,res)=>{
     },"24h");
     res.cookie("token", token);
     res.cookie("refreshToken", refreshtoken);
-    res.cookie("email",getUser(token).user_email);
-    res.cookie("role",getUser(token).user_role);
-    res.cookie("firstname",getUser(token).user_first_name)
-    res.cookie("lastname",getUser(token).user_last_name)
+    res.cookie("user_email",getUser(token).user_email);
+    res.cookie("user_role",getUser(token).user_role);
+    res.cookie("user_first_name",getUser(token).user_first_name)
+    res.cookie("user_last_name",getUser(token).user_last_name)
     res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
 })
 
-router.get('/refresh',JwtAuth, async(req,res)=>{
-  const jwtToken = req.headers.authorization || "Bearer " + req.cookies.token ;
-    let token = refreshToken(jwtToken.substring(7),"30m")
-    let refreshtoken = refreshToken(jwtToken.substring(7),"24h")
+router.get('/refresh', async(req,res)=>{
+  const jwtRefreshToken = req.headers.authorization || "Bearer " + req.cookies.token ;
+    let token = refreshToken(jwtRefreshToken.substring(7),"30m")
+    let refreshtoken = refreshToken(jwtRefreshToken.substring(7),"24h")
     res.cookie("token", token);
     res.cookie("refreshToken", refreshtoken);
-    res.cookie("email",getUser(token).user_email);
-    res.cookie("role",getUser(token).user_role);
-    res.cookie("firstname",getUser(token).user_first_name)
-    res.cookie("lastname",getUser(token).user_last_name)
+    res.cookie("user_email",getUser(token).user_email);
+    res.cookie("user_role",getUser(token).user_role);
+    res.cookie("user_first_name",getUser(token).user_first_name)
+    res.cookie("user_last_name",getUser(token).user_last_name)
     res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
 })
 
