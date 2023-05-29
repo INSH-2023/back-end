@@ -35,7 +35,7 @@ router.post('/',async(req,res)=>{
     res.cookie("role",getUser(token).user_role);
     res.cookie("firstname",getUser(token).user_first_name)
     res.cookie("lastname",getUser(token).user_last_name)
-    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUser(token).user_email, "role": getUser(token).user_role, "firstname": getUser(token).user_first_name, "lastname": getUser(token).user_last_name })
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
 })
 
 router.get('/refresh',JwtAuth, async(req,res)=>{
@@ -48,7 +48,7 @@ router.get('/refresh',JwtAuth, async(req,res)=>{
     res.cookie("role",getUser(token).user_role);
     res.cookie("firstname",getUser(token).user_first_name)
     res.cookie("lastname",getUser(token).user_last_name)
-    res.status(200).json({"token": token, "refreshToken": refreshtoken, "email": getUser(token).user_email, "role": getUser(token).user_role, "first_name": getUser(token).user_first_name, "last_name": getUser(token).user_last_name })
+    res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
 })
 
 module.exports=router

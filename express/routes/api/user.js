@@ -202,7 +202,7 @@ router.delete('/',(req,res)=>{
 
 
 // update data
-router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
     let input
     let status=undefined
     try{
