@@ -8,28 +8,29 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 exports.JwtAuth = (req, res, next) => {
-  // call token from hearders or cookies token
+  // เอา token จาก headers or cookies
   const jwtToken = req.headers.authorization || "Bearer " + req.cookies.token ;
   const jwtRefreshToken = req.headers.refresh || "Bearer " + req.cookies.refreshToken ;
-  // check if not have token that unauthorized
+  // ตรวจสอบถ้าไม่มี token จะเข้าสู่ระบบไม่ได้
   if (jwtToken == null && jwtRefreshToken == null) return res.status(401).json(errorModel("need login first",req.originalUrl))
   try {
-    // check access token
+    // ตรวจสอบ user ใน access token 
     let user = jwt.verify(jwtToken.substring(7), process.env.TOKEN_SECRET);
     console.log(user)
-    // if found that request on user
+    // ตรวจสอบใน token มีการทำ format ของ user ถูกต้องไหม
     if (user.user_email === undefined || user.user_role === undefined) {
       return res.status(401).json(errorModel("invalid token",req.originalUrl))
     }
+    // ถ้าเจอจะ request ไปยัง user
     req.user = user;
     next();
   } catch (err) {
-    // if access token invalid that check refresh token and refresh
+    // ถ้า access token ไม่ถูกต้องหรือหมดอายุจะตรวจ refresh token ว่าใช้ได้ไหม
     try {
-      // check refresh token
+      // ตรวจ refresh token
       user = jwt.verify(jwtRefreshToken.substring(7), process.env.TOKEN_SECRET);
     } catch (err1) {
-      // if refresh token expired that remove cookie on session and go to login page
+      // ถ้า refresh token หมดอายุ แสดงว่าต้องไปหน้า login ใหม่
       return res.status(403).json(errorModel("Refresh token: " + err1.message,req.originalUrl))
     }
       return res.status(401).json(errorModel("Access token: " + err.message,req.originalUrl))
@@ -38,9 +39,14 @@ exports.JwtAuth = (req, res, next) => {
 
 exports.verifyRole = (...roles) => {
   return (req,res,next) => {
-    const reqRole = getUser(req.cookies.token).user_role;
+    // เรียก role จาก header หรือ cookie
+    const reqRole = getUser(req.headers.authorization.substring(7) || req.cookies.token).user_role;
+
+    // ถ้าไม่มี role จะไม่มีสิทธิ์สำหรับการเข้าระบบ
     if (!reqRole) return res.status(403).json(errorModel("the role is null",req.originalUrl));
     const result = [...roles].includes(reqRole);
+
+    // ถ้า role ไม่ใช่ user, admin_it และ admin_pr จะไม่มีสิทธิ์สำหรับการเข้าระบบในส่วนนั้น
     if (!result) return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
     next();
   }
