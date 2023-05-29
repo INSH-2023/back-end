@@ -109,47 +109,58 @@ router.delete('/:id',JwtAuth,async(req,res)=>{
     }
 })
 
-// update data
-router.put('/:id',JwtAuth,async(req,res)=>{
-    let input
-    let status=undefined
-    try{
-        input=[    
-        {prop:"problem_problem",value: validator.validateStrNotNull(await req.body.problem_problem,100,table,'problem_problem'),type:'str'},
-        {prop:"problem_type",value: validator.validateStrNotNull(await req.body.problem_type,45,table,'problem_type'),type:'str'},
-    ]
-        // console.log('testing',await req.body.role)
-        status=!(await validator.checkUndefindData(input,table))
-        // validator.createData(data,table)
-    }catch(err){
-        console.log(err)
-        status=false
-        // console.log(status)
-        
-        res.status(400).json(errorModel(err.message,req.originalUrl))
-    }
-
-    if(status==true){
-        // update data
-        try {
-            if(!connMSQL.handdleConnection()){
-                let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(validator.updateData(req,input,table))
-                if(status_p&&problems.affectedRows!=0){
-                    return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
-                    
-                }else
-                if(status_p&&problems.affectedRows==0){
-                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                }
-            // }else{
-            //         console.log(`Cannot connect to mysql server !!`) 
-            //         throw new Error('connection error something')
-            // } 
-            }
-        } catch (error) {
-            res.status(500).json(errorModel(error.message,req.originalUrl))
-        }
-    }
+// delete data
+router.delete('/',(req,res)=>{
+    res.status(405).json(errorModel("bad request !! 😒",req.originalUrl))
 })
+
+
+// // update data
+// router.put('/:id',async(req,res)=>{
+//     let data
+//     let status=undefined
+//     try{
+//         data=[    
+//         {prop:"problem_problem",value: validator.validateStrNotNull(await req.body.problem_problem,100,table,'problem_problem'),type:'str'},
+//         {prop:"problem_type",value: validator.validateStrNotNull(await req.body.problem_type,45,table,'problem_type'),type:'str'},
+//     ]
+//         // console.log('testing',await req.body.role)
+//         status=!(await validator.checkUndefindData(data,table))
+//         // validator.createData(data,table)
+//     }catch(err){
+//         console.log(err)
+//         status=false
+//         // console.log(status)
+        
+//         res.status(400).json(errorModel(err.message,req.originalUrl))
+//     }
+
+//     if(status==true){
+//         // delete data
+//         try {
+//             // if(!connMSQL.handdleConnection()){
+//                 let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(validator.updateData(req,data,table))
+//                 if(status_p&&problems.affectedRows!=0){
+//                     return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
+                    
+//                 }else
+//                 if(status_p&&problems.affectedRows==0){
+//                     return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+//                 }
+//             // }else{
+//             //         console.log(`Cannot connect to mysql server !!`) 
+//             //         throw new Error('connection error something')
+//             // } 
+//         } catch (error) {
+//             res.status(500).json(errorModel(error.message,req.originalUrl))
+//         }
+//     }
+// })
+
+// // update data
+// router.put('/',(req,res)=>{
+//     res.status(405).json(errorModel('method not allow 🤨',req.originalUrl))
+// })
+
 
 module.exports=router

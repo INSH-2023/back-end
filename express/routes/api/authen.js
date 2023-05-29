@@ -2,6 +2,7 @@ const express =require('express')
 const router =express.Router()
 const connMSQL =require('../../config/db_config')
 const {getToken, getUser, refreshToken} = require('../../validator/authentication')
+const errorModel = require('../../response/errorModel')
 
 const table='user'
 const bcrypt = require('bcrypt')
@@ -11,9 +12,9 @@ router.post('/',async(req,res)=>{
     const { email, password } = req.body;
     let {status_pool:status_p,data:user,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_email ='${email}'`)
     if (!await bcrypt.compare(password, user[0].user_password)) {
-      return res.status(401).json({
-        error: "user email or password is invalid please login again",
-      });
+      return res.status(401).json(errorModel("user email or password is invalid please login again",req.originalUrl))
+    } else if (user[0].user_status!=='active'){
+      return res.status(401).json(errorModel("this user is inactive!",req.originalUrl))
     }
     delete user[0].user_password;
     console.log(user[0])

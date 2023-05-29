@@ -108,7 +108,7 @@ router.post('/',JwtAuth,async(req,res)=>{
             // if(!connMSQL.handdleConnection()){
                 let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(data,table,res))
                 if(status_p){
-                    await sendMail.sendMail('request',res,sub,sendMail.report_html(service,subject,type_of_use,type_machine,brand_name,problems,other,message),email)
+                    // await sendMail.sendMail('request',res,sub,sendMail.report_html(service,subject,type_of_use,type_machine,brand_name,problems,other,message),email)
                     await line.send(service,fname,email,subject,type_of_use,type_machine,brand_name,problems,other,message)
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
                 } 

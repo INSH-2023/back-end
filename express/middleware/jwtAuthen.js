@@ -29,13 +29,7 @@ exports.JwtAuth = (req, res, next) => {
       // if refresh token expired that remove cookie on session and go to login page
       return res.status(403).json(errorModel("Refresh token: " + err1.message,req.originalUrl))
     }
-    if(err.message == "jwt expired"){
-      const newJWTToken = refreshToken(jwtToken.substring(7),"30m")
-      const newRefreshToken = refreshToken(jwtToken.substring(7),"24h")
-      return res.status(401).json({"error": errorModel("Access token: " + err.message,req.originalUrl),"token": newJWTToken,"refreshToken": newRefreshToken})
-    } else {
-        return res.status(401).json(errorModel("Access token: " + err.message,req.originalUrl))
-      }
+      return res.status(401).json(errorModel("Access token: " + err.message,req.originalUrl))
     }
 };
 
