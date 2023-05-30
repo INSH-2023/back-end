@@ -5,7 +5,8 @@ const router =express.Router()
 const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
-const { JwtAuth } = require("../../middleware/jwtAuthen");
+const { JwtAuth, verifyRole,  } = require("../../middleware/jwtAuthen");
+const role = require('../../enum/Role')
 
 const table ="problem"
 // get data
@@ -29,7 +30,7 @@ router.get('/',JwtAuth,async(req,res)=>{
     }
 })
 
-router.get('/type/:type',JwtAuth,async(req,res)=>{
+router.get('/type/:type',JwtAuth, async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} where problem_type='${req.params.type}';`)
@@ -47,7 +48,7 @@ router.get('/type/:type',JwtAuth,async(req,res)=>{
 })
 
 // create problem
-router.post('/',JwtAuth,async(req,res)=>{
+router.post('/',JwtAuth, verifyRole(role.Admin_it),async(req,res)=>{
     console.log(req.body)
     let data
     let status=undefined
@@ -87,7 +88,7 @@ router.post('/',JwtAuth,async(req,res)=>{
 })
 
 // delete
-router.delete('/:id',JwtAuth,async(req,res)=>{
+router.delete('/:id',JwtAuth,verifyRole(role.Admin_it),async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -107,11 +108,6 @@ router.delete('/:id',JwtAuth,async(req,res)=>{
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
-})
-
-// delete data
-router.delete('/',(req,res)=>{
-    res.status(405).json(errorModel("bad request !! 😒",req.originalUrl))
 })
 
 
@@ -155,11 +151,6 @@ router.delete('/',(req,res)=>{
 //             res.status(500).json(errorModel(error.message,req.originalUrl))
 //         }
 //     }
-// })
-
-// // update data
-// router.put('/',(req,res)=>{
-//     res.status(405).json(errorModel('method not allow 🤨',req.originalUrl))
 // })
 
 
