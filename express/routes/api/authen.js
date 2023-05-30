@@ -35,7 +35,7 @@ router.post('/',async(req,res)=>{
     "user_last_name":user[0].user_last_name,
     "user_email":user[0].user_email,
     "user_role":user[0].user_role,
-  },"30s");
+  },"30m");
 
   // และ refresh token แต่เวลาต่างกัน
   const refreshtoken = getToken({
@@ -62,7 +62,7 @@ router.get('/refresh', async(req,res)=>{
   let refreshtoken = refreshToken(jwtRefreshToken.substring(7),"24h")
   // ตรวจดูว่า token ถูกต้องไหมก่อนส่ง
   if ([getUser(token).user_email,getUser(token).user_role].includes(undefined)) { 
-    return res.status(401).json(errorModel("please input valid token",req.originalUrl)) 
+    return res.status(401).json(errorModel("please input valid refresh token",req.originalUrl)) 
   }
   res.cookie("token", token);
   res.cookie("refreshToken", refreshtoken);

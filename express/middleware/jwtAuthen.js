@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const errorModel =require('../response/errorModel')
-const {getUser,refreshToken} = require('../validator/authentication')
+const {getUser} = require('../validator/authentication')
 
 const dotenv = require('dotenv');
 
@@ -40,7 +40,8 @@ exports.JwtAuth = (req, res, next) => {
 exports.verifyRole = (...roles) => {
   return (req,res,next) => {
     // เรียก role จาก header หรือ cookie
-    const reqRole = getUser(req.headers.authorization.substring(7) || req.cookies.token).user_role;
+    const jwtToken =  req.headers.authorization || "Bearer " + req.cookies.token
+    const reqRole = getUser(jwtToken.substring(7)).user_role;
 
     // ถ้าไม่มี role จะไม่มีสิทธิ์สำหรับการเข้าระบบ
     if (!reqRole) return res.status(403).json(errorModel("the role is null",req.originalUrl));

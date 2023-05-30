@@ -165,10 +165,6 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
     }
 })
 
-router.post('/:id', (req,res)=>{
-    res.status(405).json(errorModel('method not allow !! 😒,create data dont need params data !!',req.originalUrl))
-})
-
 // delete
 router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
     // delete data
@@ -194,12 +190,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
 })
-
-// delete data
-router.delete('/',(req,res)=>{
-    res.status(405).json(errorModel("method not allow !! 😒",req.originalUrl))
-})
-
 
 // update data
 router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
@@ -254,10 +244,5 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
         }
     }
 })
-
-router.put('/',(req,res)=>{
-    res.status(405).json(errorModel('method not allow !! 🤨',req.originalUrl))
-})
-
 
 module.exports=router
