@@ -31,6 +31,7 @@ router.post('/',async(req,res)=>{
 
   // สร้าง access token ภายใต้ method ที่กำหนด
   const token = getToken({
+    "user_emp_code":user[0].user_emp_code,
     "user_first_name":user[0].user_first_name,
     "user_last_name":user[0].user_last_name,
     "user_email":user[0].user_email,
@@ -39,6 +40,7 @@ router.post('/',async(req,res)=>{
 
   // และ refresh token แต่เวลาต่างกัน
   const refreshtoken = getToken({
+    "user_emp_code":user[0].user_emp_code,
     "user_first_name":user[0].user_first_name,
     "user_last_name":user[0].user_last_name,
     "user_email":user[0].user_email,
@@ -52,7 +54,7 @@ router.post('/',async(req,res)=>{
   res.cookie("user_role",getUser(token).user_role);
   res.cookie("user_first_name",getUser(token).user_first_name)
   res.cookie("user_last_name",getUser(token).user_last_name)
-  res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
+  res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_emp_code" : getUser(token).user_emp_code , "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
 })
 
 router.get('/refresh', async(req,res)=>{
@@ -70,7 +72,7 @@ router.get('/refresh', async(req,res)=>{
   res.cookie("user_role",getUser(token).user_role);
   res.cookie("user_first_name",getUser(token).user_first_name)
   res.cookie("user_last_name",getUser(token).user_last_name)
-  res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
+  res.status(200).json({"token": token, "refreshToken": refreshtoken, "user_emp_code" : getUser(token).user_emp_code,  "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
 })
 
 module.exports=router
