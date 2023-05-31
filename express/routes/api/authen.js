@@ -21,7 +21,7 @@ router.post('/',async(req,res)=>{
   
   // ตรวจสอบสถานะของ user
   else if (user[0].user_status!=='active'){
-    return res.status(401).json(errorModel("this user is inactive!",req.originalUrl))
+    return res.status(403).json(errorModel("this user is inactive!",req.originalUrl))
   }
 
   // ลบ password ของ user ก่อน response กลับไป

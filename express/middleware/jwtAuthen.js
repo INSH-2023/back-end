@@ -12,7 +12,7 @@ exports.JwtAuth = (req, res, next) => {
   const jwtToken = req.headers.authorization || "Bearer " + req.cookies.token ;
   const jwtRefreshToken = req.headers.refresh || "Bearer " + req.cookies.refreshToken ;
   // ตรวจสอบถ้าไม่มี token จะเข้าสู่ระบบไม่ได้
-  if (jwtToken == null && jwtRefreshToken == null) return res.status(401).json(errorModel("need login first",req.originalUrl))
+  if (jwtToken == "Bearer " && jwtRefreshToken == "Bearer ") return res.status(401).json(errorModel("need login first",req.originalUrl))
   try {
     // ตรวจสอบ user ใน access token 
     let user = jwt.verify(jwtToken.substring(7), process.env.TOKEN_SECRET);

@@ -98,57 +98,57 @@ router.post('/',JwtAuth,async(req,res)=>{
         return res.status(400).json(errorModel(err.message,req.originalUrl))
     }
 
-    // if(status==true){
-    //     try {
-    //         // if(!connMSQL.handdleConnection()){
-    //             let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(input,table,res))
-    //             if(status_p){
-    //                 // let sub ='This is summary report!!'
-    //                 // let service=await req.body.request_service_type
-    //                 // let fname=`${await req.body.request_first_name} ${await req.body.request_last_name}`
-    //                 // let subject=await req.body.request_subject
-    //                 // let type_of_use=await req.body.request_use_type
-    //                 // let type_machine=await req.body.request_type_matchine
-    //                 // let brand_name=await req.body.request_brand
-    //                 // let problems=await req.body.request_problems
-    //                 // let other =await req.body.request_other
-    //                 // let message =await req.body.request_message
-    //                 // let email =await req.body.request_email
-    //                 // await sendMail.sendMail('request',res,sub,sendMail.report_html(service,subject,type_of_use,type_machine,brand_name,problems,other,message),email)
-    //                 // await line.send(service,fname,email,subject,type_of_use,type_machine,brand_name,problems,other,message)
-    //                 return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-    //             } 
+    if(status==true){
+        try {
+            // if(!connMSQL.handdleConnection()){
+                let {status_pool:status_p,data:requests,msg:msg} = await connMSQL.connection_pool(validator.createData(input,table,res))
+                if(status_p){
+                    // let sub ='This is summary report!!'
+                    // let service=await req.body.request_service_type
+                    // let fname=`${await req.body.request_first_name} ${await req.body.request_last_name}`
+                    // let subject=await req.body.request_subject
+                    // let type_of_use=await req.body.request_use_type
+                    // let type_machine=await req.body.request_type_matchine
+                    // let brand_name=await req.body.request_brand
+                    // let problems=await req.body.request_problems
+                    // let other =await req.body.request_other
+                    // let message =await req.body.request_message
+                    // let email =await req.body.request_email
+                    // await sendMail.sendMail('request',res,sub,sendMail.report_html(service,subject,type_of_use,type_machine,brand_name,problems,other,message),email)
+                    // await line.send(service,fname,email,subject,type_of_use,type_machine,brand_name,problems,other,message)
+                    return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+                } 
 
-    //             // else if(status_p==false&&msg.errno==1062){
-    //             //     return res.status(400).json(errorModel("Duplicate data",req.originalUrl))
-    //             // } 
-    //             // connMSQL.connection.query(
+                // else if(!status_p&&msg.errno==1062){
+                //     return res.status(400).json(errorModel("Duplicate data",req.originalUrl))
+                // }
+                // connMSQL.connection.query(
                         
-    //             //     validator.createData(data,table,res),
+                //     validator.createData(data,table,res),
 
-    //             //     (err,results)=>{
-    //             //         // error
-    //             //         if(err){
-    //             //             console.log(err)
-    //             //             return res.status(400).json(errorModel(err.message,req.originalUrl))
-    //             //         }
-    //             //         console.log(results)
-    //             //         console.log(`create ${table} success!!`)
-    //             //         return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-    //             //     }
-    //             // )
+                //     (err,results)=>{
+                //         // error
+                //         if(err){
+                //             console.log(err)
+                //             return res.status(400).json(errorModel(err.message,req.originalUrl))
+                //         }
+                //         console.log(results)
+                //         console.log(`create ${table} success!!`)
+                //         return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+                //     }
+                // )
 
-    //         // }else{
-    //         //     console.log(`Cannot connect to mysql server !!`) 
-    //         //     throw new Error('connection error something')
-    //         // } 
-    //     } catch (error) {
-    //         console.log(error)
-    //         return res.status(500).json(errorModel(error.message,req.originalUrl))
-    //     }
-    // } else {
-    //     return res.status(400).json(errorModel('data not valid',req.originalUrl))
-    // }
+            // }else{
+            //     console.log(`Cannot connect to mysql server !!`) 
+            //     throw new Error('connection error something')
+            // } 
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json(errorModel(error.message,req.originalUrl))
+        }
+    } else {
+        return res.status(400).json(errorModel('data not valid',req.originalUrl))
+    }
 })
 
 // delete
@@ -202,7 +202,7 @@ router.put('/:id',JwtAuth,async(req,res)=>{
         // update data
         try {
             if(!connMSQL.handdleConnection()){
-                let {status_pool,data: requests} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`requestId=${req.params.id}`))
+                let {status_pool,data: requests, msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`requestId=${req.params.id}`))
                 blockPermissionWithEmail(req, res, requests[0].request_email)
                 if (data.length == 0) {
                     return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`,req.originalUrl))

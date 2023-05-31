@@ -151,10 +151,6 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
                 // error
                 if(status_p){
                     return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-
-                } else
-                if(status_p==false&&msg.errno==1062){
-                    return res.status(400).json(errorModel("Duplicate data",req.originalUrl))
                 }                   
             // }
         } catch (error) {
@@ -179,7 +175,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
             if(status_p&&users.affectedRows==0){
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-
             }
         }else{
                 console.log(`Cannot connect to mysql server !!`) 
@@ -224,7 +219,6 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
         try {
             if(!connMSQL.handdleConnection()){
                 let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.updateData(req,input,table))
-                
                     if(status_p&&users.affectedRows!=0){
                         return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
                     }else
