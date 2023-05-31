@@ -147,7 +147,6 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
         try {
             // if(!connMSQL.handdleConnection()){
                 let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.createData(input,table,res))
-                
                 // console.log(users)
                 // error
                 if(status_p){

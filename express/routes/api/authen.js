@@ -15,7 +15,7 @@ router.post('/',async(req,res)=>{
   let {status_pool:status_p,data:user,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_email ='${email}'`)
   
   // ตรวจสอบ password ที่ได้จาก mysql2 ว่าเป็น hash match กับ password ที่กรอกมาหรือป่าว
-  if (!await bcrypt.compare(password, user[0].user_password)) {
+  if (user.length==0 || !await bcrypt.compare(password, user[0].user_password)) {
     return res.status(401).json(errorModel("user email or password is invalid please login again",req.originalUrl))
   } 
   
