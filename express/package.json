@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "SET \"NODE_ENV=production\" && node index",
+    "start": "set \"NODE_ENV=production\" && node index",
     "build": "echo \"hello\" ",
-    "dev": "SET \"NODE_ENV=development\" && nodemon index"
+    "dev": "set \"NODE_ENV=development\" && nodemon index"
   },
   "keywords": [],
   "author": "",
