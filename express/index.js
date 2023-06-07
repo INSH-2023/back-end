@@ -1,15 +1,15 @@
 // เหมือนกับ import 
 const express =require("express")
 const logger =require('./middleware/logger')
-// const cors =require('cors')
+const cors =require('cors')
 const cookieParser = require('cookie-parser')
 const compression = require("compression"); // reduce loading of all site
 
 require('dotenv').config().parsed
-// let corsOptions = {
-//     // origin: process.env.CLIENT_HOST||'http://localhost:5173',
-//     // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
+let corsOptions = {
+    origin: process.env.CLIENT_HOST||'http://localhost:5173',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 
 const app =express()
 
@@ -24,7 +24,7 @@ app.use(limiter);
 
 // Init Middleware
 app.use(logger)
-// app.use(cors(corsOptions))
+app.use(cors(corsOptions))
 app.use(compression())
 
 app.use(cookieParser())
