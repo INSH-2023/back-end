@@ -54,11 +54,11 @@ router.get('/:id',JwtAuth,async(req,res)=>{
         join moral_it_device.user as user on user.user_emp_code = item.user_emp_code 
         WHERE item.itemId = "${req.params.id}";`)
 
-        blockPermissionWithEmail(req,res,items[0].user_email)
         if(status_p && items.length!=0){
             return res.status(200).json(items)
         }
         else if(status_p && items.length==0){
+            blockPermissionWithEmail(req,res,items[0].user_email)
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
         }
         // }else{
@@ -79,11 +79,11 @@ router.get('/emp-code/:id',JwtAuth,async(req,res)=>{
         user_email,user_group FROM moral_it_device.item as item 
         join moral_it_device.user as user on user.user_emp_code = item.user_emp_code 
         WHERE user.user_emp_code = "${req.params.id}";` )
-        blockPermissionWithEmail(req,res,items[0].user_email)
+        
         if(status_p && items.length!=0){
             return res.status(200).json(items)
-        }else
-        if(status_p && items.length==0){
+        }else if(status_p && items.length==0){
+            blockPermissionWithEmail(req,res,items[0].user_email)
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
         }
         // }else{
