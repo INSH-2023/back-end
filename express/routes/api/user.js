@@ -63,7 +63,7 @@ router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), asyn
     }
 })
 
-router.get('/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/:id', JwtAuth, async(req,res)=>{
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
@@ -76,6 +76,10 @@ router.get('/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,r
                         timeZone: 'Asia/Bangkok',
                     })
                 })
+                // block user when they see other user except owner
+                if(req.user.user_role === "user" && users[0].userId != req.params.id){
+                    return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
+                }
                 return res.status(200).json(users)
             }else 
             if(status_p && users.length==0){
@@ -92,12 +96,16 @@ router.get('/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,r
 })
 
 // get data by emp code
-router.get('/emp-code/:id', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/emp-code/:id', JwtAuth, async(req,res)=>{
 
     try {
         if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`user_emp_code=${req.params.id}`))
             if(status_p && users.length!=0){
+                // block user when they see other user except owner
+                if(req.user.user_role === "user" && users[0].user_emp_code != req.params.id){
+                    return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
+                }
                 return res.status(200).json(users)
             }else 
             if(status_p && users.length==0){
