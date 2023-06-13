@@ -183,6 +183,7 @@ router.delete('/:id',JwtAuth,async(req,res)=>{
 router.put('/:id',JwtAuth,async(req,res)=>{
     let input
     let status=undefined
+    
     try{
         input=[
             {prop:"request_status" ,value: validator.validateStrNotNull(await req.body.request_status,100,table,'request_status'),type:'str'},
@@ -201,10 +202,11 @@ router.put('/:id',JwtAuth,async(req,res)=>{
     if(status==true){
         // update data
         try {
+            
             if(!connMSQL.handdleConnection()){
                 let {status_pool,data: requests, msg} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`requestId=${req.params.id}`))
                 blockPermissionWithEmail(req, res, requests[0].request_email)
-                if (data.length == 0) {
+                if (requests.length == 0) {
                     return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`,req.originalUrl))
                 } else {
                     await connMSQL.connection_pool(validator.updateData(req,input,table))

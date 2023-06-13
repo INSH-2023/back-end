@@ -5,7 +5,7 @@ const router =express.Router()
 const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
-const { JwtAuth, verifyRole,  } = require("../../middleware/jwtAuthen");
+const { JwtAuth, verifyRole} = require("../../middleware/jwtAuthen");
 const role = require('../../enum/Role')
 
 const table ="problem"
