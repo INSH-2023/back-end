@@ -205,11 +205,11 @@ const validateRole =  (str='',table,name) => {
     // let text = str
     if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
-    }else if(str != ROLE.Admin_it && str != ROLE.Admin_pr && str != ROLE.User){
-        throw new Error("role is user , admin_it and admin_pr only")
+    }else if(str != ROLE.Admin_it && str != ROLE.Admin_pr && str != ROLE.User && str != ROLE.Super_admin){
+        throw new Error("role is user , admin_it, admin_pr and super_admin only")
     }else
-    if(str.length > 10){
-        throw new Error("role is more then 10 charecter!!")
+    if(str.length > 11){
+        throw new Error("role is more then 11 charecter!!")
     }else{
         console.log(`validate role / ${table} ${name} : ${str}`)
         return str.toString().trim()

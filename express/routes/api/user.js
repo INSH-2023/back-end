@@ -10,7 +10,7 @@ const table='user'
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 
 // get data
-router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin), async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
@@ -31,7 +31,7 @@ router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)
 })
 
 // get user data by admin
-router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr), async(req,res)=>{
+router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin), async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
@@ -122,7 +122,7 @@ router.get('/emp-code/:id', JwtAuth, async(req,res)=>{
 })
 
 // create user
-router.post('/', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
+router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -169,7 +169,7 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
 })
 
 // delete
-router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
@@ -194,7 +194,7 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
 })
 
 // update data
-router.put('/:id', JwtAuth, verifyRole(ROLE.Admin_it), async(req,res)=>{
+router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     let input
     let status=undefined
     try{

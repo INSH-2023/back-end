@@ -48,7 +48,7 @@ router.get('/type/:type',JwtAuth, async(req,res)=>{
 })
 
 // create problem
-router.post('/',JwtAuth, verifyRole(role.Admin_it),async(req,res)=>{
+router.post('/',JwtAuth, verifyRole(role.Admin_it,role.Admin_pr,role.Super_admin),async(req,res)=>{
     console.log(req.body)
     let data
     let status=undefined
@@ -88,7 +88,7 @@ router.post('/',JwtAuth, verifyRole(role.Admin_it),async(req,res)=>{
 })
 
 // delete
-router.delete('/:id',JwtAuth,verifyRole(role.Admin_it),async(req,res)=>{
+router.delete('/:id',JwtAuth,verifyRole(role.Admin_it,role.Admin_pr,role.Super_admin),async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){
