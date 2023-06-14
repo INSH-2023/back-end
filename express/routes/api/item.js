@@ -13,7 +13,6 @@ const table='item'
 router.get('/',JwtAuth,async(req,res)=>{
 
     try {
-        // if(!connMSQL.handdleConnection()){
         let statement = `SELECT itemId,item_name,item_number,item_type,user_first_name,
         user_last_name,user_email,user_group FROM moral_it_device.item as item 
         join moral_it_device.user as user on user.user_emp_code=item.user_emp_code`
@@ -32,10 +31,6 @@ router.get('/',JwtAuth,async(req,res)=>{
             return res.status(200).json(data)
         }
 
-        // }else{
-        //     console.log(`Cannot connect to mysql server !!`) 
-        //     throw new Error('connection error something')
-        // }
     } catch (error) {
         console.log(error)
         return res.status(500).json(errorModel(error.message,req.originalUrl))
@@ -46,7 +41,6 @@ router.get('/',JwtAuth,async(req,res)=>{
 // get item by id
 router.get('/:id',JwtAuth,async(req,res)=>{
     try {
-        // if(!connMSQL.handdleConnection()){
         
         let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(
         `SELECT itemId,item_name,item_number,item_type,user_first_name,
@@ -61,10 +55,6 @@ router.get('/:id',JwtAuth,async(req,res)=>{
             blockPermissionWithEmail(req,res,items[0].user_email)
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
         }
-        // }else{
-        //     console.log(`Cannot connect to mysql server !!`) 
-        //     throw new Error('connection error something')
-        // } 
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
@@ -73,7 +63,6 @@ router.get('/:id',JwtAuth,async(req,res)=>{
 
 router.get('/emp-code/:id',JwtAuth,async(req,res)=>{
     try {
-        // if(!connMSQL.handdleConnection()){
         let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(`
         SELECT itemId,item_name,item_number,item_type,user_first_name,user_last_name,
         user_email,user_group FROM moral_it_device.item as item 
@@ -86,10 +75,6 @@ router.get('/emp-code/:id',JwtAuth,async(req,res)=>{
             blockPermissionWithEmail(req,res,items[0].user_email)
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
         }
-        // }else{
-        //     console.log(`Cannot connect to mysql server !!`) 
-        //     throw new Error('connection error something')
-        // } 
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }

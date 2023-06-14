@@ -16,28 +16,23 @@ const ServiceType = require('../../enum/ServiceType')
 router.get('/', JwtAuth, async (req, res) => {
     // can sorted data
     try {
-        if (!connMSQL.handdleConnection()) {
-            let columns = ['first_name', 'last_name', 'email', 'group', 'service_type', 'subject', 'status',
-                'req_date', 'assign', 'use_type', 'sn', 'brand', 'type_matchine', 'other', 'problems', 'message']
-            let { status_pool, data } = await connMSQL.connection_pool(
-                `SELECT requestId,request_first_name,request_last_name,request_email,request_group,
-                request_service_type,request_subject,request_status,DATE_FORMAT(request_req_date,"%Y-%m-%d %H:%i:%s") 
-                as request_req_date,request_assign,request_use_type,request_sn,request_brand,request_type_matchine,
-                request_other,request_problems,request_message FROM moral_it_device.request 
-                order by request${columns.includes(req.query.sort)
-                    ? '_' + req.query.sort : 'Id'} ${req.query.sortType == 'desc' ? 'desc' : 'asc'}`)
-            if (req.user.user_role == "user") {
-                data = data.filter(e => e.request_email == req.user.user_email)
-            } else if (req.user.user_role == role.Admin_it) {
-                data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "it_service")
-            } else if (req.user.user_role == role.Admin_pr) {
-                data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "pr_service")
-            }
-            return res.status(200).json(data)
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw new Error('connection error something :', err)
+        let columns = ['first_name', 'last_name', 'email', 'group', 'service_type', 'subject', 'status',
+            'req_date', 'assign', 'use_type', 'sn', 'brand', 'type_matchine', 'other', 'problems', 'message']
+        let { status_pool, data } = await connMSQL.connection_pool(
+            `SELECT requestId,request_first_name,request_last_name,request_email,request_group,
+            request_service_type,request_subject,request_status,DATE_FORMAT(request_req_date,"%Y-%m-%d %H:%i:%s") 
+            as request_req_date,request_assign,request_use_type,request_sn,request_brand,request_type_matchine,
+            request_other,request_problems,request_message FROM moral_it_device.request 
+            order by request${columns.includes(req.query.sort)
+                ? '_' + req.query.sort : 'Id'} ${req.query.sortType == 'desc' ? 'desc' : 'asc'}`)
+        if (req.user.user_role == "user") {
+            data = data.filter(e => e.request_email == req.user.user_email)
+        } else if (req.user.user_role == role.Admin_it) {
+            data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "it_service")
+        } else if (req.user.user_role == role.Admin_pr) {
+            data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "pr_service")
         }
+        return res.status(200).json(data)
     } catch (error) {
         console.log(error)
         return res.status(400).json(errorModel(error.message, req.originalUrl))
@@ -47,31 +42,27 @@ router.get('/', JwtAuth, async (req, res) => {
 // get data by id
 router.get('/:id', JwtAuth, async (req, res) => {
     try {
-        if (!connMSQL.handdleConnection()) {
-            let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.foundId(req, table))
+        let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.foundId(req, table))
 
-            // user can get with their email only
-            if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
-                return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
-            }
-
-            // validate role of admin IT and admin PR who can upload by This role only
-            if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
-                return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-            } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
-                return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
-            }
-
-            if (status_p && requests.length != 0) {
-                return res.status(200).json(requests)
-            } else
-                if (status_p && requests.length == 0) {
-                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
-                }
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw new Error('connection error something')
+        // user can get with their email only
+        if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
+            return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
         }
+
+        // validate role of admin IT and admin PR who can upload by This role only
+        if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
+            return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
+        } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
+            return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
+        }
+
+        if (status_p && requests.length != 0) {
+            return res.status(200).json(requests)
+        } else
+            if (status_p && requests.length == 0) {
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+            }
+        
     } catch (error) {
         return res.status(400).json(errorModel(error.message, req.originalUrl))
     }
@@ -128,7 +119,6 @@ router.post('/', JwtAuth, async (req, res) => {
 
     if (status == true) {
         try {
-            // if(!connMSQL.handdleConnection()){
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.createData(input, table, res))
             if (status_p) {
                 let sub = 'This is summary report!!'
@@ -183,7 +173,6 @@ router.post('/', JwtAuth, async (req, res) => {
 router.delete('/:id', JwtAuth, async (req, res) => {
     // delete data
     try {
-        if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'requestId'))
 
             // user can get with their email only
@@ -208,10 +197,6 @@ router.delete('/:id', JwtAuth, async (req, res) => {
                     // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
 
                 }
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw new Error('connection error something ')
-        }
     } catch (error) {
         res.status(400).json(errorModel(error.message, req.originalUrl))
     }
@@ -240,30 +225,24 @@ router.put('/:id', JwtAuth, async (req, res) => {
     if (status == true) {
         // update data
         try {
-
-            if (!connMSQL.handdleConnection()) {
-                let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(req, table, '*', `requestId=${req.params.id}`))
-                if (requests.length == 0) {
-                    return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
-                } else {
-                    // user can get with their email only
-                    if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
-                        return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
-                    }
-
-                    // validate role of admin IT and admin PR who can upload by This role only
-                    if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
-                        return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-                    } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
-                        return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
-                    }
-
-                    await connMSQL.connection_pool(validator.updateData(req, input, table))
-                    return res.status(200).json({ message: `update ${table} id ${req.params.id} success!!`, status: '200' })
-                }
+            let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(req, table, '*', `requestId=${req.params.id}`))
+            if (requests.length == 0) {
+                return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
             } else {
-                console.log(`Cannot connect to mysql server !!`)
-                throw new Error('connection error something :', err)
+                // user can get with their email only
+                if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
+                    return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+                }
+
+                // validate role of admin IT and admin PR who can upload by This role only
+                if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
+                    return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
+                } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
+                    return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
+                }
+
+                await connMSQL.connection_pool(validator.updateData(req, input, table))
+                return res.status(200).json({ message: `update ${table} id ${req.params.id} success!!`, status: '200' })
             }
         } catch (error) {
             res.status(400).json(errorModel(error.message, req.originalUrl))

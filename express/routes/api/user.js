@@ -13,17 +13,12 @@ const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin), async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
-        // if(!connMSQL.handdleConnection()){
             // get user when pool
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable}`)
             
             if(status_p){
                 return res.status(200).json(users)
             }
-        // }else{
-        //     console.log(`Cannot connect to mysql server !!`) 
-        //     throw new Error('connection error something')
-        // }
     } catch (error) {
         console.log(error)
         return res.status(500).json(errorModel(error.message,req.originalUrl))
@@ -34,7 +29,6 @@ router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin
 router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin), async(req,res)=>{
     // connMSQL.testinsg_pool()
     try {
-        // if(!connMSQL.handdleConnection()){
             // get user with roles
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${viewTable} WHERE user_role ='${req.params.role}'`)
             if (status_p && users.length!=0) {
@@ -53,10 +47,6 @@ router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.S
                 return res.status(404).json(errorModel(`${table} role ${req.params.role} does not exist`,req.originalUrl))
             }
      
-        // }else{
-        //     console.log(`Cannot connect to mysql server !!`) 
-        //     throw new Error('connection error something')
-        // }
     } catch (error) {
         console.log(error)
         return res.status(400).json(errorModel(error.message,req.originalUrl))
@@ -65,31 +55,27 @@ router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.S
 
 router.get('/:id', JwtAuth, async(req,res)=>{
     try {
-        if(!connMSQL.handdleConnection()){
-            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
-            if(status_p && users.length!=0){
-                users.forEach(user => {
-                    user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
-                        timeZone: 'Asia/Bangkok',
-                    })
-                    user.user_updatedAt =user.user_updatedAt.toLocaleString('th-TH', {
-                        timeZone: 'Asia/Bangkok',
-                    })
+        let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`userId=${req.params.id}`))
+        if(status_p && users.length!=0){
+            users.forEach(user => {
+                user.user_createdAt = user.user_createdAt.toLocaleString('th-TH', {
+                    timeZone: 'Asia/Bangkok',
                 })
-                // block user when they see other user except owner
-                if(req.user.user_role === "user" && users[0].userId != req.params.id){
-                    return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
-                }
-                return res.status(200).json(users)
-            }else 
-            if(status_p && users.length==0){
-                // console.log(msg)
-                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                user.user_updatedAt =user.user_updatedAt.toLocaleString('th-TH', {
+                    timeZone: 'Asia/Bangkok',
+                })
+            })
+            // block user when they see other user except owner
+            if(req.user.user_role === "user" && users[0].userId != req.params.id){
+                return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
             }
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something')
-        } 
+            return res.status(200).json(users)
+        }else 
+        if(status_p && users.length==0){
+            // console.log(msg)
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+        }
+        
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
@@ -99,7 +85,6 @@ router.get('/:id', JwtAuth, async(req,res)=>{
 router.get('/emp-code/:id', JwtAuth, async(req,res)=>{
 
     try {
-        if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`user_emp_code=${req.params.id}`))
             if(status_p && users.length!=0){
                 // block user when they see other user except owner
@@ -112,17 +97,13 @@ router.get('/emp-code/:id', JwtAuth, async(req,res)=>{
                 // console.log(msg)
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something')
-        } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
 })
 
 // create user
-router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
+router.post('/',JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     let input
     let status=undefined
     try{
@@ -153,14 +134,12 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     if(status==true){
 
         try {
-            // if(!connMSQL.handdleConnection()){
-                let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.createData(input,table,res))
-                // console.log(users)
-                // error
-                if(status_p){
-                    return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-                }                   
-            // }
+            let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.createData(input,table,res))
+            // console.log(users)
+            // error
+            if(status_p){
+                return res.status(200).json({message:`create ${table} success!!`,status:'200'})
+            }   
         } catch (error) {
 
             res.status(500).json(errorModel(error.message,req.originalUrl))
@@ -172,7 +151,6 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
 router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     // delete data
     try {
-        if(!connMSQL.handdleConnection()){
             // delete
             let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table,"userId"))
 
@@ -184,10 +162,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }
-        }else{
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something')
-        } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
@@ -225,21 +199,16 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
     if(status==true){
         // update data
         try {
-            if(!connMSQL.handdleConnection()){
-                let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.updateData(req,input,table))
-                    if(status_p&&users.affectedRows!=0){
-                        return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
-                    }else
-                    if(status_p&&users.affectedRows==0){
-                        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                    }else
-                    if(status_p==false){
-                        return res.status(400).json(errorModel('bad request!!',req.originalUrl))
-                    }
-            }else{
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something')
-            } 
+            let {status_pool:status_p,data:users,msg:msg}=await connMSQL.connection_pool(validator.updateData(req,input,table))
+                if(status_p&&users.affectedRows!=0){
+                    return res.status(200).json({message:`update ${table} id ${req.params.id} success!!`,status:'200'})
+                }else
+                if(status_p&&users.affectedRows==0){
+                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                }else
+                if(status_p==false){
+                    return res.status(400).json(errorModel('bad request!!',req.originalUrl))
+                }
         } catch (error) {
             res.status(400).json(errorModel(error.message,req.originalUrl))
         }

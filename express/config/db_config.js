@@ -6,7 +6,7 @@ require('dotenv').config().parsed
 const db_config={
     host: process.env.MYSQLDB_HOST||'localhost',
     user: process.env.MYSQLDB_USER||'root',
-    password: process.env.MYSQLDB_PASSWORD||'abcd1234',
+    password: process.env.MYSQLDB_PASSWORD||'(Pheeraprt0123)',
     database: process.env.MYSQLDB_DATABASE||'moral_it_device',
     port:process.env.MYSQLDB_PORT||3306,
     // option
@@ -59,7 +59,7 @@ const connection_pool=async(statement)=>{
             .then(conn=>{
                 const res=conn.query(statement)
                 conn.release()
-                conn.end()
+                // conn.end()
                 return res
             })
             .then(result=>{

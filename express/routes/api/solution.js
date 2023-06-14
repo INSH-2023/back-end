@@ -11,7 +11,7 @@ const stepTable='step_solution'
 //get solution
 router.get('/',JwtAuth,async(req,res)=>{
     try {
-        if(!connMSQL.handdleConnection()){
+        // if(!connMSQL.handdleConnection()){
             // เรียกข้อมูลของ solution ออกมา
             let {status_pool:sp1, data:solutions} = await connMSQL.connection_pool(
                 `SELECT * FROM moral_it_device.${table}`)
@@ -29,10 +29,10 @@ router.get('/',JwtAuth,async(req,res)=>{
                 return sol
             }))
             return res.status(200).json(solutions)
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw res.status(400).json(errorModel(error.message,req.originalUrl))
-        }
+        // }else{
+        //     console.log(`Cannot connect to mysql server !!`) 
+        //     throw res.status(400).json(errorModel(error.message,req.originalUrl))
+        // }
     } catch (error) {
         return res.status(500).json(errorModel(error.message,req.originalUrl))
     }
@@ -42,7 +42,7 @@ router.get('/',JwtAuth,async(req,res)=>{
 // get solution by id
 router.get('/:id',JwtAuth,async(req,res)=>{
     try {
-        if(!connMSQL.handdleConnection()){
+        // if(!connMSQL.handdleConnection()){
             let {status_pool:sp1, data:solution} = await connMSQL.connection_pool(validator.foundId(req,table,'*',`solutionId=${req.params.id}`))
             if (sp1 && solution.length == 0) {
                 return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`,req.originalUrl))
@@ -56,10 +56,10 @@ router.get('/:id',JwtAuth,async(req,res)=>{
                 solution[0].solution_steps = steps.length == 0 ? null : steps
                 return res.status(200).send(solution)
             }
-        }else{
-            console.log(`Cannot connect to mysql server !!`) 
-            throw new Error('connection error something :',err)
-        } 
+        // }else{
+        //     console.log(`Cannot connect to mysql server !!`) 
+        //     throw new Error('connection error something :',err)
+        // } 
     } catch (error) {
         res.status(500).json(errorModel(error.message,req.originalUrl))
     }
@@ -88,7 +88,7 @@ router.post('/',JwtAuth,async(req,res)=>{
 
     if(status==true){
         try {
-            if(!connMSQL.handdleConnection()){
+            // if(!connMSQL.handdleConnection()){
 
                 let {status_pool,data} = await connMSQL.connection_pool(validator.createData(input,table,res))
 
@@ -104,10 +104,10 @@ router.post('/',JwtAuth,async(req,res)=>{
                 })
                 // error
                 return res.status(200).json({message:`create ${table} success!!`,status:'200'})
-            } else {
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something :',err)
-            }
+            // } else {
+            //     console.log(`Cannot connect to mysql server !!`) 
+            //     throw new Error('connection error something :',err)
+            // }
         } catch (error) {
             res.status(400).json(errorModel(error.message,req.originalUrl))
         }
@@ -120,7 +120,7 @@ router.post('/',JwtAuth,async(req,res)=>{
 router.delete('/:id',JwtAuth,async(req,res)=>{
     // delete data
     try {
-        if(!connMSQL.handdleConnection()){
+        // if(!connMSQL.handdleConnection()){
             // delete
             await connMSQL.connection_pool(validator.deleteData(req,'step_solution','solution_Id'))
             let {status_pool:status_p,data:sol,msg:msg}=await connMSQL.connection_pool(validator.deleteData(req,table,'solutionId'))
@@ -134,10 +134,10 @@ router.delete('/:id',JwtAuth,async(req,res)=>{
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
 
             }
-        }else{
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something')
-        } 
+        // }else{
+        //         console.log(`Cannot connect to mysql server !!`) 
+        //         throw new Error('connection error something')
+        // } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))
     }
@@ -166,7 +166,7 @@ router.put('/:id',JwtAuth,async(req,res)=>{
 
     if(status==true){
         try {
-            if(!connMSQL.handdleConnection()){
+            // if(!connMSQL.handdleConnection()){
 
                 let {status_pool:status_p,data} = await connMSQL.connection_pool(validator.updateData(req,input,table))
 
@@ -194,10 +194,10 @@ router.put('/:id',JwtAuth,async(req,res)=>{
 
                 // error
                 return res.status(200).json({message:`update ${table} success!!`,status:'200'})
-            } else {
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something :',err)
-            }
+            // } else {
+            //     console.log(`Cannot connect to mysql server !!`) 
+            //     throw new Error('connection error something :',err)
+            // }
         } catch (error) {
             res.status(400).json(errorModel(error.message,req.originalUrl))
         }
