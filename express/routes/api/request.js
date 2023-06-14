@@ -84,18 +84,18 @@ router.post('/', JwtAuth, async (req, res) => {
     try {
         // data=await validator.validateRequestData(req)
         input = [
-            { prop: "request_first_name", value: validator.validateStrNotNull(await req.body.request_first_name, 100, table, 'request_first_name'), type: 'str' },
-            { prop: "request_last_name", value: validator.validateStrNotNull(await req.body.request_last_name, 100, table, 'request_last_name'), type: 'str' },
-            { prop: "request_email", value: validator.validateEmail(await req.body.request_email, 100, table, 'request_email'), type: 'str' },
-            { prop: "request_group", value: validator.validateStrNotNull(await req.body.request_group, 100, table, 'request_group'), type: 'str' },
-            { prop: "request_service_type", value: validator.validateStrNotNull(await req.body.request_service_type, 100, table, 'request_service_type'), type: 'str' },
-            { prop: "request_subject", value: validator.validateStrNotNull(await req.body.request_subject, 100, table, 'request_subject'), type: 'str' },
-            { prop: "request_status", value: validator.validateStrNotNull(await req.body.request_status, 100, table, 'request_status'), type: 'str' },
-            { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 100, table, 'request_assign'), type: 'str' },
+            { prop: "request_first_name", value: validator.validateStrNotNull(await req.body.request_first_name, 50, table, 'request_first_name'), type: 'str' },
+            { prop: "request_last_name", value: validator.validateStrNotNull(await req.body.request_last_name, 50, table, 'request_last_name'), type: 'str' },
+            { prop: "request_email", value: validator.validateEmail(await req.body.request_email, 50, table, 'request_email'), type: 'str' },
+            { prop: "request_group", value: validator.validateStrNotNull(await req.body.request_group, 50, table, 'request_group'), type: 'str' },
+            { prop: "request_service_type", value: validator.validateStrNotNull(await req.body.request_service_type, 15, table, 'request_service_type'), type: 'str' },
+            { prop: "request_subject", value: validator.validateStrNotNull(await req.body.request_subject, 15, table, 'request_subject'), type: 'str' },
+            { prop: "request_status", value: validator.validateStrNotNull(await req.body.request_status, 15, table, 'request_status'), type: 'str' },
+            { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 50, table, 'request_assign'), type: 'str' },
             { prop: "request_use_type", value: validator.validateStrNull(await req.body.request_use_type, 4, table, 'request_use_type'), type: 'str' },
-            { prop: "request_sn", value: validator.validateStrNull(await req.body.request_sn, 50, table, 'request_sn'), type: 'str' },
-            { prop: "request_brand", value: validator.validateStrNull(await req.body.request_brand, 100, table, 'request_brand'), type: 'str' },
-            { prop: "request_type_matchine", value: validator.validateStrNull(await req.body.request_type_matchine, 50, table, 'request_type_matchine'), type: 'str' },
+            { prop: "request_sn", value: validator.validateStrNull(await req.body.request_sn, 40, table, 'request_sn'), type: 'str' },
+            { prop: "request_brand", value: validator.validateStrNull(await req.body.request_brand, 50, table, 'request_brand'), type: 'str' },
+            { prop: "request_type_matchine", value: validator.validateStrNull(await req.body.request_type_matchine, 15, table, 'request_type_matchine'), type: 'str' },
             { prop: "request_other", value: validator.validateStrNull(await req.body.request_other, 150, table, 'request_other'), type: 'str' },
             { prop: "request_problems", value: validator.validateStrNotNull(await req.body.request_problems, 150, table, 'request_problems'), type: 'str' },
             // {prop:"request_message"        ,value: validator.validateStr(await req.body.request_message,150,table,'request_message'),type:'str'},
@@ -224,8 +224,8 @@ router.put('/:id', JwtAuth, async (req, res) => {
 
     try {
         input = [
-            { prop: "request_status", value: validator.validateStrNotNull(await req.body.request_status, 100, table, 'request_status'), type: 'str' },
-            { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 100, table, 'request_assign'), type: 'str' }
+            { prop: "request_status", value: validator.validateStrNotNull(await req.body.request_status, 15, table, 'request_status'), type: 'str' },
+            { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 50, table, 'request_assign'), type: 'str' }
         ]
         // console.log('testing',await req.body.role)
         status = !(await validator.checkUndefindData(input, table))
