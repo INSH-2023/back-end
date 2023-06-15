@@ -132,6 +132,8 @@ router.put('/reset_password', async (req, res) => {
   )
   if (logs.length == 0) {
     return res.status(401).json(errorModel(`token : ${uuId_token} is invalid`, req.originalUrl))
+  } else if (logs[0].use_token == 1) {
+    return res.status(401).json(errorModel(`token : ${uuId_token} is already used`, req.originalUrl))
   }
   let input
   let status = undefined
