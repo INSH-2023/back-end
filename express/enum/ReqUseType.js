@@ -1,6 +1,6 @@
 const req = Object.freeze({
-    OR: 'or',
-    SF: 'sf',
+    Organization: 'or',
+    Self: 'sf',
 })
 
 module.exports = req
