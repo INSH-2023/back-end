@@ -1,5 +1,5 @@
 // const { EmptyResultError } = require('sequelize')
-const ROLE = require('../enum/User')
+// const ROLE = require('../enum/User')
 
 // const Users = require('../config/db').users
 

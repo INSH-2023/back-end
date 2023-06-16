@@ -23,7 +23,6 @@ const problem = Object.freeze({
     Website: 'website',
     Meeting: 'meeting',
     Application: 'application',
-    Other: 'other',
     Media: 'media',
     News: 'news',
     Other: 'other',

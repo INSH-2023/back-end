@@ -7,7 +7,7 @@ const errorModel =require('../../response/errorModel')
 const viewTable='userview'
 const table='user'
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
-const {ROLE,STATUS} = require('../../enum/User')
+const {ROLE,STATUS} = require("../../enum/UserType")
 
 // get data
 router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin), async(req,res)=>{
@@ -77,7 +77,7 @@ router.get('/:id', JwtAuth, async(req,res)=>{
                     })
                 })
                 // block user when they see other user except owner
-                if(req.user.user_role === "user" && users[0].userId != req.params.id){
+                if(req.user.user_role === ROLE.user && users[0].userId != req.params.id){
                     return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
                 }
                 return res.status(200).json(users)
@@ -185,8 +185,8 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }
         }else{
-                console.log(`Cannot connect to mysql server !!`) 
-                throw new Error('connection error something')
+            console.log(`Cannot connect to mysql server !!`) 
+            throw new Error('connection error something')
         } 
     } catch (error) {
         res.status(400).json(errorModel(error.message,req.originalUrl))

@@ -20,7 +20,7 @@ router.get('/stage/:stage/:id',(req,res)=>{
     let max =5
     if(stage==5&&num!=0){
         if(num<=max && num>=min){
-            return  res.status(200).download(`${__dirname}/../../images/stage/stage_5/${num}.png`)
+            return  res.status(200).download(`${__dirname}/../../assets/images/stage/stage_5/${num}.png`)
 
         }else{
             return res.status(404).json(errorModel("not found id !!!",req.originalUrl))
@@ -29,7 +29,7 @@ router.get('/stage/:stage/:id',(req,res)=>{
     if(stage==3&&num!=0){
         num+=2
         if(num<=max && num>=min){
-            return  res.status(200).download(`${__dirname}/../../images/stage/stage_5/${num}.png`)
+            return  res.status(200).download(`${__dirname}/../../assets/images/stage/stage_5/${num}.png`)
 
         }else{
             return res.status(404).json(errorModel("not found id !!!",req.originalUrl))
@@ -38,7 +38,7 @@ router.get('/stage/:stage/:id',(req,res)=>{
     if(stage==2&&num!=0){
         num+=3
         if(num<=max && num>=min){
-            return  res.status(200).download(`${__dirname}/../../images/stage/stage_5/${num}.png`)
+            return  res.status(200).download(`${__dirname}/../../assets/images/stage/stage_5/${num}.png`)
 
         }else{
             return res.status(404).json(errorModel("not found id !!!",req.originalUrl))
@@ -50,6 +50,7 @@ router.get('/stage/:stage/:id',(req,res)=>{
     // res.download(`${__dirname}/../../images/stage/stage_5/${req.params.id}.png`)
 
 })
+
 
 
 module.exports=router

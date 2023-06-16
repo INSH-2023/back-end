@@ -6,7 +6,7 @@ const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
 const { JwtAuth, verifyRole} = require("../../middleware/jwtAuthen");
-const {ROLE} = require('../../enum/User')
+const {ROLE} = require('../../enum/UserType')
 const {PROBLEM} = require('../../enum/Request')
 
 const table ="problem"

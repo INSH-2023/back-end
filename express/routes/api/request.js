@@ -9,7 +9,7 @@ const line = require('../../config/lineChat_config')
 
 const table = 'request'
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
-const {ROLE} = require('../../enum/User')
+const {ROLE} = require('../../enum/UserType')
 const {SERVICE,USETYPE,STATUS,PROBLEM} = require('../../enum/Request')
 
 // get data
@@ -26,12 +26,12 @@ router.get('/', JwtAuth, async (req, res) => {
                 request_other,request_problems,request_message FROM moral_it_device.request 
                 order by request${columns.includes(req.query.sort)
                     ? '_' + req.query.sort : 'Id'} ${req.query.sortType == 'desc' ? 'desc' : 'asc'}`)
-            if (req.user.user_role == "user") {
+            if (req.user.user_role == ROLE.user) {
                 data = data.filter(e => e.request_email == req.user.user_email)
             } else if (req.user.user_role == ROLE.Admin_it) {
-                data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "it_service")
+                data = data.filter(e => e.request_service_type == SERVICE.Admin_it)
             } else if (req.user.user_role == ROLE.Admin_pr) {
-                data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "pr_service")
+                data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
             }
             return res.status(200).json(data)
         } else {
@@ -56,9 +56,9 @@ router.get('/:id', JwtAuth, async (req, res) => {
             }
 
             // validate role of admin IT and admin PR who can upload by This role only
-            if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
+            if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== SERVICE.Admin_it) {
                 return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-            } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
+            } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== SERVICE.Admin_pr) {
                 return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
             }
 
@@ -180,14 +180,14 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'requestId'))
 
             // user can get with their email only
-            if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
+            if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
                 return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
             }
 
             // validate role of admin IT and admin PR who can upload by This role only
-            if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
+            if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== SERVICE.Admin_it) {
                 return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-            } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
+            } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== SERVICE.Admin_pr) {
                 return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
             }
 
@@ -240,14 +240,14 @@ router.put('/:id', JwtAuth, async (req, res) => {
                     return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
                 } else {
                     // user can get with their email only
-                    if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
+                    if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
                         return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
                     }
 
                     // validate role of admin IT and admin PR who can upload by This role only
-                    if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
+                    if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== SERVICE.Admin_it) {
                         return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-                    } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
+                    } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== SERVICE.Admin_pr) {
                         return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
                     }
 
