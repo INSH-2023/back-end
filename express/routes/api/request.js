@@ -9,8 +9,8 @@ const line = require('../../config/lineChat_config')
 
 const table = 'request'
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
-const role = require('../../enum/Role')
-const ServiceType = require('../../enum/ServiceType')
+const {ROLE} = require('../../enum/User')
+const {SERVICE,USETYPE,STATUS,PROBLEM} = require('../../enum/Request')
 
 // get data
 router.get('/', JwtAuth, async (req, res) => {
@@ -28,9 +28,9 @@ router.get('/', JwtAuth, async (req, res) => {
                     ? '_' + req.query.sort : 'Id'} ${req.query.sortType == 'desc' ? 'desc' : 'asc'}`)
             if (req.user.user_role == "user") {
                 data = data.filter(e => e.request_email == req.user.user_email)
-            } else if (req.user.user_role == role.Admin_it) {
+            } else if (req.user.user_role == ROLE.Admin_it) {
                 data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "it_service")
-            } else if (req.user.user_role == role.Admin_pr) {
+            } else if (req.user.user_role == ROLE.Admin_pr) {
                 data = data.filter(e => e.request_service_type.toLocaleLowerCase() == "pr_service")
             }
             return res.status(200).json(data)
@@ -51,14 +51,14 @@ router.get('/:id', JwtAuth, async (req, res) => {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.foundId(req, table))
 
             // user can get with their email only
-            if (req.user.user_role == role.User && requests[0].request_email !== req.user.user_email) {
+            if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
                 return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
             }
 
             // validate role of admin IT and admin PR who can upload by This role only
-            if (req.user.user_role == role.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
+            if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== ServiceType.Admin_it) {
                 return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-            } else if (req.user.user_role == role.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
+            } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== ServiceType.Admin_pr) {
                 return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
             }
 
@@ -88,11 +88,11 @@ router.post('/', JwtAuth, async (req, res) => {
             { prop: "request_last_name", value: validator.validateStrNotNull(await req.body.request_last_name, 50, table, 'request_last_name'), type: 'str' },
             { prop: "request_email", value: validator.validateEmail(await req.body.request_email, 50, table, 'request_email'), type: 'str' },
             { prop: "request_group", value: validator.validateStrNotNull(await req.body.request_group, 50, table, 'request_group'), type: 'str' },
-            { prop: "request_service_type", value: validator.validateStrNotNull(await req.body.request_service_type, 15, table, 'request_service_type'), type: 'str' },
-            { prop: "request_subject", value: validator.validateStrNotNull(await req.body.request_subject, 15, table, 'request_subject'), type: 'str' },
-            { prop: "request_status", value: validator.validateStrNotNull(await req.body.request_status, 15, table, 'request_status'), type: 'str' },
+            { prop: "request_service_type", value: validator.validateRole(await req.body.request_service_type, SERVICE, 15, table, 'request_service_type'), type: 'str' },
+            { prop: "request_subject", value: validator.validateRole(await req.body.request_subject, PROBLEM, 15, table, 'request_subject'), type: 'str' },
+            { prop: "request_status", value: validator.validateRole(await req.body.request_status, STATUS, 15, table, 'request_status'), type: 'str' },
             { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 50, table, 'request_assign'), type: 'str' },
-            { prop: "request_use_type", value: validator.validateStrNull(await req.body.request_use_type, 4, table, 'request_use_type'), type: 'str' },
+            { prop: "request_use_type", value: validator.validateRole(await req.body.request_use_type, USETYPE, 4, table, 'request_use_type'), type: 'str' },
             { prop: "request_sn", value: validator.validateStrNull(await req.body.request_sn, 40, table, 'request_sn'), type: 'str' },
             { prop: "request_brand", value: validator.validateStrNull(await req.body.request_brand, 50, table, 'request_brand'), type: 'str' },
             { prop: "request_type_matchine", value: validator.validateStrNull(await req.body.request_type_matchine, 15, table, 'request_type_matchine'), type: 'str' },
@@ -108,15 +108,8 @@ router.post('/', JwtAuth, async (req, res) => {
         // validator.createData(data,table)
 
         // user can get with their email only
-        if (req.user.user_role == role.User && input[2].value !== req.user.user_email) {
+        if (req.user.user_role == ROLE.User && input[2].value !== req.user.user_email) {
             return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
-        }
-
-        // validate role of admin IT and admin PR who can upload by This role only
-        if (req.user.user_role == role.Admin_it && input[4].value !== ServiceType.Admin_it) {
-            return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
-        } else if (req.user.user_role == role.Admin_pr && input[4].value !== ServiceType.Admin_pr) {
-            return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
         }
 
     } catch (err) {
@@ -180,7 +173,7 @@ router.post('/', JwtAuth, async (req, res) => {
 })
 
 // delete
-router.delete('/:id', JwtAuth, async (req, res) => {
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     // delete data
     try {
         if (!connMSQL.handdleConnection()) {
@@ -224,7 +217,7 @@ router.put('/:id', JwtAuth, async (req, res) => {
 
     try {
         input = [
-            { prop: "request_status", value: validator.validateStrNotNull(await req.body.request_status, 15, table, 'request_status'), type: 'str' },
+            { prop: "request_status", value: validator.validateRole(await req.body.request_status, STATUS, 15, table, 'request_status'), type: 'str' },
             { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 50, table, 'request_assign'), type: 'str' }
         ]
         // console.log('testing',await req.body.role)

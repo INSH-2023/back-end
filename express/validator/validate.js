@@ -1,5 +1,5 @@
 // const { EmptyResultError } = require('sequelize')
-const ROLE = require('../enum/Role')
+const ROLE = require('../enum/User')
 
 // const Users = require('../config/db').users
 
@@ -201,18 +201,20 @@ const validatePassword =  async (str='',table,name) => {
     }
 }
 
-const validateRole =  (str='',table,name) => {
+const validateRole =  (str='',enumClass,l,table,name) => {
     // let text = str
     if(str === undefined || str === null || str.length==0){
         throw new Error(`${name} is null`)
-    }else if(str != ROLE.Admin_it && str != ROLE.Admin_pr && str != ROLE.User && str != ROLE.Super_admin){
-        throw new Error("role is user , admin_it, admin_pr and super_admin only")
-    }else
-    if(str.length > 11){
-        throw new Error("role is more then 11 charecter!!")
+    }else if(str.length > l){
+        throw new Error(`role is more then ${l} charecter!!`)
     }else{
-        console.log(`validate role / ${table} ${name} : ${str}`)
-        return str.toString().trim()
+        for (type in enumClass) {
+            if(str.toString().trim() == enumClass[type]){
+                console.log(`validate role / ${table} ${name} : ${str}`)
+                return str.toString().trim().toLowerCase()
+            }
+        }
+        throw new Error(`${str} not in ${table} ${name} types`)
     }
 }
 

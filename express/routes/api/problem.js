@@ -6,7 +6,8 @@ const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
 const { JwtAuth, verifyRole} = require("../../middleware/jwtAuthen");
-const role = require('../../enum/Role')
+const {ROLE} = require('../../enum/User')
+const {PROBLEM} = require('../../enum/Request')
 
 const table ="problem"
 // get data
@@ -48,14 +49,14 @@ router.get('/type/:type',JwtAuth, async(req,res)=>{
 })
 
 // create problem
-router.post('/',JwtAuth, verifyRole(role.Admin_it,role.Admin_pr,role.Super_admin),async(req,res)=>{
+router.post('/',JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin),async(req,res)=>{
     console.log(req.body)
     let data
     let status=undefined
     try{
         data=[
             {prop:"problem_problem",value: validator.validateStrNotNull(await req.body.problem_problem,100,table,'problem_problem'),type:'str'},
-            {prop:"problem_type",value: validator.validateStrNotNull(await req.body.problem_type,45,table,'problem_type'),type:'str'},
+            {prop:"problem_type",value: validator.validateStrNotNull(await req.body.problem_type,PROBLEM,45,table,'problem_type'),type:'str'},
         ]
         // console.log('testing',await req.body.role)
         status=!(await validator.checkUndefindData(data,table))
@@ -88,7 +89,7 @@ router.post('/',JwtAuth, verifyRole(role.Admin_it,role.Admin_pr,role.Super_admin
 })
 
 // delete
-router.delete('/:id',JwtAuth,verifyRole(role.Admin_it,role.Admin_pr,role.Super_admin),async(req,res)=>{
+router.delete('/:id',JwtAuth,verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin),async(req,res)=>{
     // delete data
     try {
         if(!connMSQL.handdleConnection()){

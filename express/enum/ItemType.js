@@ -5,4 +5,4 @@ const item = Object.freeze({
     Tablet: "tablet"
 })
 
-module.exports = item
+module.exports.ITEM = item

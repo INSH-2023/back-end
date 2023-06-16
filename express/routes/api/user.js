@@ -3,11 +3,11 @@ const router =express.Router()
 const validator = require('../../validator/validate')
 const connMSQL =require('../../config/db_config')
 const errorModel =require('../../response/errorModel')
-const ROLE = require('../../enum/Role')
 
 const viewTable='userview'
 const table='user'
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
+const {ROLE,STATUS} = require('../../enum/User')
 
 // get data
 router.get('/', JwtAuth, verifyRole(ROLE.Admin_it,ROLE.Admin_pr,ROLE.Super_admin), async(req,res)=>{
@@ -103,7 +103,7 @@ router.get('/emp-code/:id', JwtAuth, async(req,res)=>{
             let {status_pool:status_p,data:users,msg:msg} = await connMSQL.connection_pool(validator.foundId(req,viewTable,'*',`user_emp_code=${req.params.id}`))
             if(status_p && users.length!=0){
                 // block user when they see other user except owner
-                if(req.user.user_role === "user" && users[0].user_emp_code != req.params.id){
+                if(req.user.user_role == ROLE.user && users[0].user_emp_code != req.params.id){
                     return res.status(403).json(errorModel("the role is not allowed to use",req.originalUrl));
                 }
                 return res.status(200).json(users)
@@ -131,10 +131,10 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
             {prop:"user_emp_code",value: validator.validateNumber(await req.body.user_emp_code,table,'user_emp_code'),type:'int'},
             {prop:"user_first_name",value: validator.validateStrNotNull(await req.body.user_first_name,50,table,'user_first_name'),type:'str'},
             {prop:"user_last_name",value: validator.validateStrNotNull(await req.body.user_last_name,50,table,'user_last_name'),type:'str'},
-            {prop:"user_role",value: validator.validateRole(await req.body.user_role,table,'user_role'),type:'str'},
+            {prop:"user_role",value: validator.validateRole(await req.body.user_role,ROLE,11,table,'user_role'),type:'str'},
             {prop:"user_group",value: validator.validateStrNotNull(await req.body.user_group,50,table,'user_group'),type:'str'},
             {prop:"user_office",value: validator.validateStrNotNull(await req.body.user_office,50,table,'user_office'),type:'str'},
-            {prop:"user_status",value: validator.validateStrNotNull(await req.body.user_status,10,table,'user_status'),type:'str'},
+            {prop:"user_status",value: validator.validateRole(await req.body.user_status,STATUS,10,table,'user_status'),type:'str'},
             {prop:"user_position",value: validator.validateStrNotNull(await req.body.user_position,50,table,'user_position'),type:'str'},
             {prop:"user_email",value: validator.validateEmail(await req.body.user_email,50,table,'user_email'),type:'str'},
             {prop:"user_password",value: await validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'}
@@ -203,10 +203,10 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async(req,res)=>{
             // {prop:"user_emp_code",value: validator.validateNumber(await req.body.emp_code,table,'emp_code'),type:'int'},
             {prop:"user_first_name",value: validator.validateStrNotNull(await req.body.user_first_name,50,table,'user_first_name'),type:'str'},
             {prop:"user_last_name",value: validator.validateStrNotNull(await req.body.user_last_name,50,table,'user_last_name'),type:'str'},
-            {prop:"user_role",value: validator.validateRole(await req.body.user_role,table,'user_role'),type:'str'},
+            {prop:"user_role",value: validator.validateRole(await req.body.user_role,ROLE,11,table,'user_role'),type:'str'},
             {prop:"user_group",value: validator.validateStrNotNull(await req.body.user_group,50,table,'user_group'),type:'str'},
             {prop:"user_office",value: validator.validateStrNotNull(await req.body.user_office,50,table,'user_office'),type:'str'},
-            {prop:"user_status",value: validator.validateStrNotNull(await req.body.user_status,10,table,'user_status'),type:'str'},
+            {prop:"user_status",value: validator.validateRole(await req.body.user_status,STATUS,10,table,'user_status'),type:'str'},
             {prop:"user_position",value: validator.validateStrNotNull(await req.body.user_position,50,table,'user_position'),type:'str'},
             {prop:"user_email",value: validator.validateEmail(await req.body.user_email,50,table,'user_email'),type:'str'},
             {prop:"user_password",value: await validator.validatePassword(await req.body.user_password,table,'user_password'),type:'str'},
