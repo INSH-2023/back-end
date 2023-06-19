@@ -44,7 +44,6 @@ const getUpload = upload.single('file')
 // read solution image (not found case)
 router.get('/:endpoint/:Id', JwtAuth, async (req, res) => {
     let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.Id}`
-    console.log(pathed + (req.params.endpoint == "solution" ? `/${req.query.step}.png` : '.png'))
     res.sendFile(path.resolve(__dirname + pathed + (req.params.endpoint == "solution" ? `/${req.query.step}.png` : '.png')), err => {
         return res.status(404).send(errorModel("File not found", req.originalUrl))
     })
