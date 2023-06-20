@@ -8,24 +8,32 @@ const errorModel =require('../../response/errorModel')
 const { JwtAuth } = require("../../middleware/jwtAuthen");
 
 const table='item'
+const userView='userview'
+const columns=["itemId","item_name","item_number","item_type","user_first_name",
+    "user_last_name","user_email","user_group"]
 
 //get item
 router.get('/',JwtAuth,async(req,res)=>{
 
     try {
         // if(!connMSQL.handdleConnection()){
-        let statement = `SELECT itemId,item_name,item_number,item_type,user_first_name,
-        user_last_name,user_email,user_group FROM moral_it_device.item as item 
-        join moral_it_device.user as user on user.user_emp_code=item.user_emp_code`
+        // let statement = `SELECT itemId,item_name,item_number,item_type,user_first_name,
+        // user_last_name,user_email,user_group FROM moral_it_device.item as item 
+        // join moral_it_device.user as user on user.user_emp_code=item.user_emp_code`
 
         let results
-        console.log(req.user.user_role)
+        // console.log(req.user.user_role)
         if (req.user.user_role == "user") {
-            console.log(statement)
-            results = await connMSQL.connection_pool(`${statement} WHERE user.user_email = "${req.user.user_email}"`)
-            
+            results = await connMSQL.connection_pool(validator.foundId(table,columns,
+                [{col: "user_email", val: req.user.user_email}],
+                [{table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code'}]
+            ))
         } else {
-            results = await connMSQL.connection_pool(statement)
+
+            results = await connMSQL.connection_pool(validator.foundId(table,columns,
+                '',
+                [{table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code'}]
+            ))
         }
         let {status_pool,data} = results
         if(status_pool){
@@ -48,11 +56,15 @@ router.get('/:id',JwtAuth,async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
         
-        let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(
-        `SELECT itemId,item_name,item_number,item_type,user_first_name,
-        user_last_name,user_email,user_group FROM moral_it_device.item as item 
-        join moral_it_device.user as user on user.user_emp_code = item.user_emp_code 
-        WHERE item.itemId = "${req.params.id}";`)
+        // let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(
+        // `SELECT itemId,item_name,item_number,item_type,user_first_name,
+        // user_last_name,user_email,user_group FROM moral_it_device.item as item 
+        // join moral_it_device.user as user on user.user_emp_code = item.user_emp_code 
+        // WHERE item.itemId = "${req.params.id}";`)
+        let {status_pool:status_p,data:items,msg:msg} = await connMSQL.connection_pool(validator.foundId(table,columns,
+            [{col: "user_email", val: req.user.user_email, log: "AND"},{col: "itemId",val: req.params.id}],
+            [{table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code'}]
+        ))
 
         if(status_p && items.length!=0){
             return res.status(200).json(items)

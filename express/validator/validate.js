@@ -10,45 +10,48 @@ const saltRounds = 10
 // make statement
 //find data
 const foundId =  (
-    req='',
     table='',
     select='',
     where='',
-    join='',
-    on='' ) => {
-    let id =parseInt(req.params.id)
+    join='') => {
     let statement=''
-    // console.log('this is params id :',id)
-    console.log(select)
-    if(select.length!=0||where.length!=0){
-        if(select!=undefined &&select.length > 0){
-            statement=`SELECT ${select} FROM moral_it_device.${table} `
-        }else{
-            statement=`SELECT * FROM moral_it_device.${table} `
-        }
-        
-        if(where.length!=0){
-            statement+=` WHERE ${where} `
-        }
 
-        if(join.length!=0 && on.length!=0){
-            statement+=` JOIN ${join} on ${on}`
-        }
-// console.log(statement)
-        if(statement.length ==0 ){
-            throw new Error('cannot create script')
-        }
-        console.log(statement)
-        return statement
-
+    if(select!=undefined &&select.length > 0){
+        statement=`SELECT ${select[0]}`
+        select.forEach(col => {
+            statement+=`,${col} `
+        })
+        statement+=` FROM moral_it_device.${table} `
     }else{
-        statement=''
-        statement =`SELECT * FROM moral_it_device.${table} where ${table}Id=${id}`
-        console.log(statement)
-        return statement
-
+        statement=`SELECT * FROM moral_it_device.${table} `
     }
-    console.log('cannot create statement')
+
+    if(![undefined,null].includes(join) && join.length!=0){
+        statement+=`${table.substring(0,2)}`
+        join.forEach( ref => {
+            statement+=` ${ref.table} on ${ref.on}`
+        })
+    }
+
+    if(![undefined,null].includes(where) && where.length!=0){
+        statement+=` WHERE `
+        where.forEach(condition => {
+            if ([undefined,null].includes(condition.log)) {
+                console.log(typeof condition.val)
+                statement+=`${condition.col}=${typeof condition.val==='string' ? "'" + condition.val + "'" : condition.val} `
+            } else {
+                statement+=`${condition.col}=${typeof condition.val==='string' ? "'" + condition.val + "'" : condition.val} ${condition.log} `
+            }
+        })
+    } else if(!isNaN(id)) {
+        statement+=` WHERE ${table}Id=${id}`
+    }
+// console.log(statement)
+    if(statement.length ==0 ){
+        throw new Error('cannot create script')
+    }
+    console.log(statement)
+    return statement
 }
 
 // create data
