@@ -15,6 +15,7 @@ const foundId =  (
     where='',
     join='') => {
     let statement=''
+    console.log(where)
 
     if(select!=undefined &&select.length > 0){
         statement=`SELECT ${select[0]}`
@@ -43,8 +44,6 @@ const foundId =  (
                 statement+=`${condition.col}=${typeof condition.val==='string' ? "'" + condition.val + "'" : condition.val} ${condition.log} `
             }
         })
-    } else if(!isNaN(id)) {
-        statement+=` WHERE ${table}Id=${id}`
     }
 // console.log(statement)
     if(statement.length ==0 ){

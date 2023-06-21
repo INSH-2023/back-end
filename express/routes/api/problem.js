@@ -16,7 +16,7 @@ router.get('/',JwtAuth,async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
             // if ( req.headers.subject_type == undefined || req.headers.subject_type == null ) {
-            let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table};`)
+            let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(validator.foundId(table))
             if(status_p){
                 return res.status(200).json(problems)
             }
@@ -34,7 +34,7 @@ router.get('/',JwtAuth,async(req,res)=>{
 router.get('/type/:type',JwtAuth, async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
-            let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} where problem_type='${req.params.type}';`)
+            let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(validator.foundId(table,'',[{col: "problem_type" ,val: req.params.type}]))
             if(status_p && problems.length!=0){
                 return res.status(200).json(problems)
             }else
