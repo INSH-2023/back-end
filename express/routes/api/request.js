@@ -146,19 +146,19 @@ router.post('/', JwtAuth, async (req, res) => {
             if(!connMSQL.handdleConnection()){
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.createData(input, table, res))
             if (status_p) {
-            //     let sub = 'This is summary report!!'
-            //     let service = await req.body.request_service_type
-            //     let fname = `${await req.body.request_first_name} ${await req.body.request_last_name}`
-            //     let subject = await req.body.request_subject
-            //     let type_of_use = await req.body.request_use_type
-            //     let type_machine = await req.body.request_type_matchine
-            //     let brand_name = await req.body.request_brand
-            //     let problems = await req.body.request_problems
-            //     let other = await req.body.request_other
-            //     let message = await req.body.request_message
-            //     let email = await req.body.request_email
-            //     await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
-            //     await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
+                let sub = 'This is summary report!!'
+                let service = await req.body.request_service_type
+                let fname = `${await req.body.request_first_name} ${await req.body.request_last_name}`
+                let subject = await req.body.request_subject
+                let type_of_use = await req.body.request_use_type
+                let type_machine = await req.body.request_type_matchine
+                let brand_name = await req.body.request_brand
+                let problems = await req.body.request_problems
+                let other = await req.body.request_other
+                let message = await req.body.request_message
+                let email = await req.body.request_email
+                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
+                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
                 return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
                 }
             }
