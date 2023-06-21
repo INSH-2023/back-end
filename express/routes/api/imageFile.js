@@ -10,14 +10,14 @@ const { JwtAuth } = require("../../middleware/jwtAuthen");
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
         let path = `./assets/images/${req.params.endpoint}`
-        if (req.params.endpoint == 'solution') {
+        if (req.params.endpoint == 'solutions') {
             path = path + `/${req.params.Id}`
         }
         fs.mkdirSync(path, { recursive: true })
         callback(null, path);
     },
     filename: function (req, file, cb) {
-        if (req.params.endpoint == 'solution') {
+        if (req.params.endpoint == 'solutions') {
             cb(null, `${req.query.step}.png`);
         } else {
             cb(null, `${req.params.Id}.png`);
@@ -44,7 +44,7 @@ const getUpload = upload.single('file')
 // read solution image (not found case)
 router.get('/:endpoint/:Id', JwtAuth, async (req, res) => {
     let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.Id}`
-    res.sendFile(path.resolve(__dirname + pathed + (req.params.endpoint == "solution" ? `/${req.query.step}.png` : '.png')), err => {
+    res.sendFile(path.resolve(__dirname + pathed + (req.params.endpoint == "solutions" ? `/${req.query.step}.png` : '.png')), err => {
         return res.status(404).send(errorModel("File not found", req.originalUrl))
     })
 })
@@ -65,7 +65,7 @@ router.post('/:endpoint/:Id', JwtAuth, async (req, res) => {
 // delete solution image
 router.delete('/:endpoint/:Id', async (req, res) => {
     let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.Id}`
-    fs.unlink(__dirname + pathed + (req.params.endpoint == "solution" ? `/${req.query.step}.png` : '.png'), (err) => {
+    fs.unlink(__dirname + pathed + (req.params.endpoint == "solutions" ? `/${req.query.step}.png` : '.png'), (err) => {
         if (err) {
             return res.status(404).send(errorModel("File not found", req.originalUrl))
         }
