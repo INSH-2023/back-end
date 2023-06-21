@@ -15,10 +15,17 @@ router.post('/', async (req, res) => {
   const { email, password } = req.body;
 
   // เรียกข้อมูล user โดยใช้ email
-  let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_email ='${email}'`)
+  let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '',
+    [{ col: 'user_email', val: email }]
+  ))
+
+  // ถ้า email หาไม่เจอก็จะส่งกลับไปเพื่อใช้ในการทำ reset password
+  if (user.length == 0) {
+    return res.status(404).json(errorModel(`user email ${email} does not exist`, req.originalUrl))
+  }
 
   // ตรวจสอบ password ที่ได้จาก mysql2 ว่าเป็น hash match กับ password ที่กรอกมาหรือป่าว
-  if (user.length == 0 || !await bcrypt.compare(password, user[0].user_password)) {
+  if (!await bcrypt.compare(password, user[0].user_password)) {
     return res.status(401).json(errorModel("user email or password is invalid please login again", req.originalUrl))
   }
 
@@ -79,9 +86,11 @@ router.get('/refresh', async (req, res) => {
 })
 
 router.post('/verify', async (req, res) => {
-  let {email} = req.body
+  let { email } = req.body
   // เรียกข้อมูล user โดยใช้ email
-  let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(`SELECT * FROM moral_it_device.${table} WHERE user_email ='${email}'`)
+  let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '',
+    [{ col: 'user_email', val: email }]
+  ))
   if (user.length == 0) {
     return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
   } else if (user[0].user_email != email) {
@@ -99,7 +108,7 @@ router.post('/verify', async (req, res) => {
     // block reset password in 3 times per day
     let { status_pool: status_p1, data: logs, msg: msg1 } = await connMSQL.connection_pool(`SELECT Count(*) AS count FROM moral_it_device.${table_log} WHERE user_email ='${email}' and use_token = 1 and timestamp >= CURDATE()`)
     console.log(logs[0])
-    if (logs[0].count>=3){
+    if (logs[0].count >= 3) {
       return res.status(403).json(errorModel(`this user email can verify token in 3 times per day`, req.originalUrl))
     }
 
@@ -112,7 +121,10 @@ router.post('/verify', async (req, res) => {
   if (status == true) {
     try {
       await connMSQL.connection_pool(validator.createData(input, table_log, res))
-      let { status_pool: status_p2, data: logs1, msg: msg2 } = await connMSQL.connection_pool(`SELECT uuId_token FROM moral_it_device.${table_log} WHERE user_email ='${email}' and use_token = 0 and Id = (select max(Id) from moral_it_device.${table_log})`)
+      let { status_pool: status_p2_1, data: max, msg: msg2_1} = await connMSQL.connection_pool(validator.foundId(table_log,['max(reset_password_logId) as Id']))
+      let { status_pool: status_p2, data: logs1, msg: msg2 } = await connMSQL.connection_pool(validator.foundId(table_log, ['uuId_token'],
+          [{ col: 'user_email', val: email, log: 'AND' },{ col: 'use_token', val: 0, log: 'AND' },{ col: 'reset_password_logId', val: max[0].Id }]
+      ))
       if (status_p2) {
         return res.status(200).json(logs1[0])
       }
@@ -124,12 +136,15 @@ router.post('/verify', async (req, res) => {
 
 router.put('/reset_password', async (req, res) => {
   let uuId_token = req.headers.authorization
-  let {password} = req.body
+  let { password } = req.body
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: logs, msg: msg } = await connMSQL.connection_pool(
-    `SELECT l.reset_password_logId,u.userId,l.user_email,l.use_token FROM moral_it_device.${table_log} l 
-  JOIN moral_it_device.${table} u on l.user_email = u.user_email WHERE l.uuId_token ='${uuId_token}'`
-  )
+    validator.foundId(table_log,["re.reset_password_logId","us.userId","re.user_email","re.use_token"], 
+    [{col: 'uuId_token', val: uuId_token}],
+    [{table: `moral_it_device.${table} as us `, on: `re.user_email = us.user_email`}]
+  ))
+  //     `SELECT l.reset_password_logId,u.userId,l.user_email,l.use_token FROM moral_it_device.${table_log} l 
+  // JOIN moral_it_device.${table} u on l.user_email = u.user_email WHERE l.uuId_token ='${uuId_token}'`
   if (logs.length == 0) {
     return res.status(401).json(errorModel(`token : ${uuId_token} is invalid`, req.originalUrl))
   } else if (logs[0].use_token == 1) {
@@ -139,10 +154,10 @@ router.put('/reset_password', async (req, res) => {
   let status = undefined
   try {
     input = [
-      { prop:"user_password",value: await validator.validatePassword(await password,table,'user_password'),type:'str'},
+      { prop: "user_password", value: await validator.validatePassword(await password, table, 'user_password'), type: 'str' },
     ]
     input_log = [
-      { prop:"use_token",value: 1,type:'int'}
+      { prop: "use_token", value: 1, type: 'int' }
     ]
     status = !(await validator.checkUndefindData(input, table))
 
@@ -157,6 +172,7 @@ router.put('/reset_password', async (req, res) => {
       req.params.id = logs[0].reset_password_logId
       await connMSQL.connection_pool(validator.updateData(req, input_log, table_log))
       req.params.id = logs[0].userId
+      console.log(logs[0])
       let { status_pool: status_p1, data: logs1, msg: msg1 } = await connMSQL.connection_pool(validator.updateData(req, input, table))
       if (status_p1) {
         return res.status(200).json({ message: `password of ${logs[0].user_email} is reset!!`, status: '200' })

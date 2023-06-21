@@ -26,13 +26,13 @@ router.get('/', JwtAuth, async (req, res) => {
             if (req.user.user_role == "user") {
                 results = await connMSQL.connection_pool(validator.foundId(table, columns,
                     [{ col: "user_email", val: req.user.user_email }],
-                    [{ table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
+                    [{ table: `moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
                 ))
             } else {
 
                 results = await connMSQL.connection_pool(validator.foundId(table, columns,
                     '',
-                    [{ table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
+                    [{ table: `moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
                 ))
             }
             let { status_pool, data } = results
@@ -62,7 +62,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
             // WHERE item.itemId = "${req.params.id}";`)
             let { status_pool: status_p, data: items, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, columns,
                 [{ col: "itemId", val: req.params.id }],
-                [{ table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
+                [{ table: `moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
             ))
             console.log(items)
 
@@ -96,7 +96,7 @@ router.get('/emp-code/:id', JwtAuth, async (req, res) => {
             // WHERE user.user_emp_code = "${req.params.id}";`)
             let { status_pool: status_p, data: items, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, columns,
                 [{ col: "it.user_emp_code", val: req.params.id }],
-                [{ table: `JOIN moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
+                [{ table: `moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
             ))
 
             if (status_p && items.length != 0) {

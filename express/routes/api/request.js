@@ -12,12 +12,11 @@ const userView = "userview"
 const item = "item"
 let columns = ["requestId", "user_first_name as request_first_name", "user_last_name as request_last_name",
     "user_email as request_email", "user_group as request_group", "request_service_type", "request_subject", "request_status",
-    "request_req_date", "request_assign", "request_use_type,item_number as request_sn", "item_name as request_brand",
-    "item_type as request_type_matchine", "request_other", "request_problems", "request_message"]
+    "request_req_date", "request_assign", "request_sn", "request_brand",
+    "request_type_matchine", "request_other", "request_problems", "request_message"]
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 const { ROLE } = require('../../enum/UserType')
 const { SERVICE, USETYPE, STATUS, PROBLEM } = require('../../enum/Request')
-const { ITEM } = require('../../enum/ItemType')
 
 // get data
 router.get('/', JwtAuth, async (req, res) => {
@@ -28,8 +27,7 @@ router.get('/', JwtAuth, async (req, res) => {
             //     'req_date', 'assign', 'use_type', 'sn', 'brand', 'type_matchine', 'other', 'problems', 'message']
             let { status_pool, data, msg: msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
-                    '', [{ table: `JOIN moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` },
-                    { table: `LEFT JOIN moral_it_device.${item} as it`, on: `it.itemId=re.itemId` }]
+                    '', [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
                 ))
             if (req.user.user_role == ROLE.user) {
                 data = data.filter(e => e.request_email == req.user.user_email)
@@ -56,8 +54,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
                     [{ col: "requestId", val: req.params.id}],
-                    [{ table: `JOIN moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` },
-                    { table: `LEFT JOIN moral_it_device.${item} as it`, on: `it.itemId=re.itemId` }]
+                    [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` },]
                 ))
 
             // user can get with their email only
@@ -101,13 +98,6 @@ router.post('/', JwtAuth, async (req, res) => {
                 { col: "user_group", val: validator.validateStrNotNull(await req.body.request_group, 50, table, 'request_group') }
             ])
         )
-        let {status_pool:item_p,data: itemInput } = await connMSQL.connection_pool(
-            validator.foundId("item", ["itemId"], [
-                { col: "item_number", val: validator.validateStrNull(await req.body.request_sn, 40, table, 'request_sn'), log: 'AND' },
-                { col: "item_name", val: validator.validateStrNull(await req.body.request_brand, 50, table, 'request_brand'), log: 'AND' },
-                { col: "item_type", val: validator.validateStrNull(await req.body.request_matchine, 50, table, 'request_type_matchine') }
-            ])
-        )
 
         input = [
             { prop: "user_emp_code", value: userInput[0].user_emp_code, type: 'int' },
@@ -116,21 +106,21 @@ router.post('/', JwtAuth, async (req, res) => {
             { prop: "request_status", value: validator.validateRole(await req.body.request_status, STATUS, 15, table, 'request_status'), type: 'str' },
             { prop: "request_assign", value: validator.validateStrNotNull(await req.body.request_assign, 50, table, 'request_assign'), type: 'str' },
             { prop: "request_use_type", value: validator.validateRole(await req.body.request_use_type, USETYPE, 4, table, 'request_use_type'), type: 'str' },
+            { prop: "request_sn", value: validator.validateStrNull(await req.body.request_sn, 40, table, 'request_sn'), type: 'str' },
+            { prop: "request_brand", value: validator.validateStrNull(await req.body.request_brand, 50, table, 'request_brand'), type: 'str' },
+            { prop: "request_type_matchine", value: validator.validateStrNull(await req.body.request_type_matchine, 50, table, 'request_type_matchine'), type: 'str' },
             { prop: "request_other", value: validator.validateStrNull(await req.body.request_other, 150, table, 'request_other'), type: 'str' },
             { prop: "request_problems", value: validator.validateStrNotNull(await req.body.request_problems, 150, table, 'request_problems'), type: 'str' },
             // {prop:"request_message"        ,value: validator.validateStr(await req.body.request_message,150,table,'request_message'),type:'str'},
             { prop: "request_message", value: validator.validateStrNull(await req.body.request_message, 150, table, 'request_message'), type: 'str' },
         ]
-        if(itemInput.length=0) {
-            input.push({ prop: "itemId", value: itemInput, type: 'int' })
-        }
         console.log(input)
         // console.log('testing',await req.body.role)
         status = !(await validator.checkUndefindData(input, table))
         // validator.createData(data,table)
 
         // user can get with their email only
-        if (req.user.user_role == ROLE.User && input[2].value !== req.user.user_email) {
+        if (req.user.user_role == ROLE.User && userInput.user_email !== req.user.user_email) {
             return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
         }
 
@@ -157,8 +147,8 @@ router.post('/', JwtAuth, async (req, res) => {
                 let other = await req.body.request_other
                 let message = await req.body.request_message
                 let email = await req.body.request_email
-                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
-                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
+                // await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
+                // await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
                 return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
                 }
             }
