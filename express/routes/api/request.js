@@ -257,7 +257,7 @@ router.put('/:id', JwtAuth, async (req, res) => {
         try {
 
             if (!connMSQL.handdleConnection()) {
-                let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(req, table, ''))
+                let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{col: "requestId", val: req.params.id}]))
                 if (requests.length == 0) {
                     return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
                 } else {
