@@ -94,7 +94,7 @@ router.post('/', JwtAuth, async (req, res) => {
     try {
         // data=await validator.validateRequestData(req)
         let {status_pool:user_p,data: userInput} = await connMSQL.connection_pool(
-            validator.foundId(req, "user", ["user_emp_code"], [
+            validator.foundId("user", ["user_emp_code"], [
                 { col: "user_first_name", val: validator.validateStrNotNull(await req.body.request_first_name, 50, table, 'request_first_name'), log: 'AND' },
                 { col: "user_last_name", val: validator.validateStrNotNull(await req.body.request_last_name, 50, table, 'request_last_name'), log: 'AND' },
                 { col: "user_email", val: validator.validateEmail(await req.body.request_email, 50, table, 'request_email'), log: 'AND' },
@@ -102,7 +102,7 @@ router.post('/', JwtAuth, async (req, res) => {
             ])
         )
         let {status_pool:item_p,data: itemInput } = await connMSQL.connection_pool(
-            validator.foundId(req, "item", ["itemId"], [
+            validator.foundId("item", ["itemId"], [
                 { col: "item_number", val: validator.validateStrNull(await req.body.request_sn, 40, table, 'request_sn'), log: 'AND' },
                 { col: "item_name", val: validator.validateStrNull(await req.body.request_brand, 50, table, 'request_brand'), log: 'AND' },
                 { col: "item_type", val: validator.validateStrNull(await req.body.request_matchine, 50, table, 'request_type_matchine') }
