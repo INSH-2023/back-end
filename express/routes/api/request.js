@@ -98,6 +98,11 @@ router.post('/', JwtAuth, async (req, res) => {
                 { col: "user_group", val: validator.validateStrNotNull(await req.body.request_group, 50, table, 'request_group') }
             ])
         )
+        if (userInput.length == 0) {
+            return res.status(404).json(errorModel(`this ${table} does not exist by 
+            ${req.body.request_first_name} ${req.body.request_last_name}
+            ${req.body.request_email} ${req.body.request_group}`, req.originalUrl))
+        }
 
         input = [
             { prop: "user_emp_code", value: userInput[0].user_emp_code, type: 'int' },

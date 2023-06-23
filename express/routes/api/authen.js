@@ -106,7 +106,8 @@ router.post('/verify', async (req, res) => {
     status = !(await validator.checkUndefindData(input, table))
 
     // block reset password in 3 times per day
-    let { status_pool: status_p1, data: logs, msg: msg1 } = await connMSQL.connection_pool(`SELECT Count(*) AS count FROM moral_it_device.${table_log} WHERE user_email ='${email}' and use_token = 1 and timestamp >= CURDATE()`)
+    let { status_pool: status_p1, data: logs, msg: msg1 } = await connMSQL.connection_pool(`SELECT Count(*) AS count 
+    FROM moral_it_device.${table_log} WHERE user_email ='${email}' and use_token = 1 and timestamp >= CURDATE()`)
     console.log(logs[0])
     if (logs[0].count >= 3) {
       return res.status(403).json(errorModel(`this user email can verify token in 3 times per day`, req.originalUrl))
@@ -121,9 +122,9 @@ router.post('/verify', async (req, res) => {
   if (status == true) {
     try {
       await connMSQL.connection_pool(validator.createData(input, table_log, res))
-      let { status_pool: status_p2_1, data: max, msg: msg2_1} = await connMSQL.connection_pool(validator.foundId(table_log,['max(reset_password_logId) as Id']))
+      let { status_pool: status_p2_1, data: max, msg: msg2_1 } = await connMSQL.connection_pool(validator.foundId(table_log, ['max(reset_password_logId) as Id']))
       let { status_pool: status_p2, data: logs1, msg: msg2 } = await connMSQL.connection_pool(validator.foundId(table_log, ['uuId_token'],
-          [{ col: 'user_email', val: email, log: 'AND' },{ col: 'use_token', val: 0, log: 'AND' },{ col: 'reset_password_logId', val: max[0].Id }]
+        [{ col: 'user_email', val: email, log: 'AND' }, { col: 'use_token', val: 0, log: 'AND' }, { col: 'reset_password_logId', val: max[0].Id }]
       ))
       if (status_p2) {
         return res.status(200).json(logs1[0])
@@ -134,15 +135,30 @@ router.post('/verify', async (req, res) => {
   }
 })
 
+router.post('/verify/count', async (req, res) => {
+  let { email } = req.body
+
+  try {
+    // block reset password in 3 times per day
+    let { status_pool: status_p1, data: logs, msg: msg1 } = await connMSQL.connection_pool(`SELECT Count(*) AS count
+    FROM moral_it_device.${table_log} WHERE user_email ='${email}' and use_token = 1 and timestamp >= CURDATE()`)
+    return res.status(200).json({count: 3 - logs[0].count})
+  } catch (err) {
+    console.log(err)
+    status = false
+    res.status(400).json(errorModel(err.message, req.originalUrl))
+  }
+})
+
 router.put('/reset_password', async (req, res) => {
   let uuId_token = req.headers.authorization
   let { password } = req.body
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: logs, msg: msg } = await connMSQL.connection_pool(
-    validator.foundId(table_log,["re.reset_password_logId","us.userId","re.user_email","re.use_token"], 
-    [{col: 'uuId_token', val: uuId_token}],
-    [{table: `moral_it_device.${table} as us `, on: `re.user_email = us.user_email`}]
-  ))
+    validator.foundId(table_log, ["re.reset_password_logId", "us.userId", "re.user_email", "re.use_token"],
+      [{ col: 'uuId_token', val: uuId_token }],
+      [{ table: `moral_it_device.${table} as us `, on: `re.user_email = us.user_email` }]
+    ))
   //     `SELECT l.reset_password_logId,u.userId,l.user_email,l.use_token FROM moral_it_device.${table_log} l 
   // JOIN moral_it_device.${table} u on l.user_email = u.user_email WHERE l.uuId_token ='${uuId_token}'`
   if (logs.length == 0) {
