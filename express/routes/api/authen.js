@@ -93,9 +93,8 @@ router.post('/verify', async (req, res) => {
   ))
   if (user.length == 0) {
     return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
-  } else if (user[0].user_email != email) {
-    return res.status(401).json(errorModel(`this user email cannot modified`, req.originalUrl))
   }
+  
   let input
   let status = undefined
   try {
@@ -139,10 +138,18 @@ router.post('/verify/count', async (req, res) => {
   let { email } = req.body
 
   try {
+    // เรียกข้อมูล user โดยใช้ email
+    let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, ['user_email'],
+      [{ col: 'user_email', val: email }]
+    ))
+    if (user.length == 0) {
+      return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
+    }
+
     // block reset password in 3 times per day
     let { status_pool: status_p1, data: logs, msg: msg1 } = await connMSQL.connection_pool(`SELECT Count(*) AS count
-    FROM moral_it_device.${table_log} WHERE user_email ='${email}' and use_token = 1 and timestamp >= CURDATE()`)
-    return res.status(200).json({count: 3 - logs[0].count})
+    FROM moral_it_device.${table_log} WHERE user_email ='${user[0].user_email}' and use_token = 1 and timestamp >= CURDATE()`)
+    return res.status(200).json({ count: 3 - logs[0].count })
   } catch (err) {
     console.log(err)
     status = false
@@ -151,7 +158,7 @@ router.post('/verify/count', async (req, res) => {
 })
 
 router.put('/reset_password', async (req, res) => {
-  let uuId_token = req.headers.authorization
+  let uuId_token = req.headers.authorization.substring(7,43)
   let { password } = req.body
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: logs, msg: msg } = await connMSQL.connection_pool(
@@ -164,7 +171,7 @@ router.put('/reset_password', async (req, res) => {
   if (logs.length == 0) {
     return res.status(401).json(errorModel(`token : ${uuId_token} is invalid`, req.originalUrl))
   } else if (logs[0].use_token == 1) {
-    return res.status(401).json(errorModel(`token : ${uuId_token} is already used`, req.originalUrl))
+    return res.status(403).json(errorModel(`token : ${uuId_token} is already used`, req.originalUrl))
   }
   let input
   let status = undefined
