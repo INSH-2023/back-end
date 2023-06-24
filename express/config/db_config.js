@@ -11,8 +11,8 @@ const db_config={
     port:process.env.MYSQLDB_PORT||3306,
     // option
     waitForConnections: true,
-    connectionLimit: 1000,
-    maxIdle: 1000, // max idle connections, the default value is the same as `connectionLimit`
+    connectionLimit: 1024,
+    maxIdle: 1024, // max idle connections, the default value is the same as `connectionLimit`
     idleTimeout: 60000,
     queueLimit: 0
 }
@@ -22,7 +22,6 @@ let connection =mysql.createConnection(db_config);
 // mysql connection
 const handdleConnection=()=>{
     let status =false
-
     const connection =mysql.createConnection(db_config)
 
     
@@ -65,7 +64,6 @@ const connection_pool=async(statement)=>{
             .then(result=>{
                 // console.log(result[0])
                 console.log('connection status : good')
-                
                 return  result[0]
             })
             .catch(err=>{
