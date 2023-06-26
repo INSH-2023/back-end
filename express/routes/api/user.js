@@ -216,7 +216,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
             { prop: "user_status", value: validator.validateRole(await req.body.user_status, STATUS, 10, table, 'user_status'), type: 'str' },
             { prop: "user_position", value: validator.validateStrNotNull(await req.body.user_position, 50, table, 'user_position'), type: 'str' },
             { prop: "user_email", value: validator.validateEmail(await req.body.user_email, 50, table, 'user_email'), type: 'str' },
-            { prop: "user_password", value: await validator.validatePassword(await req.body.user_password, table, 'user_password'), type: 'str' },
+            // { prop: "user_password", value: await validator.validatePassword(await req.body.user_password, table, 'user_password'), type: 'str' },
             // {prop:"user_updatedAt",value: validator.currentDate(table,'updatedAt'),type:'str'}
         ]
         // console.log('testing',await req.body.role)
