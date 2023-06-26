@@ -49,11 +49,12 @@ router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE
                 })
             })
             return res.status(200).json(users)
-        } else
-            if (status_p && users.length == 0) {
-                console.log(msg)
-                return res.status(404).json(errorModel(`${table} role ${req.params.role} does not exist`, req.originalUrl))
-            }
+        }
+        // else
+        //     if (status_p && users.length == 0) {
+        //         console.log(msg)
+        //         return res.status(404).json(errorModel(`${table} role ${req.params.role} does not exist`, req.originalUrl))
+        //     }
 
         // }else{
         //     console.log(`Cannot connect to mysql server !!`) 

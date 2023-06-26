@@ -99,12 +99,13 @@ router.get('/emp-code/:id', JwtAuth, async (req, res) => {
                 [{ table: `moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
             ))
 
+            if (req.user.user_role == "user" && items[0].user_email !== req.user.user_email) {
+                    return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+                }
+
             if (status_p && items.length != 0) {
                 return res.status(200).json(items)
             } else if (status_p && items.length == 0) {
-                if (req.user.user_role == "user" && items[0].user_email !== req.user.user_email) {
-                    return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
-                }
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
             }
         } else {

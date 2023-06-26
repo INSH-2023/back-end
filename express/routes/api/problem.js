@@ -35,12 +35,13 @@ router.get('/type/:type',JwtAuth, async(req,res)=>{
     try {
         // if(!connMSQL.handdleConnection()){
             let {status_pool:status_p,data:problems,msg:msg} = await connMSQL.connection_pool(validator.foundId(table,'',[{col: "problem_type" ,val: req.params.type}]))
-            if(status_p && problems.length!=0){
+            if(status_p){
                 return res.status(200).json(problems)
-            }else
-            if(status_p && problems.length==0){
-                return res.status(404).json(errorModel(`${table} type ${req.params.type} does not exist`,req.originalUrl))
             }
+            // else
+            // if(status_p && problems.length==0){
+            //     return res.status(404).json(errorModel(`${table} type ${req.params.type} does not exist`,req.originalUrl))
+            // }
         // }
     }catch(error){
         console.log(error)
