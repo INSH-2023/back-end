@@ -152,8 +152,8 @@ router.post('/', JwtAuth, async (req, res) => {
                 let other = await req.body.request_other
                 let message = await req.body.request_message
                 let email = await req.body.request_email
-                // await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
-                // await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
+                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
+                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
                 return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
                 }
             }
