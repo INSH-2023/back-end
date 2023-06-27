@@ -215,7 +215,7 @@ const validateRole = (str = '', enumClass, l, table, name) => {
         for (type in enumClass) {
             if (str.toString().trim() == enumClass[type]) {
                 console.log(`validate role / ${table} ${name} : ${str}`)
-                return str.toString().trim().toLowerCase()
+                return str.toString().trim()
             }
         }
         throw new Error(`${str} not in ${table} ${name} types`)
