@@ -29,7 +29,7 @@ router.get('/', JwtAuth, async (req, res) => {
                 validator.foundId(table, columns,
                     '', [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
                 ))
-            if (req.user.user_role == ROLE.user) {
+            if (req.user.user_role == ROLE.User) {
                 data = data.filter(e => e.request_email == req.user.user_email)
             } else if (req.user.user_role == ROLE.Admin_it) {
                 data = data.filter(e => e.request_service_type == SERVICE.Admin_it)
@@ -228,7 +228,7 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
 })
 
 // update data
-router.put('/:id', JwtAuth, async (req, res) => {
+router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it,ROLE.Admin_pr), async (req, res) => {
     let input
     let status = undefined
 
