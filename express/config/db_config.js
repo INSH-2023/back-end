@@ -11,8 +11,8 @@ const db_config={
     port:process.env.MYSQLDB_PORT||3306,
     // option
     waitForConnections: true,
-    connectionLimit: 1024,
-    maxIdle: 1024, // max idle connections, the default value is the same as `connectionLimit`
+    connectionLimit: 4096,
+    maxIdle: 4096, // max idle connections, the default value is the same as `connectionLimit`
     idleTimeout: 60000,
     queueLimit: 0
 }

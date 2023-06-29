@@ -25,7 +25,6 @@ const problem = Object.freeze({
     Application: 'application',
     Media: 'media',
     News: 'news',
-    Other: 'other',
     ALL: 'all'
 })
 

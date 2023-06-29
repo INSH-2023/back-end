@@ -91,7 +91,7 @@ router.post('/', JwtAuth, async (req, res) => {
     try {
         // data=await validator.validateRequestData(req)
         let {status_pool:user_p,data: userInput} = await connMSQL.connection_pool(
-            validator.foundId("user", ["user_emp_code"], [
+            validator.foundId("user", ["user_emp_code","user_email"], [
                 { col: "user_first_name", val: validator.validateStrNotNull(await req.body.request_first_name, 50, table, 'request_first_name'), log: 'AND' },
                 { col: "user_last_name", val: validator.validateStrNotNull(await req.body.request_last_name, 50, table, 'request_last_name'), log: 'AND' },
                 { col: "user_email", val: validator.validateEmail(await req.body.request_email, 50, table, 'request_email'), log: 'AND' },
@@ -125,7 +125,7 @@ router.post('/', JwtAuth, async (req, res) => {
         // validator.createData(data,table)
 
         // user can get with their email only
-        if (req.user.user_role == ROLE.User && userInput.user_email !== req.user.user_email) {
+        if (req.user.user_role == ROLE.User && userInput[0].user_email !== req.user.user_email) {
             return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
         }
 
@@ -152,7 +152,7 @@ router.post('/', JwtAuth, async (req, res) => {
                 let other = await req.body.request_other
                 let message = await req.body.request_message
                 let email = await req.body.request_email
-                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
+                // await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
                 await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
                 return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
                 }
