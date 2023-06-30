@@ -114,7 +114,7 @@ router.post('/', JwtAuth, async (req, res) => {
             res.status(400).json(errorModel(error.message, req.originalUrl))
         }
     } else {
-        return res.status(400).json(errorModel('data not valid', req.originalUrl))
+        return res.status(500).json(errorModel('data not valid', req.originalUrl))
     }
 })
 
@@ -141,7 +141,7 @@ router.delete('/:id', JwtAuth, async (req, res) => {
             throw new Error('connection error something')
         }
     } catch (error) {
-        res.status(400).json(errorModel(error.message, req.originalUrl))
+        res.status(500).json(errorModel(error.message, req.originalUrl))
     }
 })
 
@@ -204,7 +204,7 @@ router.put('/:id', JwtAuth, async (req, res) => {
             res.status(400).json(errorModel(error.message, req.originalUrl))
         }
     } else {
-        return res.status(400).json(errorModel('data not valid', req.originalUrl))
+        return res.status(500).json(errorModel('data not valid', req.originalUrl))
     }
 })
 
