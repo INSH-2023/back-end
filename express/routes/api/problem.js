@@ -88,9 +88,9 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_ad
             if (!connMSQL.handdleConnection()) {
                 let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.createData(data, table, res))
                 if (status_p) {
-                    return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
+                    req.body.problemId = problems.insertId
+                    return res.status(200).json(req.body)
                 }
-
             } else {
                 console.log(`Cannot connect to mysql server !!`)
                 throw new Error('connection error something')

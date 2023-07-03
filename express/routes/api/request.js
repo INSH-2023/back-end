@@ -8,6 +8,7 @@ const sendMail = require('../../config/mailer_config')
 const line = require('../../config/lineChat_config')
 
 const table = 'request'
+const user = "user"
 const userView = "userview"
 const item = "item"
 let columns = ["requestId", "user_first_name as request_first_name", "user_last_name as request_last_name",
@@ -25,7 +26,7 @@ router.get('/', JwtAuth, async (req, res) => {
         if (!connMSQL.handdleConnection()) {
             // let columns = ['first_name', 'last_name', 'email', 'group', 'service_type', 'subject', 'status',
             //     'req_date', 'assign', 'use_type', 'sn', 'brand', 'type_matchine', 'other', 'problems', 'message']
-            let { status_pool, data, msg: msg } = await connMSQL.connection_pool(
+            let { status_pool, data, msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
                     '', [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
                 ))
@@ -36,6 +37,20 @@ router.get('/', JwtAuth, async (req, res) => {
             } else if (req.user.user_role == ROLE.Admin_pr) {
                 data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
             }
+
+            // update user request by count for notify
+            if (req.user.user_role != ROLE.User) {
+                let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId","request_count"],
+                    [{ col: "user_email", val: req.user.user_email }]
+                ))
+                req.params.id = requests[0].userId
+                input = [
+                    { prop: "user_requestCount", value: data.length, type: 'int' },
+                ]
+                await connMSQL.connection_pool(validator.updateData(req, input, user))
+                return res.status(200).json({data: data, request_count: requests[0].request_count})
+            }
+
             return res.status(200).json(data)
         } else {
             console.log(`Cannot connect to mysql server !!`)
@@ -53,7 +68,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
         if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
-                    [{ col: "requestId", val: req.params.id}],
+                    [{ col: "requestId", val: req.params.id }],
                     [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` },]
                 ))
 
@@ -90,8 +105,8 @@ router.post('/', JwtAuth, async (req, res) => {
     let status = undefined
     try {
         // data=await validator.validateRequestData(req)
-        let {status_pool:user_p,data: userInput} = await connMSQL.connection_pool(
-            validator.foundId("user", ["user_emp_code","user_email"], [
+        let { status_pool: user_p, data: userInput } = await connMSQL.connection_pool(
+            validator.foundId("user", ["user_emp_code", "user_email"], [
                 { col: "user_first_name", val: validator.validateStrNotNull(await req.body.request_first_name, 50, table, 'request_first_name'), log: 'AND' },
                 { col: "user_last_name", val: validator.validateStrNotNull(await req.body.request_last_name, 50, table, 'request_last_name'), log: 'AND' },
                 { col: "user_email", val: validator.validateEmail(await req.body.request_email, 50, table, 'request_email'), log: 'AND' },
@@ -138,23 +153,23 @@ router.post('/', JwtAuth, async (req, res) => {
 
     if (status == true) {
         try {
-            if(!connMSQL.handdleConnection()){
-            let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.createData(input, table, res))
-            if (status_p) {
-                let sub = 'This is summary report!!'
-                let service = await req.body.request_service_type
-                let fname = `${await req.body.request_first_name} ${await req.body.request_last_name}`
-                let subject = await req.body.request_subject
-                let type_of_use = await req.body.request_use_type
-                let type_machine = await req.body.request_type_matchine
-                let brand_name = await req.body.request_brand
-                let problems = await req.body.request_problems
-                let other = await req.body.request_other
-                let message = await req.body.request_message
-                let email = await req.body.request_email
-                // await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
-                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
-                return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
+            if (!connMSQL.handdleConnection()) {
+                let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.createData(input, table, res))
+                if (status_p) {
+                    let sub = 'This is summary report!!'
+                    let service = await req.body.request_service_type
+                    let fname = `${await req.body.request_first_name} ${await req.body.request_last_name}`
+                    let subject = await req.body.request_subject
+                    let type_of_use = await req.body.request_use_type
+                    let type_machine = await req.body.request_type_matchine
+                    let brand_name = await req.body.request_brand
+                    let problems = await req.body.request_problems
+                    let other = await req.body.request_other
+                    let message = await req.body.request_message
+                    let email = await req.body.request_email
+                    // await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
+                    await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
+                    return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
                 }
             }
             // else if(!status_p&&msg.errno==1062){
@@ -216,7 +231,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
                 if (status_p && requests.affectedRows == 0) {
                     return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
                     // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-
                 }
         } else {
             console.log(`Cannot connect to mysql server !!`)
@@ -228,7 +242,7 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
 })
 
 // update data
-router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it,ROLE.Admin_pr), async (req, res) => {
+router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Admin_pr), async (req, res) => {
     let input
     let status = undefined
 
@@ -252,7 +266,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it,ROLE.Admin
         try {
 
             if (!connMSQL.handdleConnection()) {
-                let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{col: "requestId", val: req.params.id}]))
+                let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{ col: "requestId", val: req.params.id }]))
                 if (requests.length == 0) {
                     return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
                 } else {

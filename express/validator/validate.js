@@ -20,9 +20,10 @@ const foundId = (
     if (select != undefined && select.length > 0) {
         statement = `SELECT ${select[0]}`
         if (select.length > 1) {
-            select.forEach(col => {
-                statement += `,${col} `
-            })
+            console.log(select)
+            for (i = 0; i < select.length - 1; i++) {
+                statement += `,${select[i+1]} `
+            }
         }
         statement += ` FROM moral_it_device.${table} `
     } else {
