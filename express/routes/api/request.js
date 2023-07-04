@@ -169,7 +169,7 @@ router.post('/', JwtAuth, async (req, res) => {
                     let email = await req.body.request_email
                     // await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
                     await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
-                    return res.status(200).json({ message: `create ${table} success!!`, status: '200' })
+                    return res.status(201).json({ message: `create ${table} success!!`, status: '200' })
                 }
             }
             // else if(!status_p&&msg.errno==1062){

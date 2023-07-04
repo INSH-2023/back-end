@@ -24,8 +24,7 @@ const problem = Object.freeze({
     Meeting: 'meeting',
     Application: 'application',
     Media: 'media',
-    News: 'news',
-    ALL: 'all'
+    News: 'news'
 })
 
 module.exports.STATUS = status

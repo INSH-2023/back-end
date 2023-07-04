@@ -3,15 +3,16 @@ const router = express.Router()
 path = require('path');
 const multer = require("multer")
 const errorModel = require('../../response/errorModel')
+const connMSQL = require('../../config/db_config')
 const fs = require('fs')
-const { JwtAuth } = require("../../middleware/jwtAuthen");
+const validator = require('../../validator/validate')
 
 // allow multipart file
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
         let path = `./assets/images/${req.params.endpoint}`
         if (req.params.endpoint == 'solutions') {
-            path = path + `/${req.params.Id}`
+            path = path + `/${req.params.id}`
         }
         fs.mkdirSync(path, { recursive: true })
         callback(null, path);
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
         if (req.params.endpoint == 'solutions') {
             cb(null, `${req.query.step}.png`);
         } else {
-            cb(null, `${req.params.Id}.png`);
+            cb(null, `${req.params.id}.png`);
         }
     }
 })
@@ -42,32 +43,36 @@ const upload = multer(
 const getUpload = upload.single('file')
 
 // read solution image (not found case)
-router.get('/:endpoint/:Id', JwtAuth, async (req, res) => {
-    let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.Id}`
-    res.sendFile(path.resolve(__dirname + pathed + (req.params.endpoint == "solutions" ? `/${req.query.step}.png` : '.png')), err => {
-        return res.status(404).send(errorModel("File not found", req.originalUrl))
-    })
-})
+router.get('/:endpoint/:id', async (req, res, next) => {
+    let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
+    res.sendFile(path.resolve(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png')),
+        err => {
+            next(errorModel("File not found!!", req.originalUrl))
+        });
+});
 
 // upload solution image
 // condition (file size < 10 MB, file multipart, file upload per solution, file type image only, path storage property)
-router.post('/:endpoint/:Id', JwtAuth, async (req, res) => {
+router.post('/:endpoint/:id', async (req, res) => {
+    if(req.params.id=="undefined" || req.params.endpoint=="undefined") {
+        return res.status(400).send(errorModel("upload file is blocked", req.originalUrl));
+    }
     getUpload(req, res, err => {
+
         if (err) {
-            return res.status(400).send(errorModel(err.message, req.originalUrl))
+            return res.status(400).send(errorModel(err.message, req.originalUrl));
         }
         // Everything went fine.
-        console.log(req.file)
         res.status(201).send(req.file)
     })
 })
 
 // delete solution image
-router.delete('/:endpoint/:Id', async (req, res) => {
-    let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.Id}`
-    fs.unlink(__dirname + pathed + (req.params.endpoint == "solutions" ? `/${req.query.step}.png` : '.png'), (err) => {
+router.delete('/:endpoint/:id', async (req, res) => {
+    let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
+    fs.unlink(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png'), (err) => {
         if (err) {
-            return res.status(404).send(errorModel("File not found", req.originalUrl))
+            return res.status(404).send(errorModel("File not found", req.originalUrl));
         }
         res.send({ message: "file has been deleted" })
     })

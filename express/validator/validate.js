@@ -179,6 +179,13 @@ const validateNumber = (int, table, name) => {
         }
 }
 
+const validateBoolean = (str = false, table, name) => {
+    if (![true,false].includes(str)) {
+        throw new Error(`${table} ${name}: ${str} is not boolean format`)
+    }
+    return str ? 1 : 0
+}
+
 const validateEmail = (str = '', l, table, name) => {
     // let text = str
     regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -326,6 +333,7 @@ module.exports.foundId = foundId
 module.exports.validateStrNotNull = validateStrNotNull
 module.exports.validateStrNull = validateStrNull
 module.exports.validateNumber = validateNumber
+module.exports.validateBoolean = validateBoolean
 module.exports.validateEmail = validateEmail
 module.exports.validatePassword = validatePassword
 module.exports.validateRole = validateRole
