@@ -3,7 +3,8 @@ const router = express.Router()
 const validator = require('../../validator/validate')
 const connMSQL = require('../../config/db_config')
 const errorModel = require('../../response/errorModel')
-const { JwtAuth } = require("../../middleware/jwtAuthen");
+const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
+const {ROLE} = require("../../enum/UserType")
 
 const table = 'solution'
 const stepTable = 'step_solution'
@@ -43,14 +44,14 @@ router.get('/', JwtAuth, async (req, res) => {
 router.get('/:id', JwtAuth, async (req, res) => {
     try {
         if (!connMSQL.handdleConnection()) {
-            let { status_pool: sp1, data: solution } = await connMSQL.connection_pool(validator.foundId(validator.foundId(table, '',
+            let { status_pool: sp1, data: solution } = await connMSQL.connection_pool(validator.foundId(table, '',
                 [{ col: 'solutionId', val: req.params.id }]
-            )))
+            ))
             if (sp1 && solution.length == 0) {
                 return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
             } else if (sp1 && solution.length != 0) {
                 let { status_pool: sp2, data: steps } = await connMSQL.connection_pool(validator.foundId(stepTable, stepColumn,
-                    [{ col: 'solution_Id', val: sol.solutionId }]
+                    [{ col: 'solution_Id', val: solution[0].solutionId }]
                 ))
                 // เปลี่ยนจาก string เป็น array ถ้าค่านั้นไม่ว่าง
                 solution[0].solution_tag = solution[0].solution_tag == null ? null : solution[0].solution_tag.split(",")
@@ -68,7 +69,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
 })
 
 // create solution
-router.post('/', JwtAuth, async (req, res) => {
+router.post('/', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_pr,ROLE.Admin_it), async (req, res) => {
     let input
     let status = undefined
     try {
@@ -119,7 +120,7 @@ router.post('/', JwtAuth, async (req, res) => {
 })
 
 // delete solution
-router.delete('/:id', JwtAuth, async (req, res) => {
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_pr,ROLE.Admin_it), async (req, res) => {
     // delete data
     try {
         if (!connMSQL.handdleConnection()) {
@@ -146,7 +147,7 @@ router.delete('/:id', JwtAuth, async (req, res) => {
 })
 
 // update solution
-router.put('/:id', JwtAuth, async (req, res) => {
+router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_pr,ROLE.Admin_it), async (req, res) => {
     let input
     let status = undefined
     try {
