@@ -56,7 +56,8 @@ router.get('/:endpoint/:id', async (req, res, next) => {
     //     err => {
     //         next(errorModel("File not found!!", req.originalUrl))
     //     });
-    const folder = `images/${process.env.NODE_ENV == "production" ? "productions" : "developments"}/${req.params.endpoint}`
+    console.log(process.env.NODE_ENV)
+    const folder = `images/${process.env.NODE_ENV == "development" ? "developments" : "productions"}/${req.params.endpoint}`
     const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
     const file = bucket.file(fileName);
     file.download().then(downloadResponse => {
@@ -88,7 +89,7 @@ router.post('/:endpoint/:id', upload.single('file'), async (req, res) => {
         }
     }
 
-    const folder = `images/${process.env.NODE_ENV == "production" ? "productions" : "developments"}/${req.params.endpoint}`
+    const folder = `images/${process.env.NODE_ENV == "development" ? "developments" : "productions"}/${req.params.endpoint}`
     const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
     const fileUpload = bucket.file(fileName)
     const blobStream = fileUpload.createWriteStream({
@@ -114,7 +115,7 @@ router.delete('/:endpoint/:id', async (req, res) => {
     //     }
     //     res.send({ message: "file has been deleted" })
     // })
-    const folder = `images/${process.env.NODE_ENV == "production" ? "productions" : "developments"}/${req.params.endpoint}`
+    const folder = `images/${process.env.NODE_ENV == "development" ? "developments" : "productions"}/${req.params.endpoint}`
     const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
     for (let i in PROBLEM) {
         if (req.params.id == PROBLEM[i]) {
