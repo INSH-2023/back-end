@@ -33,3 +33,6 @@ npm i cookie-parser cookie-session
 
 <!-- ตั้ง node เป็น dev mode-->
 SET NODE_ENV=development
+
+<!-- ติดตั้ง firebase ในการจัดการข้อมูลบน cloud-->
+npm i fire-admin
