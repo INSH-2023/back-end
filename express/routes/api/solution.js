@@ -135,7 +135,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async
                 if (status_p && sol.affectedRows == 0) {
                     return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
                     // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-
                 }
         } else {
             console.log(`Cannot connect to mysql server !!`)
@@ -155,7 +154,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (r
             { prop: "solution_title", value: validator.validateStrNotNull(await req.body.solution_title, 50, table, 'solution_title'), type: 'str' },
             // { prop: "solution_icon", value: validator.validateStrNotNull(await req.body.solution_icon, 100, table, 'solution_icon'), type: 'str' },
             { prop: "solution_text", value: validator.validateStrNotNull(await req.body.solution_text, 150, table, 'solution_text'), type: 'str' },
-            { prop: "solution_tag", value: validator.validateStrNotNull(await req.body.solution_tag, 150, table, 'solution_tag'), type: 'str' },
+            { prop: "solution_tag", value: validator.validateStrNotNull(await req.body.solution_tag, 50, table, 'solution_tag'), type: 'str' },
         ]
         steps = validator.validateStep(await req.body.solution_steps, table, 'solution_steps')
         // console.log('testing',await req.body.role)
