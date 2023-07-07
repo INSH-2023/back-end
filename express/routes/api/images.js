@@ -28,7 +28,7 @@ router.get('/stage/:stage/:id',(req,res)=>{
     }else
     if(stage==3&&num!=0){
         num+=2
-        if(num<=max && num>=min){
+        if(num<=max && num>=min){ 
             return  res.status(200).download(`${__dirname}/../../assets/images/stage/stage_5/${num}.png`)
 
         }else{

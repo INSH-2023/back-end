@@ -99,14 +99,16 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req
                 steps.forEach(async (step) => {
                     let stepInput = [
                         { prop: "solution_Id", value: data.insertId, type: 'int' },
-                        { prop: "step_", value: step.step, type: 'int' },
-                        { prop: "step_name", value: step.step_name, type: 'str' },
-                        { prop: "step_description", value: step.step_description, type: 'str' }
+                        { prop: "step_", value: validator.validateNumber(await step.step,'step_solution','step_'), type: 'int' },
+                        { prop: "step_name", value: validator.validateStrNotNull(await step.step_name,'step_solution','step_name'), type: 'str' },
+                        { prop: "step_description", value: validator.validateStrNull(await step.step_description,'step_solution','step_decsription'), type: 'str' },
+                        { prop: "step_upload", value: validator.validateBoolean(await step.step_upload,'step_solution','step_upload'), type: 'int'}
                     ]
                     await connMSQL.connection_pool(validator.createData(stepInput, 'step_solution', res))
                 })
+                req.body.solutionId = data.insertId
                 // error
-                return res.status(201).json({ message: `create ${table} success!!`, status: '200' })
+                return res.status(201).json(req.body)
             } else {
                 console.log(`Cannot connect to mysql server !!`)
                 throw new Error('connection error something :', err)
@@ -146,66 +148,66 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async
 })
 
 // update solution
-router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req, res) => {
-    let input
-    let status = undefined
-    try {
-        input = [
-            { prop: "solution_title", value: validator.validateStrNotNull(await req.body.solution_title, 50, table, 'solution_title'), type: 'str' },
-            // { prop: "solution_icon", value: validator.validateStrNotNull(await req.body.solution_icon, 100, table, 'solution_icon'), type: 'str' },
-            { prop: "solution_text", value: validator.validateStrNotNull(await req.body.solution_text, 150, table, 'solution_text'), type: 'str' },
-            { prop: "solution_tag", value: validator.validateStrNotNull(await req.body.solution_tag, 50, table, 'solution_tag'), type: 'str' },
-        ]
-        steps = validator.validateStep(await req.body.solution_steps, table, 'solution_steps')
-        // console.log('testing',await req.body.role)
-        status = !(await validator.checkUndefindData(input, table))
-    } catch (err) {
-        console.log(err)
-        status = false
-        // console.log(status)
-        return res.status(400).json(errorModel(err.message, req.originalUrl))
-    }
+// router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req, res) => {
+//     let input
+//     let status = undefined
+//     try {
+//         input = [
+//             { prop: "solution_title", value: validator.validateStrNotNull(await req.body.solution_title, 50, table, 'solution_title'), type: 'str' },
+//             // { prop: "solution_icon", value: validator.validateStrNotNull(await req.body.solution_icon, 100, table, 'solution_icon'), type: 'str' },
+//             { prop: "solution_text", value: validator.validateStrNotNull(await req.body.solution_text, 150, table, 'solution_text'), type: 'str' },
+//             { prop: "solution_tag", value: validator.validateStrNotNull(await req.body.solution_tag, 50, table, 'solution_tag'), type: 'str' },
+//         ]
+//         steps = validator.validateStep(await req.body.solution_steps, table, 'solution_steps')
+//         // console.log('testing',await req.body.role)
+//         status = !(await validator.checkUndefindData(input, table))
+//     } catch (err) {
+//         console.log(err)
+//         status = false
+//         // console.log(status)
+//         return res.status(400).json(errorModel(err.message, req.originalUrl))
+//     }
 
-    if (status == true) {
-        try {
-            if (!connMSQL.handdleConnection()) {
+//     if (status == true) {
+//         try {
+//             if (!connMSQL.handdleConnection()) {
 
-                let { status_pool: status_p, data } = await connMSQL.connection_pool(validator.updateData(req, input, table))
+//                 let { status_pool: status_p, data } = await connMSQL.connection_pool(validator.updateData(req, input, table))
 
-                // update steps
-                await connMSQL.connection_pool(validator.deleteData(req, 'step_solution', 'solution_Id'))
-                steps.forEach(async (step) => {
-                    let stepInput = [
-                        { prop: "solution_Id", value: req.params.id, type: 'int' },
-                        { prop: "step_", value: step.step, type: 'int' },
-                        { prop: "step_name", value: step.step_name, type: 'str' },
-                        { prop: "step_description", value: step.step_description, type: 'str' }
-                    ]
-                    await connMSQL.connection_pool(validator.createData(stepInput, 'step_solution', res))
-                })
+//                 // update steps
+//                 await connMSQL.connection_pool(validator.deleteData(req, 'step_solution', 'solution_Id'))
+//                 steps.forEach(async (step) => {
+//                     let stepInput = [
+//                         { prop: "solution_Id", value: req.params.id, type: 'int' },
+//                         { prop: "step_", value: step.step, type: 'int' },
+//                         { prop: "step_name", value: step.step_name, type: 'str' },
+//                         { prop: "step_description", value: step.step_description, type: 'str' }
+//                     ]
+//                     await connMSQL.connection_pool(validator.createData(stepInput, 'step_solution', res))
+//                 })
 
-                if (status_p && data.affectedRows != 0) {
-                    return res.status(200).json({ message: `update ${table} id ${req.params.id} success!!`, status: '200' })
-                } else
-                    if (status_p && data.affectedRows == 0) {
-                        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
-                    } else
-                        if (status_p == false) {
-                            return res.status(400).json(errorModel('bad request!!', req.originalUrl))
-                        }
+//                 if (status_p && data.affectedRows != 0) {
+//                     return res.status(200).json({ message: `update ${table} id ${req.params.id} success!!`, status: '200' })
+//                 } else
+//                     if (status_p && data.affectedRows == 0) {
+//                         return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+//                     } else
+//                         if (status_p == false) {
+//                             return res.status(400).json(errorModel('bad request!!', req.originalUrl))
+//                         }
 
-                // error
-                return res.status(200).json({ message: `update ${table} success!!`, status: '200' })
-            } else {
-                console.log(`Cannot connect to mysql server !!`)
-                throw new Error('connection error something :', err)
-            }
-        } catch (error) {
-            res.status(400).json(errorModel(error.message, req.originalUrl))
-        }
-    } else {
-        return res.status(500).json(errorModel('data not valid', req.originalUrl))
-    }
-})
+//                 // error
+//                 return res.status(200).json({ message: `update ${table} success!!`, status: '200' })
+//             } else {
+//                 console.log(`Cannot connect to mysql server !!`)
+//                 throw new Error('connection error something :', err)
+//             }
+//         } catch (error) {
+//             res.status(400).json(errorModel(error.message, req.originalUrl))
+//         }
+//     } else {
+//         return res.status(500).json(errorModel('data not valid', req.originalUrl))
+//     }
+// })
 
 module.exports = router
