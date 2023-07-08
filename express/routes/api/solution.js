@@ -8,7 +8,7 @@ const {ROLE} = require("../../enum/UserType")
 
 const table = 'solution'
 const stepTable = 'step_solution'
-const stepColumn = ["step_", "step_name", "step_description"]
+const stepColumn = ["step_", "step_name", "step_description","step_upload"]
 
 //get solution
 router.get('/', JwtAuth, async (req, res) => {
