@@ -102,12 +102,10 @@ const deleteData = (req, table, field) => {
         let statement = `DELETE FROM ${table} WHERE ${field} = ${id}`
         return statement
     }
-
 }
 
 // update date
 const updateData = (req, data, table) => {
-
     if (req.params.id == null || req.params.id == undefined || req.params.id == "") {
         throw new Error('please input id to update data !!')
     } else {
@@ -159,7 +157,7 @@ const validateStrNull = (str = '', l, table, name) => {
         throw new Error(`${name} :${str}  have  more than ${l} characters`)
     } else {
         console.log(`validator string / ${table} ${name} : ${str}`)
-        return str == null ? null : str.toString().trim()
+        return str.toString().trim()
     }
 }
 
@@ -263,7 +261,6 @@ const checkUndefindData = async (data, table) => {
 }
 
 const validateDate = (date, table, name) => {
-
     if (date === undefined || date === null || date === "") {
         throw new Error(date + " is not null")
     } else {
@@ -280,7 +277,6 @@ const validateDate = (date, table, name) => {
             return new_date.toString().trim()
         }
     }
-
 }
 
 const validateTag = (arr = [], l, table, name) => {
@@ -308,7 +304,7 @@ const validateStep = (arr = [], table, name) => {
         i = 1
         arr.forEach(step => {
             // validate string length in each item 
-            if (step.step_name === undefined || step.step_name === null || step.step_name.length == 0) {
+            if (step.step_name.length == 0) {
                 throw new Error(`step name is null`)
             } else if (step.step_name.length > 100) {
                 throw new Error(item + ` in step name have  more than 100 characters`)
@@ -319,8 +315,10 @@ const validateStep = (arr = [], table, name) => {
             } else if (step.step_description != undefined) {
                 step.step_description = null
             }
-            // input step
+            // input step  
             step.step = i
+            step.step_name = step.step_name.toString().trim()
+            step_description = step.step_description.toString().trim()
             i++
         })
 

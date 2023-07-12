@@ -5,6 +5,7 @@ const connMSQL = require('../../config/db_config')
 const errorModel = require('../../response/errorModel')
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 const {ROLE} = require("../../enum/UserType")
+const { bucket, mode } = require('../../config/firestore_implement')
 
 const table = 'solution'
 const stepTable = 'step_solution'
@@ -126,9 +127,20 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async
     // delete data
     try {
         if (!connMSQL.handdleConnection()) {
-            // delete
+            // delete data
             await connMSQL.connection_pool(validator.deleteData(req, 'step_solution', 'solution_Id'))
+            
             let { status_pool: status_p, data: sol, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'solutionId'))
+
+            const folder = `images/${mode == "development" ? "developments" : "productions"}/solutions`
+            const fileName = `${folder}/${req.params.id}.png`
+            bucket.deleteFiles({
+                prefix: fileName
+            });
+            const directory = `${folder}/${req.params.id}/`
+            bucket.deleteFiles({
+                prefix: directory
+            });
 
             if (status_p && sol.affectedRows != 0) {
                 return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })

@@ -5,17 +5,8 @@ const multer = require("multer")
 const errorModel = require('../../response/errorModel')
 // const fs = require('fs')
 const { PROBLEM } = require('../../enum/Request')
+const { bucket, mode } = require('../../config/firestore_implement')
 
-require('dotenv').config().parsed
-
-const admin = require('firebase-admin')
-const serviceAccount = require('../../config/firestore_config')
-const FirebaseApp = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
-})
-const storage = FirebaseApp.storage();
-const bucket = storage.bucket();
 // allow multipart file
 // const multerStorage = multer.diskStorage({
 //     destination: function (req, file, callback) {
@@ -50,14 +41,14 @@ const upload = multer(
     })
 
 // read solution image (not found case)
-router.get('/:endpoint/:id', async (req, res, next) => {
+router.get('/:endpoint/:id', async (req, res) => {
     // let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
     // res.sendFile(path.resolve(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png')),
     //     err => {
     //         next(errorModel("File not found!!", req.originalUrl))
     //     });
-    console.log(process.env.NODE_ENV)
-    const folder = `images/${process.env.NODE_ENV == "development" ? "developments" : "productions"}/${req.params.endpoint}`
+    console.log(mode)
+    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`
     const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
     const file = bucket.file(fileName);
     file.download().then(downloadResponse => {
@@ -89,7 +80,7 @@ router.post('/:endpoint/:id', upload.single('file'), async (req, res) => {
         }
     }
 
-    const folder = `images/${process.env.NODE_ENV == "development" ? "developments" : "productions"}/${req.params.endpoint}`
+    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`
     const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
     const fileUpload = bucket.file(fileName)
     const blobStream = fileUpload.createWriteStream({
@@ -115,15 +106,19 @@ router.delete('/:endpoint/:id', async (req, res) => {
     //     }
     //     res.send({ message: "file has been deleted" })
     // })
-    const folder = `images/${process.env.NODE_ENV == "development" ? "developments" : "productions"}/${req.params.endpoint}`
-    const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
     for (let i in PROBLEM) {
         if (req.params.id == PROBLEM[i]) {
             return res.status(403).send(errorModel("This file cannot delete!!", req.originalUrl))
         }
     }
+    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`
+    const fileName = `${folder}/${req.params.id}.png`
     bucket.deleteFiles({
         prefix: fileName
+    });
+    const directory = `${folder}/${req.params.id}/`
+    bucket.deleteFiles({
+        prefix: directory
     });
     return res.status(200).json({message:'Delete complete!'});
 })

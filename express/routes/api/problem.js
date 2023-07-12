@@ -8,7 +8,7 @@ const errorModel = require('../../response/errorModel')
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 const { ROLE } = require('../../enum/UserType')
 const { PROBLEM } = require('../../enum/Request')
-const fs = require('fs')
+const { bucket, mode } = require('../../config/firestore_implement')
 
 const table = "problem"
 const problemTypeIt = [PROBLEM.Application, PROBLEM.Hardware, PROBLEM.Internet, PROBLEM.Meeting, PROBLEM.Printer, PROBLEM.Software, PROBLEM.Website]
@@ -116,8 +116,13 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
             }
 
             let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'problemId'))
-            let pathed = `/../../assets/images/problems/${req.params.id}`
-            fs.unlink(__dirname + pathed + '.png', (err) => {})
+            
+            const folder = `images/${mode == "development" ? "developments" : "productions"}/problems`
+            const fileName = `${folder}/${req.params.id}.png`
+            bucket.deleteFiles({
+                prefix: fileName
+            });
+
             if (status_p && problems.affectedRows != 0) {
                 return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
             } else

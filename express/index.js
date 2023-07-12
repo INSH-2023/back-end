@@ -4,7 +4,6 @@ const logger =require('./middleware/logger')
 const cors =require('cors')
 const cookieParser = require('cookie-parser')
 const compression = require("compression"); // reduce loading of all site
-
 require('dotenv').config().parsed
 let corsOptions = {
     origin: process.env.CLIENT_HOST||'http://localhost:5173',

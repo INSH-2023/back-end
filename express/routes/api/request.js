@@ -40,7 +40,7 @@ router.get('/', JwtAuth, async (req, res) => {
 
             // update user request by count for notify
             if (req.user.user_role != ROLE.User) {
-                let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId","request_count"],
+                let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId", "request_count"],
                     [{ col: "user_email", val: req.user.user_email }]
                 ))
                 req.params.id = requests[0].userId
@@ -48,7 +48,7 @@ router.get('/', JwtAuth, async (req, res) => {
                     { prop: "user_requestCount", value: data.length, type: 'int' },
                 ]
                 await connMSQL.connection_pool(validator.updateData(req, input, user))
-                return res.status(200).json({data: data, request_count: requests[0].request_count})
+                return res.status(200).json({ data: data, request_count: requests[0].request_count })
             }
 
             return res.status(200).json(data)
@@ -97,6 +97,36 @@ router.get('/:id', JwtAuth, async (req, res) => {
     } catch (error) {
         return res.status(400).json(errorModel(error.message, req.originalUrl))
     }
+})
+
+router.get('/status/count', JwtAuth, async (req, res) => {
+    try {
+        if (!connMSQL.handdleConnection()) {
+            let { status_pool, data, msg } = await connMSQL.connection_pool(
+                validator.foundId(table, columns,
+                    '', [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
+                ))
+            if (req.user.user_role == ROLE.User) {
+                data = data.filter(e => e.request_email == req.user.user_email)
+            } else if (req.user.user_role == ROLE.Admin_it) {
+                data = data.filter(e => e.request_service_type == SERVICE.Admin_it)
+            } else if (req.user.user_role == ROLE.Admin_pr) {
+                data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
+            }
+            console.log(data.filter(e=>e.request_status==STATUS.Request).length)
+
+            return res.status(200).json({
+                request: data.filter(e=>e.request_status==STATUS.Request).length,
+                inProgress: data.filter(e=>e.request_status==STATUS.InProgress).length,
+                finish: data.filter(e=>e.request_status==STATUS.Finish).length,
+                opencase: data.filter(e=>e.request_status==STATUS.OpenCase).length
+            })
+        }
+    } catch (error) {
+        return res.status(400).json(errorModel(error.message, req.originalUrl))
+    }
+
+    // todo ให้ list เฉพาะอีเมลของตัวเองเมื่อมีการแจ้งซ่อม และเมื่อกดปุ่มรับแจ้งจะสามารถดูข้อมูลสรุปว่าใครสามารถแจ้งซ่อมได้
 })
 
 // create request
