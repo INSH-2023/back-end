@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const connMSQL = require('../../config/db_config')
-const { getToken, getUser, refreshToken } = require('../../validator/authentication')
+const { getToken, getUser, refreshToken, isExpired } = require('../../validator/authentication')
 const errorModel = require('../../response/errorModel')
 const { v4: uuidv4 } = require('uuid')
 const validator = require('./../../validator/validate')
@@ -56,6 +56,8 @@ router.post('/', async (req, res) => {
     "user_email": user[0].user_email,
     "user_role": user[0].user_role,
   }, "24h");
+  console.log(token)
+  console.log(getUser(token).user_role)
 
   // เก็บเป็น cookie ให้ผู้พัฒนา backend สามารถใช้งานได้
   res.cookie("token", token);
@@ -64,14 +66,31 @@ router.post('/', async (req, res) => {
   res.cookie("user_role", getUser(token).user_role);
   res.cookie("user_first_name", getUser(token).user_first_name)
   res.cookie("user_last_name", getUser(token).user_last_name)
-  res.status(200).json({ "token": token, "refreshToken": refreshtoken, "user_emp_code": getUser(token).user_emp_code, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
+  res.status(200).json({
+    "token": token, "refreshToken": refreshtoken,
+    "user_emp_code": getUser(token).user_emp_code,
+    "user_email": getUser(token).user_email,
+    "user_role": getUser(token).user_role,
+    "user_first_name": getUser(token).user_first_name,
+    "user_last_name": getUser(token).user_last_name
+  })
 })
 
-router.get('/refresh', async (req, res) => {
+router.post('/refresh', async (req, res) => {
   // เรียก refresh token เพื่อใช้ในการ refresh ถ้าหากเป็น access token จะทำการลบข้อมูลของ user ทำให้ส่ง token ผิด
-  const jwtRefreshToken = req.headers.authorization || "Bearer " + req.cookies.token;
-  let token = refreshToken(jwtRefreshToken.substring(7), "30m")
-  let refreshtoken = refreshToken(jwtRefreshToken.substring(7), "24h")
+  const jwtRefreshToken = req.headers.authorization || "Bearer " + req.cookies.refreshToken;
+  let userInfo = {
+    "user_first_name": req.body.user_first_name,
+    "user_last_name": req.body.user_last_name,
+    "user_email": req.body.user_email,
+    "user_role": req.body.user_role,
+  }
+  if (isExpired(jwtRefreshToken.substring(7))){
+    return res.status(401).json(errorModel("token is expired", req.originalUrl))
+  }
+  let token = refreshToken(jwtRefreshToken.substring(7), userInfo, "30m")
+  let refreshtoken = refreshToken(jwtRefreshToken.substring(7), userInfo, "24h")
+
   // ตรวจดูว่า token ถูกต้องไหมก่อนส่ง
   if ([getUser(token).user_email, getUser(token).user_role].includes(undefined)) {
     return res.status(401).json(errorModel("please input valid refresh token", req.originalUrl))
@@ -82,7 +101,14 @@ router.get('/refresh', async (req, res) => {
   res.cookie("user_role", getUser(token).user_role);
   res.cookie("user_first_name", getUser(token).user_first_name)
   res.cookie("user_last_name", getUser(token).user_last_name)
-  res.status(200).json({ "token": token, "refreshToken": refreshtoken, "user_emp_code": getUser(token).user_emp_code, "user_email": getUser(token).user_email, "user_role": getUser(token).user_role, "user_first_name": getUser(token).user_first_name, "user_last_name": getUser(token).user_last_name })
+  res.status(200).json({
+    "token": token, "refreshToken": refreshtoken,
+    "user_emp_code": getUser(token).user_emp_code,
+    "user_email": getUser(token).user_email,
+    "user_role": getUser(token).user_role,
+    "user_first_name": getUser(token).user_first_name,
+    "user_last_name": getUser(token).user_last_name
+  })
 })
 
 router.post('/verify', async (req, res) => {
@@ -94,7 +120,7 @@ router.post('/verify', async (req, res) => {
   if (user.length == 0) {
     return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
   }
-  
+
   let input
   let status = undefined
   try {
@@ -158,7 +184,7 @@ router.post('/verify/count', async (req, res) => {
 })
 
 router.put('/reset_password', async (req, res) => {
-  let uuId_token = req.headers.authorization.substring(7,43)
+  let uuId_token = req.headers.authorization.substring(7, 43)
   let { password } = req.body
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: logs, msg: msg } = await connMSQL.connection_pool(

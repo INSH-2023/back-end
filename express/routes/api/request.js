@@ -13,8 +13,9 @@ const userView = "userview"
 const item = "item"
 let columns = ["requestId", "user_first_name as request_first_name", "user_last_name as request_last_name",
     "user_email as request_email", "user_group as request_group", "request_service_type", "request_subject", "request_status",
-    "request_req_date", "request_assign", "request_sn", "request_brand",
-    "request_type_matchine", "request_other", "request_problems", "request_message"]
+    "request_req_date", "request_assign", "request_sn", "request_brand", "request_type_matchine", "request_other",
+    "request_problems", "request_message"]
+let notifyMessage = ["request_historyId", "request_problems", "request_message", "history_status", "request_status", "history_req_date", "request_update"]
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 const { ROLE } = require('../../enum/UserType')
 const { SERVICE, USETYPE, STATUS, PROBLEM } = require('../../enum/Request')
@@ -39,28 +40,22 @@ router.get('/', JwtAuth, async (req, res) => {
             }
 
             // format for request date
-            data.forEach(req=>{
-                let date = new Date(req.request_req_date)
-                let utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(),
-                date.getUTCDate(), date.getUTCHours(),
-                date.getUTCMinutes(), date.getUTCSeconds());
-                req.request_req_date = new Date(utc).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+            data.forEach(req => {
+                req.request_req_date = new Date(req.request_req_date).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
             })
 
             // update user request by count for notify
-            if (req.user.user_role != ROLE.User) {
-                let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId", "request_count"],
-                    [{ col: "user_email", val: req.user.user_email }]
-                ))
-                req.params.id = requests[0].userId
-                input = [
-                    { prop: "user_requestCount", value: data.length, type: 'int' },
-                ]
-                await connMSQL.connection_pool(validator.updateData(req, input, user))
-                return res.status(200).json({ data: data, request_count: requests[0].request_count })
-            }
+            let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId", "request_count", "request_update"],
+                [{ col: "user_email", val: req.user.user_email }]
+            ))
+            req.params.id = requests[0].userId
+            input = [
+                { prop: "user_requestCount", value: data.length, type: 'int' },
+                { prop: "user_updateCount" }
+            ]
+            await connMSQL.connection_pool(validator.updateData(req, input, user))
+            return res.status(200).json({ data: data, request_count: requests[0].request_count})
 
-            return res.status(200).json(data)
         } else {
             console.log(`Cannot connect to mysql server !!`)
             throw new Error('connection error something :', err)
@@ -94,6 +89,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
             }
 
             if (status_p && requests.length != 0) {
+                requests[0].request_req_date = new Date(req.request_req_date).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
                 return res.status(200).json(requests)
             } else
                 if (status_p && requests.length == 0) {
@@ -108,19 +104,39 @@ router.get('/:id', JwtAuth, async (req, res) => {
     }
 })
 
+router.get('/updated/notify', JwtAuth, async (req, res) => {
+    try {
+        if (!connMSQL.handdleConnection()) {
+            let { status_pool, data, msg } = await connMSQL.connection_pool(
+                validator.foundId('request_history', notifyMessage,
+                    [{ col: "user_email", val: req.user.user_email }],
+                    [{ table: `moral_it_device.${table} as r`, on: `re.requestId=r.requestId` }, { table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=r.user_emp_code` }]
+                ))
+            // format for request date
+            data.forEach(req => {
+                req.history_req_date = new Date(req.history_req_date).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+            })
+            return res.status(200).json(data)
+        }
+    } catch (error) {
+        return res.status(400).json(errorModel(error.message, req.originalUrl))
+    }
+    // todo ให้ list เฉพาะอีเมลของตัวเองเมื่อมีการแจ้งซ่อม และเมื่อกดปุ่มรับแจ้งจะสามารถดูข้อมูลสรุปว่าใครสามารถแจ้งซ่อมได้
+})
+
 router.get('/status/user', JwtAuth, async (req, res) => {
     try {
         if (!connMSQL.handdleConnection()) {
             let { status_pool, data, msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
-                    [{col: "user_email", val: req.user.user_email}], [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
+                    [{ col: "user_email", val: req.user.user_email }], [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
                 ))
 
             return res.status(200).json({
-                request: data.filter(e=>e.request_status==STATUS.Request).length,
-                inProgress: data.filter(e=>e.request_status==STATUS.InProgress).length,
-                finish: data.filter(e=>e.request_status==STATUS.Finish).length,
-                opencase: data.filter(e=>e.request_status==STATUS.OpenCase).length
+                request: data.filter(e => e.request_status == STATUS.Request).length,
+                inProgress: data.filter(e => e.request_status == STATUS.InProgress).length,
+                finish: data.filter(e => e.request_status == STATUS.Finish).length,
+                opencase: data.filter(e => e.request_status == STATUS.OpenCase).length
             })
         }
     } catch (error) {
@@ -145,10 +161,10 @@ router.get('/status/admin', JwtAuth, async (req, res) => {
             }
 
             return res.status(200).json({
-                request: data.filter(e=>e.request_status==STATUS.Request).length,
-                inProgress: data.filter(e=>e.request_status==STATUS.InProgress).length,
-                finish: data.filter(e=>e.request_status==STATUS.Finish).length,
-                opencase: data.filter(e=>e.request_status==STATUS.OpenCase).length
+                request: data.filter(e => e.request_status == STATUS.Request).length,
+                inProgress: data.filter(e => e.request_status == STATUS.InProgress).length,
+                finish: data.filter(e => e.request_status == STATUS.Finish).length,
+                opencase: data.filter(e => e.request_status == STATUS.OpenCase).length
             })
         }
     } catch (error) {
@@ -321,7 +337,6 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
     if (status == true) {
         // update data
         try {
-
             if (!connMSQL.handdleConnection()) {
                 let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{ col: "requestId", val: req.params.id }]))
                 if (requests.length == 0) {
@@ -340,7 +355,31 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
                     }
 
                     await connMSQL.connection_pool(validator.updateData(req, input, table))
-                    return res.status(200).json({ message: `update ${table} id ${req.params.id} success!!`, status: '200' })
+
+                    let reqId = req.params.id
+
+                    let { status_pool, data: user, msg } = await connMSQL.connection_pool(validator.foundId(
+                        userView, ['userId','request_update'], [{ col: "user_emp_code", val: requests[0].user_emp_code }]))
+
+                    user[0].request_update++
+
+                    req.params.id = user[0].userId
+                   
+                    let update = [
+                        { prop: "user_updateRequest", value: user[0].request_update, type: 'int' }
+                    ]
+
+                    await connMSQL.connection_pool(validator.updateData(req, update, 'user'))
+
+                    let log = [
+                        { prop: "requestId", value: reqId, type: 'int' },
+                        { prop: "history_status", value: validator.validateRole(await req.body.request_status, STATUS, 15, table, 'history_status'), type: 'str' },
+                        { prop: "history_assign", value: validator.validateStrNotNull(await req.body.request_assign, 50, table, 'history_assign'), type: 'str' }
+                    ]
+
+                    await connMSQL.connection_pool(validator.createData(log, 'request_history'))
+
+                    return res.status(200).json({ message: `update ${table} id ${reqId} success!!`, status: '200' })
                 }
             } else {
                 console.log(`Cannot connect to mysql server !!`)
