@@ -38,6 +38,15 @@ router.get('/', JwtAuth, async (req, res) => {
                 data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
             }
 
+            // format for request date
+            data.forEach(req=>{
+                let date = new Date(req.request_req_date)
+                let utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(),
+                date.getUTCDate(), date.getUTCHours(),
+                date.getUTCMinutes(), date.getUTCSeconds());
+                req.request_req_date = new Date(utc).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+            })
+
             // update user request by count for notify
             if (req.user.user_role != ROLE.User) {
                 let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId", "request_count"],
@@ -99,21 +108,13 @@ router.get('/:id', JwtAuth, async (req, res) => {
     }
 })
 
-router.get('/status/count', JwtAuth, async (req, res) => {
+router.get('/status/user', JwtAuth, async (req, res) => {
     try {
         if (!connMSQL.handdleConnection()) {
             let { status_pool, data, msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
-                    '', [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
+                    [{col: "user_email", val: req.user.user_email}], [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
                 ))
-            if (req.user.user_role == ROLE.User) {
-                data = data.filter(e => e.request_email == req.user.user_email)
-            } else if (req.user.user_role == ROLE.Admin_it) {
-                data = data.filter(e => e.request_service_type == SERVICE.Admin_it)
-            } else if (req.user.user_role == ROLE.Admin_pr) {
-                data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
-            }
-            console.log(data.filter(e=>e.request_status==STATUS.Request).length)
 
             return res.status(200).json({
                 request: data.filter(e=>e.request_status==STATUS.Request).length,
@@ -125,8 +126,34 @@ router.get('/status/count', JwtAuth, async (req, res) => {
     } catch (error) {
         return res.status(400).json(errorModel(error.message, req.originalUrl))
     }
-
     // todo ให้ list เฉพาะอีเมลของตัวเองเมื่อมีการแจ้งซ่อม และเมื่อกดปุ่มรับแจ้งจะสามารถดูข้อมูลสรุปว่าใครสามารถแจ้งซ่อมได้
+})
+
+router.get('/status/admin', JwtAuth, async (req, res) => {
+    try {
+        if (!connMSQL.handdleConnection()) {
+            let { status_pool, data, msg } = await connMSQL.connection_pool(
+                validator.foundId(table, columns,
+                    '', [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
+                ))
+            if (req.user.user_role == ROLE.User) {
+                return res.status(403).json(errorModel('block user get status', req.originalUrl))
+            } else if (req.user.user_role == ROLE.Admin_it) {
+                data = data.filter(e => e.request_service_type == SERVICE.Admin_it)
+            } else if (req.user.user_role == ROLE.Admin_pr) {
+                data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
+            }
+
+            return res.status(200).json({
+                request: data.filter(e=>e.request_status==STATUS.Request).length,
+                inProgress: data.filter(e=>e.request_status==STATUS.InProgress).length,
+                finish: data.filter(e=>e.request_status==STATUS.Finish).length,
+                opencase: data.filter(e=>e.request_status==STATUS.OpenCase).length
+            })
+        }
+    } catch (error) {
+        return res.status(400).json(errorModel(error.message, req.originalUrl))
+    }
 })
 
 // create request
