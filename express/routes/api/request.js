@@ -15,7 +15,7 @@ let columns = ["requestId", "user_first_name as request_first_name", "user_last_
     "user_email as request_email", "user_group as request_group", "request_service_type", "request_subject", "request_status",
     "request_req_date", "request_assign", "request_sn", "request_brand", "request_type_matchine", "request_other",
     "request_problems", "request_message"]
-let notifyMessage = ["request_historyId", "request_problems", "request_message", "history_status", "request_status", "history_req_date", "request_update"]
+let notifyMessage = ["request_historyId", "request_problems", "request_message", "history_status", "history_assign", "history_req_date", "request_update"]
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
 const { ROLE } = require('../../enum/UserType')
 const { SERVICE, USETYPE, STATUS, PROBLEM } = require('../../enum/Request')
@@ -50,11 +50,10 @@ router.get('/', JwtAuth, async (req, res) => {
             ))
             req.params.id = requests[0].userId
             input = [
-                { prop: "user_requestCount", value: data.length, type: 'int' },
-                { prop: "user_updateCount" }
+                { prop: "user_requestCount", value: data.length, type: 'int' }
             ]
             await connMSQL.connection_pool(validator.updateData(req, input, user))
-            return res.status(200).json({ data: data, request_count: requests[0].request_count})
+            return res.status(200).json({ data: data, request_count: requests[0].request_count })
 
         } else {
             console.log(`Cannot connect to mysql server !!`)
@@ -122,6 +121,25 @@ router.get('/updated/notify', JwtAuth, async (req, res) => {
         return res.status(400).json(errorModel(error.message, req.originalUrl))
     }
     // todo ให้ list เฉพาะอีเมลของตัวเองเมื่อมีการแจ้งซ่อม และเมื่อกดปุ่มรับแจ้งจะสามารถดูข้อมูลสรุปว่าใครสามารถแจ้งซ่อมได้
+})
+
+router.put('/updated/notify', JwtAuth, async (req, res) => {
+    try {
+        if (!connMSQL.handdleConnection()) {
+            // update user request by count for notify
+            let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId"],
+                [{ col: "user_email", val: req.user.user_email }]
+            ))
+            req.params.id=requests[0].userId
+            input = [
+                { prop: "user_updateRequest", value: 0, type: 'int' }
+            ]
+            await connMSQL.connection_pool(validator.updateData(req, input, user))
+            return res.status(200).json({ message: `notification is confirmed!!` })
+        }
+    } catch (error) {
+        return res.status(400).json(errorModel(error.message, req.originalUrl))
+    }
 })
 
 router.get('/status/user', JwtAuth, async (req, res) => {
@@ -242,7 +260,7 @@ router.post('/', JwtAuth, async (req, res) => {
                     let email = await req.body.request_email
                     await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
                     await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
-                    return res.status(201).json({ message: `create ${table} success!!`, status: '200' })
+                    return res.status(201).json({ message: `create ${table} success!!` })
                 }
             }
             // else if(!status_p&&msg.errno==1062){
@@ -298,7 +316,7 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
 
             if (status_p && requests.affectedRows != 0) {
                 console.log(msg)
-                return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
+                return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!` })
 
             } else
                 if (status_p && requests.affectedRows == 0) {
@@ -308,6 +326,26 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
         } else {
             console.log(`Cannot connect to mysql server !!`)
             throw new Error('connection error something ')
+        }
+    } catch (error) {
+        res.status(400).json(errorModel(error.message, req.originalUrl))
+    }
+})
+
+router.delete('/updated/notify/:id', JwtAuth, async (req, res) => {
+    // delete data
+    try {
+        if (!connMSQL.handdleConnection()) {
+            let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, 'request_history', 'request_historyId'))
+
+            if (status_p && requests.affectedRows != 0) {
+                return res.status(200).json({ message: `delete request history id ${req.params.id} success!!` })
+
+            } else
+                if (status_p && requests.affectedRows == 0) {
+                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+                    // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                }
         }
     } catch (error) {
         res.status(400).json(errorModel(error.message, req.originalUrl))
@@ -359,12 +397,12 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
                     let reqId = req.params.id
 
                     let { status_pool, data: user, msg } = await connMSQL.connection_pool(validator.foundId(
-                        userView, ['userId','request_update'], [{ col: "user_emp_code", val: requests[0].user_emp_code }]))
+                        userView, ['userId', 'request_update'], [{ col: "user_emp_code", val: requests[0].user_emp_code }]))
 
                     user[0].request_update++
 
                     req.params.id = user[0].userId
-                   
+
                     let update = [
                         { prop: "user_updateRequest", value: user[0].request_update, type: 'int' }
                     ]
@@ -379,7 +417,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
 
                     await connMSQL.connection_pool(validator.createData(log, 'request_history'))
 
-                    return res.status(200).json({ message: `update ${table} id ${reqId} success!!`, status: '200' })
+                    return res.status(200).json({ message: `update ${table} id ${reqId} success!!` })
                 }
             } else {
                 console.log(`Cannot connect to mysql server !!`)

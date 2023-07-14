@@ -10,20 +10,20 @@ const getToken = (user,date) => {
 }
 
 // refresh token
-const refreshToken = (jwttoken, user, date) => {
+const refreshToken = (jwttoken, result, user, date) => {
     try {
-        jwt.verify(jwttoken,process.env.TOKEN_SECRET)
+        let user = jwt.verify(jwttoken,process.env.TOKEN_SECRET)
     } catch (err) {
-        jwttoken = jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: date });
+        result = jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: date });
     }
-    return jwttoken
+    return result
 }
 
 // convert to user email
-const getUser = (jwttoken) => {
+const getUser = (jwttoken, secret) => {
     let user = {}
     try {
-        user = jwt.verify(jwttoken,process.env.TOKEN_SECRET)
+        user = jwt.verify(jwttoken, process.env.TOKEN_SECRET)
     } catch (err) {
         // throw new Error(err.message)
     }
@@ -31,10 +31,10 @@ const getUser = (jwttoken) => {
 }
 
 // check is expired
-const isExpired = (jwttoken) => {
+const isExpired = (jwtrefreshtoken) => {
     let isExpired = false
     try {
-        let user = jwt.verify(jwttoken,process.env.TOKEN_SECRET)
+        let user = jwt.verify(jwtrefreshtoken,process.env.TOKEN_SECRET)
     } catch (err) {
         isExpired = true
     }
