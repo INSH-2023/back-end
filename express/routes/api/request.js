@@ -74,6 +74,12 @@ router.get('/:id', JwtAuth, async (req, res) => {
                     [{ col: "requestId", val: req.params.id }],
                     [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` },]
                 ))
+            if (status_p && requests.length == 0) {
+                return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
+            }
+
+            let { status_pool: status_p1, data: problems, msg: msg1 } = await connMSQL.connection_pool(
+                validator.foundId('problem', '', [{ col: "problem_type", val: requests[0].request_subject}]))
 
             // user can get with their email only
             if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
@@ -89,11 +95,9 @@ router.get('/:id', JwtAuth, async (req, res) => {
 
             if (status_p && requests.length != 0) {
                 requests[0].request_req_date = new Date(req.request_req_date).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+                requests[0].problem_upload = problems[0].problem_upload
                 return res.status(200).json(requests)
-            } else
-                if (status_p && requests.length == 0) {
-                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
-                }
+            }
         } else {
             console.log(`Cannot connect to mysql server !!`)
             throw new Error('connection error something')

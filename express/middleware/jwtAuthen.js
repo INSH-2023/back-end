@@ -10,7 +10,7 @@ dotenv.config();
 exports.JwtAuth = (req, res, next) => {
   // เอา token จาก headers or cookies
   const jwtToken = req.headers.authorization || "Bearer " + req.cookies.token ;
-  const jwtRefreshToken = req.headers.refresh || "Bearer " + req.cookies.refreshToken ;
+  // const jwtRefreshToken = req.headers.refresh || "Bearer " + req.cookies.refreshToken ;
   // ตรวจสอบถ้าไม่มี token จะเข้าสู่ระบบไม่ได้
   if (["null","undefined"].includes(jwtToken.substring(7)) && 
   ["null","undefined"].includes(jwtRefreshToken.substring(7))) return res.status(401).json(errorModel("need login first",req.originalUrl))
@@ -26,14 +26,7 @@ exports.JwtAuth = (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    // ถ้า access token ไม่ถูกต้องหรือหมดอายุจะตรวจ refresh token ว่าใช้ได้ไหม
-    try {
-      // ตรวจ refresh token
-      user = jwt.verify(jwtRefreshToken.substring(7), process.env.TOKEN_SECRET);
-    } catch (err1) {
-      // ถ้า refresh token หมดอายุ แสดงว่าต้องไปหน้า login ใหม่
-      return res.status(403).json(errorModel("Refresh token: " + err1.message,req.originalUrl))
-    }
+    // ถ้า access token ไม่ถูกต้องหรือหมดอายุ
       return res.status(401).json(errorModel("Access token: " + err.message,req.originalUrl))
     }
 };
