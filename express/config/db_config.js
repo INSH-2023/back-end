@@ -78,7 +78,12 @@ const connection_pool=async(statement)=>{
         console.log(error)
         testing_data.status_pool=false
         testing_data.msg=error
-        throw new Error(error)
+        if(error.errno=='1062'){
+            throw new Error('Infomation duplicate')
+        }else{
+            throw new Error(error)
+        }
+        
     }
 
     return testing_data
