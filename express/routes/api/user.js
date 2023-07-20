@@ -160,15 +160,18 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     if (status == true) {
         try {
             // if(!connMSQL.handdleConnection()){
+                // console.log('hello2')
             let { status_pool: status_p, data: users, msg: msg } = await connMSQL.connection_pool(validator.createData(input, table, res))
             // console.log(users)
             // error
             if (status_p) {
                 return res.status(201).json({ message: `create ${table} success!!`, status: '200' })
             }
+            // console.log('hello3')
             // }
         } catch (error) {
-            res.status(500).json(errorModel(error.message, req.originalUrl))
+            // console.log(error.errno)
+            res.status(400).json(errorModel(error.message, req.originalUrl))
         }
     }
 })
