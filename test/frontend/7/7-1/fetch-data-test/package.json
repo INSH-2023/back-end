@@ -1,0 +1,25 @@
+{
+  "name": "fetch-data-test",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build --base=/at3",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@glhrm/vue-scheduler": "^1.3.0",
+    "@lbgm/pro-calendar-vue": "^1.1.3",
+    "@syncfusion/ej2-data": "^20.3.60",
+    "@syncfusion/ej2-schedule": "^20.3.61",
+    "@syncfusion/ej2-vue-schedule": "^20.3.61",
+    "bower": "^1.8.14",
+    "js-cookie": "^3.0.5",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.15"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.1",
+    "vite": "^2.9.7"
+  }
+}

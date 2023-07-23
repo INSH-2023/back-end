@@ -29,7 +29,7 @@ npm i multer
 npm i jsonwebtoken bcrypt
 
 <!-- ติดตั้ง cookie ให้เก็บข้อมูลในการ authen -->
-npm i cookie-parser cookie-session
+npm i cookie-parser
 
 <!-- ตั้ง node เป็น dev mode-->
 SET NODE_ENV=development
