@@ -65,14 +65,20 @@ router.post('/', async (req, res) => {
   console.log(getUser(token).user_role)
 
   // เก็บเป็น cookie ให้ผู้พัฒนา backend สามารถใช้งานได้
-  res.cookie("token", token);
-  res.cookie("refreshToken", refreshtoken);
-  res.cookie("user_email", getUser(token).user_email);
-  res.cookie("user_role", getUser(token).user_role);
-  res.cookie("user_first_name", getUser(token).user_first_name)
-  res.cookie("user_last_name", getUser(token).user_last_name)
+  const cookieConfig = {
+    maxAge: 24*60*60*1000,
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true
+  }
+  res.cookie("token", token, cookieConfig);
+  res.cookie("refreshToken", refreshtoken, cookieConfig);
+  // res.cookie("user_email", getUser(token).user_email);
+  // res.cookie("user_role", getUser(token).user_role);
+  // res.cookie("user_first_name", getUser(token).user_first_name)
+  // res.cookie("user_last_name", getUser(token).user_last_name)
   res.status(200).json({
-    "token": token, "refreshToken": refreshtoken,
+    // "token": token, "refreshToken": refreshtoken,
     "user_emp_code": getUser(token).user_emp_code,
     "user_email": getUser(token).user_email,
     "user_role": getUser(token).user_role,
@@ -83,8 +89,8 @@ router.post('/', async (req, res) => {
 
 router.post('/refresh', async (req, res) => {
   // เรียก refresh token เพื่อใช้ในการ refresh ถ้าหากเป็น access token จะทำการลบข้อมูลของ user ทำให้ส่ง token ผิด
-  const jwtRefreshToken = req.headers.authorization || "Bearer " + req.cookies.refreshToken;
-  const jwttoken = req.body.token
+  const jwtRefreshToken = "Bearer " + req.cookies.refreshToken;
+  const jwttoken = "Bearer " + req.cookies.token
   let userInfo = {
     "user_emp_code": req.body.user_emp_code,
     "user_first_name": req.body.user_first_name,
@@ -97,8 +103,8 @@ router.post('/refresh', async (req, res) => {
     return res.status(401).json(errorModel("token is expired", req.originalUrl))
   }
 
-  let token = refreshToken(jwttoken, jwttoken, userInfo, "30m")
-  let refreshtoken = refreshToken(jwttoken, jwtRefreshToken.substring(7), userInfo, "24h")
+  let token = refreshToken(jwttoken.substring(7), jwttoken.substring(7), userInfo, "30m")
+  let refreshtoken = refreshToken(jwttoken.substring(7), jwtRefreshToken.substring(7), userInfo, "24h")
 
   // ตรวจดูว่า token ถูกต้องไหมก่อนส่ง
   if ([getUser(token).user_email, getUser(token).user_role].includes(undefined)) {
@@ -106,13 +112,13 @@ router.post('/refresh', async (req, res) => {
   }
   res.cookie("token", token);
   res.cookie("refreshToken",refreshtoken);
-  res.cookie("user_emp_code", getUser(token).user_emp_code)
-  res.cookie("user_email", getUser(token).user_email);
-  res.cookie("user_role", getUser(token).user_role);
-  res.cookie("user_first_name", getUser(token).user_first_name)
-  res.cookie("user_last_name", getUser(token).user_last_name)
+  // res.cookie("user_emp_code", getUser(token).user_emp_code)
+  // res.cookie("user_email", getUser(token).user_email);
+  // res.cookie("user_role", getUser(token).user_role);
+  // res.cookie("user_first_name", getUser(token).user_first_name)
+  // res.cookie("user_last_name", getUser(token).user_last_name)
   res.status(200).json({
-    "token": token, "refreshToken":refreshtoken,
+    // "token": token, "refreshToken":refreshtoken,
     "user_emp_code": getUser(token).user_emp_code,
     "user_email": getUser(token).user_email,
     "user_role": getUser(token).user_role,

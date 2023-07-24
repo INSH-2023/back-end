@@ -9,7 +9,7 @@ dotenv.config();
 
 exports.JwtAuth = (req, res, next) => {
   // เอา token จาก headers or cookies
-  const jwtToken = req.headers.authorization || "Bearer " + req.cookies.token ;
+  const jwtToken = "Bearer " + req.cookies.token ;
   // const jwtRefreshToken = req.headers.refresh || "Bearer " + req.cookies.refreshToken ;
   // ตรวจสอบถ้าไม่มี token จะเข้าสู่ระบบไม่ได้
   if (["null","undefined"].includes(jwtToken.substring(7)) && 
