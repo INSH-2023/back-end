@@ -11,6 +11,8 @@ const table_log = 'reset_password_log'
 const bcrypt = require('bcrypt')
 
 const dotenv = require('dotenv');
+const { JwtAuth } = require('../../middleware/jwtAuthen')
+const cookieParser = require('cookie-parser')
 
 // get config vars
 dotenv.config();
@@ -51,7 +53,7 @@ router.post('/', async (req, res) => {
     "user_last_name": user[0].user_last_name,
     "user_email": user[0].user_email,
     "user_role": user[0].user_role,
-  },"30m");
+  }, "30m");
 
   // และ refresh token แต่เวลาต่างกัน
   const refreshtoken = getToken({
@@ -60,13 +62,13 @@ router.post('/', async (req, res) => {
     "user_last_name": user[0].user_last_name,
     "user_email": user[0].user_email,
     "user_role": user[0].user_role,
-  },"24h");
-  console.log(token)
+  }, "24h");
+  // console.log(token)
   console.log(getUser(token).user_role)
 
   // เก็บเป็น cookie ให้ผู้พัฒนา backend สามารถใช้งานได้
   const cookieConfig = {
-    maxAge: 24*60*60*1000,
+    maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: 'None',
     secure: true
@@ -99,8 +101,16 @@ router.post('/refresh', async (req, res) => {
     "user_role": req.body.user_role,
   }
 
-  if (isExpired(jwtRefreshToken.substring(7))){
-    return res.status(401).json(errorModel("token is expired", req.originalUrl))
+  if (isExpired(jwtRefreshToken.substring(7))) {
+    // clear session cookie
+    const cookieConfig = {
+      httpOnly: true,
+      sameSite: 'None',
+      secure: true
+    }
+    res.clearCookie("token",cookieConfig)
+    res.clearCookie("refreshToken",cookieConfig)
+    return res.status(401).json(errorModel("token is expired, need login again", req.originalUrl))
   }
 
   let token = refreshToken(jwttoken.substring(7), jwttoken.substring(7), userInfo, "30m")
@@ -110,8 +120,15 @@ router.post('/refresh', async (req, res) => {
   if ([getUser(token).user_email, getUser(token).user_role].includes(undefined)) {
     return res.status(401).json(errorModel("please input valid refresh token", req.originalUrl))
   }
-  res.cookie("token", token);
-  res.cookie("refreshToken",refreshtoken);
+  // เก็บเป็น cookie ให้ผู้พัฒนา backend สามารถใช้งานได้
+  const cookieConfig = {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true
+  }
+  res.cookie("token", token, cookieConfig);
+  res.cookie("refreshToken", refreshtoken, cookieConfig);
   // res.cookie("user_emp_code", getUser(token).user_emp_code)
   // res.cookie("user_email", getUser(token).user_email);
   // res.cookie("user_role", getUser(token).user_role);
@@ -125,6 +142,20 @@ router.post('/refresh', async (req, res) => {
     "user_first_name": getUser(token).user_first_name,
     "user_last_name": getUser(token).user_last_name
   })
+})
+
+router.get("/signout", (req, res) => {
+  // verify token
+  const jwtRefreshToken = req.cookies.refreshToken;
+  const jwttoken = req.cookies.token
+  if (jwttoken == undefined || jwtRefreshToken == undefined) {
+    return res.status(404).json(errorModel("this account not found",req.originalUrl))
+  }
+
+  // clear session cookie
+  res.clearCookie("token")
+  res.clearCookie("refreshToken")
+  return res.status(200).json({ message: "this user is sign out !!" })
 })
 
 router.post('/verify', async (req, res) => {
