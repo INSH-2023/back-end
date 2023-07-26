@@ -36,13 +36,18 @@ router.get('/', JwtAuth, async (req, res) => {
 
 router.get('/type/:type', JwtAuth, async (req, res) => {
     try {
+        // sql injection basic protector and not found
+        if (!problemTypeIt.concat(...problemTypePr).includes(req.params.type)) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.type} does not exist`, req.originalUrl));
+        }
+
         // if(!connMSQL.handdleConnection()){
         if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(req.params.type)) {
             return res.status(403).json(errorModel(`${table} type ${req.params.type} is forbidden for admin_it`, req.originalUrl))
         } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(req.params.type)) {
             return res.status(403).json(errorModel(`${table} type ${req.params.type} is forbidden for admin_pr`, req.originalUrl))
         }
-        let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{ col: "problem_type", val: req.params.type}]))
+        let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{ col: "problem_type", val: req.params.type }]))
         if (status_p) {
             return res.status(200).json(problems)
         }
@@ -107,6 +112,11 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_ad
 router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_admin), async (req, res) => {
     // delete data
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p1, data: problems1, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(table, ['problem_type'], [{ col: "problemId", val: req.params.id }]))
             if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(problems1[0].problem_type)) {
@@ -116,7 +126,7 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
             }
 
             let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'problemId'))
-            
+
             const folder = `images/${mode == "development" ? "developments" : "productions"}/problems`
             const fileName = `${folder}/${req.params.id}.png`
             bucket.deleteFiles({

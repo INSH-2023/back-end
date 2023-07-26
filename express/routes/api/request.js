@@ -68,6 +68,11 @@ router.get('/', JwtAuth, async (req, res) => {
 // get data by id
 router.get('/:id', JwtAuth, async (req, res) => {
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(
                 validator.foundId(table, columns,
@@ -79,7 +84,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
             }
 
             let { status_pool: status_p1, data: problems, msg: msg1 } = await connMSQL.connection_pool(
-                validator.foundId('problem', '', [{ col: "problem_type", val: requests[0].request_subject}]))
+                validator.foundId('problem', '', [{ col: "problem_type", val: requests[0].request_subject }]))
 
             // user can get with their email only
             if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
@@ -134,7 +139,7 @@ router.put('/updated/notify', JwtAuth, async (req, res) => {
             let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId"],
                 [{ col: "user_email", val: req.user.user_email }]
             ))
-            req.params.id=requests[0].userId
+            req.params.id = requests[0].userId
             input = [
                 { prop: "user_updateRequest", value: 0, type: 'int' }
             ]
@@ -303,6 +308,11 @@ router.post('/', JwtAuth, async (req, res) => {
 router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     // delete data
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'requestId'))
 
@@ -339,6 +349,11 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
 router.delete('/updated/notify/:id', JwtAuth, async (req, res) => {
     // delete data
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, 'request_history', 'request_historyId'))
 
@@ -360,6 +375,11 @@ router.delete('/updated/notify/:id', JwtAuth, async (req, res) => {
 router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Admin_pr), async (req, res) => {
     let input
     let status = undefined
+
+    // sql injection basic protector
+    if (isNaN(Number(req.params.id))) {
+        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+    }
 
     try {
         input = [

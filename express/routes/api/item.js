@@ -23,6 +23,7 @@ router.get('/', JwtAuth, async (req, res) => {
 
             let results
             // console.log(req.user.user_role)
+
             if (req.user.user_role == "user") {
                 results = await connMSQL.connection_pool(validator.foundId(table, columns,
                     [{ col: "user_email", val: req.user.user_email }],
@@ -60,6 +61,12 @@ router.get('/:id', JwtAuth, async (req, res) => {
             // user_last_name,user_email,user_group FROM moral_it_device.item as item 
             // join moral_it_device.user as user on user.user_emp_code = item.user_emp_code 
             // WHERE item.itemId = "${req.params.id}";`)
+
+            // sql injection basic protector
+            if (isNaN(Number(req.params.id))) {
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            }
+
             let { status_pool: status_p, data: items, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, columns,
                 [{ col: "itemId", val: req.params.id }],
                 [{ table: `moral_it_device.${userView} as us`, on: 'us.user_emp_code=it.user_emp_code' }]
@@ -88,6 +95,12 @@ router.get('/:id', JwtAuth, async (req, res) => {
 
 router.get('/emp-code/:id', JwtAuth, async (req, res) => {
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
+
         if (!connMSQL.handdleConnection()) {
             //     let { status_pool: status_p, data: items, msg: msg } = await connMSQL.connection_pool(`
             // SELECT itemId,item_name,item_number,item_type,user_first_name,user_last_name,
@@ -100,8 +113,8 @@ router.get('/emp-code/:id', JwtAuth, async (req, res) => {
             ))
 
             if (req.user.user_role == "user" && items[0].user_email !== req.user.user_email) {
-                    return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
-                }
+                return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+            }
 
             if (status_p && items.length != 0) {
                 return res.status(200).json(items)

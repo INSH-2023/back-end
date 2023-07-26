@@ -45,6 +45,11 @@ router.get('/', JwtAuth, async (req, res) => {
 router.get('/:id', JwtAuth, async (req, res) => {
     try {
         if (!connMSQL.handdleConnection()) {
+            // sql injection basic protector
+            if(isNaN(Number(req.params.id))){
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            }
+
             let { status_pool: sp1, data: solution } = await connMSQL.connection_pool(validator.foundId(table, '',
                 [{ col: 'solutionId', val: req.params.id }]
             ))
@@ -126,6 +131,11 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req
 router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req, res) => {
     // delete data
     try {
+        // sql injection basic protector
+        if(isNaN(Number(req.params.id))){
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             // delete data
             await connMSQL.connection_pool(validator.deleteData(req, 'step_solution', 'solution_Id'))

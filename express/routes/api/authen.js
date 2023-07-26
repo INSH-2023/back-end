@@ -162,7 +162,7 @@ router.post('/verify', async (req, res) => {
   let { email } = req.body
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '',
-    [{ col: 'user_email', val: email }]
+    [{ col: 'user_email', val: validator.validateEmail(email,50,table,"user_email") }]
   ))
   if (user.length == 0) {
     return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
@@ -213,7 +213,7 @@ router.post('/verify/count', async (req, res) => {
   try {
     // เรียกข้อมูล user โดยใช้ email
     let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, ['user_email'],
-      [{ col: 'user_email', val: email }]
+      [{ col: 'user_email', val: validator.validateEmail(email, 50, table, "user_email") }]
     ))
     if (user.length == 0) {
       return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
@@ -236,7 +236,7 @@ router.put('/reset_password', async (req, res) => {
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: logs, msg: msg } = await connMSQL.connection_pool(
     validator.foundId(table_log, ["re.reset_password_logId", "us.userId", "re.user_email", "re.use_token"],
-      [{ col: 'uuId_token', val: uuId_token }],
+      [{ col: 'uuId_token', val: validator.validateStrNotNull(uuId_token,36,table_log,"token") }],
       [{ table: `moral_it_device.${table} as us `, on: `re.user_email = us.user_email` }]
     ))
   //     `SELECT l.reset_password_logId,u.userId,l.user_email,l.use_token FROM moral_it_device.${table_log} l 

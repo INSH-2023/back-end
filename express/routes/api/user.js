@@ -35,6 +35,12 @@ router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE
     // connMSQL.testinsg_pool()
     try {
         // if(!connMSQL.handdleConnection()){
+
+        // sql injection basic protector and not found
+        if (![ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_admin, ROLE.User].includes(req.params.role)) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.role} does not exist`, req.originalUrl));
+        }
+
         // get user with roles
         let { status_pool: status_p, data: users, msg: msg } = await connMSQL.connection_pool(
             validator.foundId(viewTable, '', [{ col: "user_role", val: req.params.role }])
@@ -68,9 +74,16 @@ router.get('/role/:role', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE
 
 router.get('/:id', JwtAuth, async (req, res) => {
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
+            // console.log(typeof req.params.id)
+            // console.log(typeof Number(req.params.id))
             let { status_pool: status_p, data: users, msg: msg } = await connMSQL.connection_pool(
-                validator.foundId(viewTable, '', [{ col: "userId", val: req.params.id }])
+                validator.foundId(viewTable, '', [{ col: "userId", val: Number(req.params.id) }])
             )
             if (status_p && users.length != 0) {
                 users.forEach(user => {
@@ -104,6 +117,11 @@ router.get('/:id', JwtAuth, async (req, res) => {
 router.get('/emp-code/:id', JwtAuth, async (req, res) => {
 
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             let { status_pool: status_p, data: users, msg: msg } = await connMSQL.connection_pool(
                 validator.foundId(viewTable, '', [{ col: "user_emp_code", val: req.params.id }])
@@ -160,7 +178,7 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     if (status == true) {
         try {
             // if(!connMSQL.handdleConnection()){
-                // console.log('hello2')
+            // console.log('hello2')
             let { status_pool: status_p, data: users, msg: msg } = await connMSQL.connection_pool(validator.createData(input, table, res))
             // console.log(users)
             // error
@@ -180,6 +198,11 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
 router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     // delete data
     try {
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
+
         if (!connMSQL.handdleConnection()) {
             // delete
             let { status_pool: status_p, data: users, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, "userId"))
@@ -205,6 +228,12 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
 router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     let input
     let status = undefined
+
+    // sql injection basic protector
+    if (isNaN(Number(req.params.id))) {
+        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+    }
+
     try {
         input = [
             // {prop:"userId",value: uuid.v4(),type:'int'},
