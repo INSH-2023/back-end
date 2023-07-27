@@ -70,8 +70,8 @@ router.post('/', async (req, res) => {
   const cookieConfig = {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'None',
-    secure: true
+    sameSite: 'Strict'
+    // secure: true
   }
   res.cookie("token", token, cookieConfig);
   res.cookie("refreshToken", refreshtoken, cookieConfig);
@@ -105,8 +105,8 @@ router.post('/refresh', async (req, res) => {
     // clear session cookie
     const cookieConfig = {
       httpOnly: true,
-      sameSite: 'None',
-      secure: true
+      sameSite: 'Strict'
+      // secure: true
     }
     res.clearCookie("token", cookieConfig)
     res.clearCookie("refreshToken", cookieConfig)
@@ -124,8 +124,8 @@ router.post('/refresh', async (req, res) => {
   const cookieConfig = {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'None',
-    secure: true
+    sameSite: 'Strict'
+    // secure: true
   }
   res.cookie("token", token, cookieConfig);
   res.cookie("refreshToken", refreshtoken, cookieConfig);
