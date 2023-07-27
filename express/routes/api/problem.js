@@ -117,33 +117,33 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
         }
 
-        if (!connMSQL.handdleConnection()) {
-            let { status_pool: status_p1, data: problems1, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(table, ['problem_type'], [{ col: "problemId", val: req.params.id }]))
-            if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(problems1[0].problem_type)) {
-                return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_it`, req.originalUrl))
-            } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(problems1[0].problem_type)) {
-                return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_pr`, req.originalUrl))
-            }
-
-            let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'problemId'))
-
-            const folder = `images/${mode == "development" ? "developments" : "productions"}/problems`
-            const fileName = `${folder}/${req.params.id}.png`
-            bucket.deleteFiles({
-                prefix: fileName
-            });
-
-            if (status_p && problems.affectedRows != 0) {
-                return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
-            } else
-                if (status_p && problems.affectedRows == 0) {
-                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
-                    // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                }
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw new Error('connection error something')
+        // if (!connMSQL.handdleConnection()) {
+        let { status_pool: status_p1, data: problems1, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(table, ['problem_type'], [{ col: "problemId", val: req.params.id }]))
+        if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(problems1[0].problem_type)) {
+            return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_it`, req.originalUrl))
+        } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(problems1[0].problem_type)) {
+            return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_pr`, req.originalUrl))
         }
+
+        let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'problemId'))
+
+        const folder = `images/${mode == "development" ? "developments" : "productions"}/problems`
+        const fileName = `${folder}/${req.params.id}.png`
+        bucket.deleteFiles({
+            prefix: fileName
+        });
+
+        if (status_p && problems.affectedRows != 0) {
+            return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
+        } else
+            if (status_p && problems.affectedRows == 0) {
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+                // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            }
+        // } else {
+        //     console.log(`Cannot connect to mysql server !!`)
+        //     throw new Error('connection error something')
+        // }
     } catch (error) {
         res.status(500).json(errorModel(error.message, req.originalUrl))
     }

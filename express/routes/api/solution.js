@@ -4,37 +4,32 @@ const validator = require('../../validator/validate')
 const connMSQL = require('../../config/db_config')
 const errorModel = require('../../response/errorModel')
 const { JwtAuth, verifyRole } = require("../../middleware/jwtAuthen");
-const {ROLE} = require("../../enum/UserType")
+const { ROLE } = require("../../enum/UserType")
 const { bucket, mode } = require('../../config/firestore_implement')
 
 const table = 'solution'
 const stepTable = 'step_solution'
-const stepColumn = ["step_", "step_name", "step_description","step_upload"]
+const stepColumn = ["step_", "step_name", "step_description", "step_upload"]
 
 //get solution
 router.get('/', JwtAuth, async (req, res) => {
     try {
-        if (!connMSQL.handdleConnection()) {
-            // เรียกข้อมูลของ solution ออกมา
-            let { status_pool: sp1, data: solutions } = await connMSQL.connection_pool(validator.foundId(table))
-            // // เปลี่ยนค่าในการทำ promise ทั้งหมด ใน solution
-            solutions = await Promise.all(solutions.map(async sol => {
+        // เรียกข้อมูลของ solution ออกมา
+        let { status_pool: sp1, data: solutions } = await connMSQL.connection_pool(validator.foundId(table))
+        // เปลี่ยนค่าในการทำ promise ทั้งหมด ใน solution
+        solutions = await Promise.all(solutions.map(async sol => {
 
-                // เปลี่ยนจาก string เป็น array ถ้าค่านั้นไม่ว่าง
-                sol.solution_tag = sol.solution_tag == [] ? [] : sol.solution_tag.split(",")
+            // เปลี่ยนจาก string เป็น array ถ้าค่านั้นไม่ว่าง
+            sol.solution_tag = sol.solution_tag == [] ? [] : sol.solution_tag.split(",")
 
-            //     // ทำการ map กับทุก step บน solution นั้น
+            //     ทำการ map กับทุก step บน solution นั้น
             //     let { status_pool: sp2, data: steps } = await connMSQL.connection_pool(validator.foundId(stepTable, stepColumn,
             //         [{ col: 'solution_Id', val: sol.solutionId }]
             //     ))
             //     sol.solution_steps = steps.length == 0 ? null : steps
-                return sol
-            }))
-            return res.status(200).json(solutions)
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw res.status(400).json(errorModel(error.message, req.originalUrl))
-        }
+            return sol
+        }))
+        return res.status(200).json(solutions)
     } catch (error) {
         return res.status(500).json(errorModel(error.message, req.originalUrl))
     }
@@ -44,30 +39,25 @@ router.get('/', JwtAuth, async (req, res) => {
 // get solution by id
 router.get('/:id', JwtAuth, async (req, res) => {
     try {
-        if (!connMSQL.handdleConnection()) {
-            // sql injection basic protector
-            if(isNaN(Number(req.params.id))){
-                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
-            }
+        // sql injection basic protector
+        if (isNaN(Number(req.params.id))) {
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        }
 
-            let { status_pool: sp1, data: solution } = await connMSQL.connection_pool(validator.foundId(table, '',
-                [{ col: 'solutionId', val: req.params.id }]
+        let { status_pool: sp1, data: solution } = await connMSQL.connection_pool(validator.foundId(table, '',
+            [{ col: 'solutionId', val: req.params.id }]
+        ))
+        if (sp1 && solution.length == 0) {
+            return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
+        } else if (sp1 && solution.length != 0) {
+            let { status_pool: sp2, data: steps } = await connMSQL.connection_pool(validator.foundId(stepTable, stepColumn,
+                [{ col: 'solution_Id', val: solution[0].solutionId }]
             ))
-            if (sp1 && solution.length == 0) {
-                return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
-            } else if (sp1 && solution.length != 0) {
-                let { status_pool: sp2, data: steps } = await connMSQL.connection_pool(validator.foundId(stepTable, stepColumn,
-                    [{ col: 'solution_Id', val: solution[0].solutionId }]
-                ))
-                // เปลี่ยนจาก string เป็น array ถ้าค่านั้นไม่ว่าง
-                solution[0].solution_tag = solution[0].solution_tag == null ? null : solution[0].solution_tag.split(",")
-                // ทำการ map กับทุก step บน solution นั้น
-                solution[0].solution_steps = steps.length == 0 ? null : steps
-                return res.status(200).send(solution)
-            }
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw new Error('connection error something :', err)
+            // เปลี่ยนจาก string เป็น array ถ้าค่านั้นไม่ว่าง
+            solution[0].solution_tag = solution[0].solution_tag == null ? null : solution[0].solution_tag.split(",")
+            // ทำการ map กับทุก step บน solution นั้น
+            solution[0].solution_steps = steps.length == 0 ? null : steps
+            return res.status(200).send(solution)
         }
     } catch (error) {
         res.status(500).json(errorModel(error.message, req.originalUrl))
@@ -75,7 +65,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
 })
 
 // create solution
-router.post('/', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req, res) => {
+router.post('/', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (req, res) => {
     let input
     let status = undefined
     try {
@@ -97,28 +87,23 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req
 
     if (status == true) {
         try {
-            if (!connMSQL.handdleConnection()) {
 
-                let { status_pool, data } = await connMSQL.connection_pool(validator.createData(input, table, res))
+            let { status_pool, data } = await connMSQL.connection_pool(validator.createData(input, table, res))
 
-                // create step
-                steps.forEach(async (step) => {
-                    let stepInput = [
-                        { prop: "solution_Id", value: data.insertId, type: 'int' },
-                        { prop: "step_", value: validator.validateNumber(await step.step,'step_solution','step_'), type: 'int' },
-                        { prop: "step_name", value: validator.validateStrNotNull(await step.step_name,'step_solution','step_name'), type: 'str' },
-                        { prop: "step_description", value: validator.validateStrNull(await step.step_description,'step_solution','step_decsription'), type: 'str' },
-                        { prop: "step_upload", value: validator.validateBoolean(await step.step_upload,'step_solution','step_upload'), type: 'int'}
-                    ]
-                    await connMSQL.connection_pool(validator.createData(stepInput, 'step_solution', res))
-                })
-                req.body.solutionId = data.insertId
-                // error
-                return res.status(201).json(req.body)
-            } else {
-                console.log(`Cannot connect to mysql server !!`)
-                throw new Error('connection error something :', err)
-            }
+            // create step
+            steps.forEach(async (step) => {
+                let stepInput = [
+                    { prop: "solution_Id", value: data.insertId, type: 'int' },
+                    { prop: "step_", value: validator.validateNumber(await step.step, 'step_solution', 'step_'), type: 'int' },
+                    { prop: "step_name", value: validator.validateStrNotNull(await step.step_name, 'step_solution', 'step_name'), type: 'str' },
+                    { prop: "step_description", value: validator.validateStrNull(await step.step_description, 'step_solution', 'step_decsription'), type: 'str' },
+                    { prop: "step_upload", value: validator.validateBoolean(await step.step_upload, 'step_solution', 'step_upload'), type: 'int' }
+                ]
+                await connMSQL.connection_pool(validator.createData(stepInput, 'step_solution', res))
+            })
+            req.body.solutionId = data.insertId
+            // error
+            return res.status(201).json(req.body)
         } catch (error) {
             res.status(400).json(errorModel(error.message, req.originalUrl))
         }
@@ -128,42 +113,37 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req
 })
 
 // delete solution
-router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin,ROLE.Admin_it), async (req, res) => {
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (req, res) => {
     // delete data
     try {
         // sql injection basic protector
-        if(isNaN(Number(req.params.id))){
+        if (isNaN(Number(req.params.id))) {
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
         }
 
-        if (!connMSQL.handdleConnection()) {
-            // delete data
-            await connMSQL.connection_pool(validator.deleteData(req, 'step_solution', 'solution_Id'))
-            
-            let { status_pool: status_p, data: sol, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'solutionId'))
+        // delete data
+        await connMSQL.connection_pool(validator.deleteData(req, 'step_solution', 'solution_Id'))
 
-            const folder = `images/${mode == "development" ? "developments" : "productions"}/solutions`
-            const fileName = `${folder}/${req.params.id}.png`
-            bucket.deleteFiles({
-                prefix: fileName
-            });
-            const directory = `${folder}/${req.params.id}/`
-            bucket.deleteFiles({
-                prefix: directory
-            });
+        let { status_pool: status_p, data: sol, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'solutionId'))
 
-            if (status_p && sol.affectedRows != 0) {
-                return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
+        const folder = `images/${mode == "development" ? "developments" : "productions"}/solutions`
+        const fileName = `${folder}/${req.params.id}.png`
+        bucket.deleteFiles({
+            prefix: fileName
+        });
+        const directory = `${folder}/${req.params.id}/`
+        bucket.deleteFiles({
+            prefix: directory
+        });
 
-            } else
-                if (status_p && sol.affectedRows == 0) {
-                    return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
-                    // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                }
-        } else {
-            console.log(`Cannot connect to mysql server !!`)
-            throw new Error('connection error something')
-        }
+        if (status_p && sol.affectedRows != 0) {
+            return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
+
+        } else
+            if (status_p && sol.affectedRows == 0) {
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+                // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            }
     } catch (error) {
         res.status(500).json(errorModel(error.message, req.originalUrl))
     }
