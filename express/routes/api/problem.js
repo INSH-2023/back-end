@@ -17,17 +17,11 @@ const problemTypePr = [PROBLEM.Media, PROBLEM.News]
 router.get('/', JwtAuth, async (req, res) => {
     // console.log('header',req.headers.subject_type)
     try {
-        // if(!connMSQL.handdleConnection()){
         // if ( req.headers.subject_type == undefined || req.headers.subject_type == null ) {
         let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.foundId(table))
         if (status_p) {
             return res.status(200).json(problems)
         }
-
-        // } else {
-        //     console.log(`Cannot connect to mysql server !!`) 
-        //     throw new Error('connection error somethin')
-        // }
     } catch (error) {
         console.log(error)
         return res.status(500).json(errorModel(error.message, req.originalUrl))
@@ -41,7 +35,6 @@ router.get('/type/:type', JwtAuth, async (req, res) => {
             return res.status(404).json(errorModel(`${table} id  ${req.params.type} does not exist`, req.originalUrl));
         }
 
-        // if(!connMSQL.handdleConnection()){
         if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(req.params.type)) {
             return res.status(403).json(errorModel(`${table} type ${req.params.type} is forbidden for admin_it`, req.originalUrl))
         } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(req.params.type)) {
@@ -51,11 +44,6 @@ router.get('/type/:type', JwtAuth, async (req, res) => {
         if (status_p) {
             return res.status(200).json(problems)
         }
-        // else
-        // if(status_p && problems.length==0){
-        //     return res.status(404).json(errorModel(`${table} type ${req.params.type} does not exist`,req.originalUrl))
-        // }
-        // }
     } catch (error) {
         console.log(error)
         return res.status(500).json(errorModel(error.message, req.originalUrl))
@@ -92,15 +80,10 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_ad
 
     if (status == true) {
         try {
-            if (!connMSQL.handdleConnection()) {
-                let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.createData(data, table, res))
-                if (status_p) {
-                    req.body.problemId = problems.insertId
-                    return res.status(201).json(req.body)
-                }
-            } else {
-                console.log(`Cannot connect to mysql server !!`)
-                throw new Error('connection error something')
+            let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.createData(data, table, res))
+            if (status_p) {
+                req.body.problemId = problems.insertId
+                return res.status(201).json(req.body)
             }
         } catch (error) {
             res.status(500).json(errorModel(error.message, req.originalUrl))
@@ -117,7 +100,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
         }
 
-        // if (!connMSQL.handdleConnection()) {
         let { status_pool: status_p1, data: problems1, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(table, ['problem_type'], [{ col: "problemId", val: req.params.id }]))
         if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(problems1[0].problem_type)) {
             return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_it`, req.originalUrl))
@@ -140,10 +122,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
                 return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
             }
-        // } else {
-        //     console.log(`Cannot connect to mysql server !!`)
-        //     throw new Error('connection error something')
-        // }
     } catch (error) {
         res.status(500).json(errorModel(error.message, req.originalUrl))
     }
