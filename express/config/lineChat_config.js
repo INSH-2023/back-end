@@ -4,7 +4,7 @@ require('dotenv').config().parsed
 
 // const line = require('@line/bot-sdk');
 
-const send=async(service,fullName='',email='',subj='',tOfU='',tOfM='',brand='',problem='',other='',message='')=>{
+const send=async(service,fullName='',email='',subj='',tOfU='',tOfM='',brand='',problem='',other='',message='',status='')=>{
     if(fullName.length==0,email.length==0,subj.length==0,service.length==0,problem.length==0){
         console.log('cannot send message to line !!')
         throw new Error('LINE function invalid data parameter !!')
@@ -45,8 +45,8 @@ const send=async(service,fullName='',email='',subj='',tOfU='',tOfM='',brand='',p
         // let messages=[{
         //     text:`🔧 คำร้องขอบริการของ 🔧\n${email.length==0?'-':email}\n ---------------- \n🎯 หัวข้อของปัญหา : ${subj.length==0?'-':subj}\n📋 ประเภทการใช้งาน : ${tOfU=='or'?'ขององค์กรณ์':'ของส่วนตัว'}\n💻 ประเภทของอุปกรณ์ : ${tOfM.length==0?'-':tOfM} \n💻 ยี่ห้อ : ${brand.length==0?'-':brand}\n----------------\nปัญหาที่พบ : ${problem.length==0?'-':problem}\n\nปัญหาอื่นๆ ที่พบเจอ : ${other.length==0?'-':other}\n\nเพิ่มเติม : ${message.length==0?'-':message}`
         // }]
-        let message_it=`\n🔧 คำร้องขอบริการของ 🔧\n${fullName.length==0?'-':fullName}\n${email.length==0?'-':email}\n ---------------- \n📣 Service : ${service}\n🎯 หมวดหมู่ : ${subj.length==0?'-':subj}\n📋 ประเภทการใช้งาน : ${tOfU=='or'?'ขององค์กรณ์':'ของส่วนตัว'}\n💻 ประเภทของอุปกรณ์ : ${tOfM.length==0?'-':tOfM} \n💻 ยี่ห้อ : ${brand.length==0?'-':brand}\n----------------\nปัญหาที่พบ : ${problem.length==0?'-':problem}\n\nปัญหาอื่นๆ ที่พบเจอ : ${other.length==0?'-':other}\n\nเพิ่มเติม : ${message.length==0?'-':message}`
-        let message_pr=`\n🔧 คำร้องขอบริการของ 🔧\n${fullName.length==0?'-':fullName}\n${email.length==0?'-':email}\n ---------------- \n📣 Service : ${service}\n🎯 หมวดหมู่ : ${subj.length==0?'-':subj}\n----------------\nปัญหาที่พบ : ${problem.length==0?'-':problem}\n\nปัญหาอื่นๆ ที่พบเจอ : ${other.length==0?'-':other}\n\nเพิ่มเติม : ${message.length==0?'-':message}`
+        let message_it=`\n🔧 คำร้องขอบริการของ 🔧\n${fullName.length==0?'-':fullName}\n${email.length==0?'-':email}\n ---------------- \n📣 Service : ${service}\n🎯 หมวดหมู่ : ${subj.length==0?'-':subj}\n📋 ประเภทการใช้งาน : ${tOfU=='or'?'ขององค์กรณ์':'ของส่วนตัว'}\n💻 ประเภทของอุปกรณ์ : ${tOfM.length==0?'-':tOfM} \n💻 ยี่ห้อ : ${brand.length==0?'-':brand}\n----------------\nปัญหาที่พบ : ${problem.length==0?'-':problem}\n\nปัญหาอื่นๆ ที่พบเจอ : ${other.length==0?'-':other}\n\nเพิ่มเติม : ${message.length==0?'-':message}\n\nสถานะการรับแจ้ง : ${status.length==0?'-':status}`
+        let message_pr=`\n🔧 คำร้องขอบริการของ 🔧\n${fullName.length==0?'-':fullName}\n${email.length==0?'-':email}\n ---------------- \n📣 Service : ${service}\n🎯 หมวดหมู่ : ${subj.length==0?'-':subj}\n----------------\nปัญหาที่พบ : ${problem.length==0?'-':problem}\n\nปัญหาอื่นๆ ที่พบเจอ : ${other.length==0?'-':other}\n\nเพิ่มเติม : ${message.length==0?'-':message}\n\nสถานะการรับแจ้ง : ${status.length==0?'-':status}`
         let data = new FormData()
         
         data.append("message",service=='IT_Service'?message_it:message_pr)
@@ -62,7 +62,6 @@ const send=async(service,fullName='',email='',subj='',tOfU='',tOfM='',brand='',p
         let res=await fetch('https://notify-api.line.me/api/notify',{
             method:'POST',
             headers:{
-                
                 'Authorization':`Bearer tPKlVyIHny5gXfeEdoUIrnjF3i3j74lQ8zU3bkYCcf5`
             },
             body:data

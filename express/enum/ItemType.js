@@ -1,8 +1,8 @@
 const item = Object.freeze({
-    Notebook: 'notebook',
-    PC: 'pc',
-    Phone: "phone",
-    Tablet: "tablet"
+    Notebook: 'Notebook',
+    PC: 'PC',
+    Phone: "Smart_Phone",
+    Tablet: "Tablet"
 })
 
 module.exports.ITEM = item

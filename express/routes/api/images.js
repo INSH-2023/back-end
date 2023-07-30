@@ -1,11 +1,11 @@
-const express = require('express')
-const router = express.Router()
-path = require('path');
-const multer = require("multer")
-const errorModel = require('../../response/errorModel')
+const express = require("express");
+const router = express.Router();
+path = require("path");
+const multer = require("multer");
+const errorModel = require("../../response/errorModel");
 // const fs = require('fs')
-const { PROBLEM } = require('../../enum/Request')
-const { bucket, mode } = require('../../config/firestore_implement')
+const { PROBLEM } = require("../../enum/Request");
+const { bucket, mode } = require("../../config/firestore_implement");
 
 // allow multipart file
 // const multerStorage = multer.diskStorage({
@@ -26,43 +26,53 @@ const { bucket, mode } = require('../../config/firestore_implement')
 //     }
 // })
 
-const upload = multer(
-    {
-        storage: multer.memoryStorage(),
-        limits: {
-            fileSize: 1024 * 1024 * 10
-        },
-        fileFilter(req, file, cb) {
-            if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-                return cb(new Error('Please upload a image file type jpg, jpeg or png'))
-            }
-            cb(undefined, true)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 1024 * 1024 * 10,
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error("Please upload a image file type jpg, jpeg or png"));
         }
-    })
+        cb(undefined, true);
+    },
+});
 
 // read solution image (not found case)
-router.get('/:endpoint/:id', async (req, res) => {
+router.get("/:endpoint/:id", async (req, res) => {
     // let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
     // res.sendFile(path.resolve(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png')),
     //     err => {
     //         next(errorModel("File not found!!", req.originalUrl))
     //     });
-    console.log(mode)
-    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`
-    const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
+    console.log(mode);
+    const folder = `images/${mode == "development" ? "developments" : "productions"
+        }/${req.params.endpoint}`;
+    const fileName =
+        req.query.step != undefined
+            ? `${folder}/${req.params.id}/${req.query.step}.png`
+            : `${folder}/${req.params.id}.png`;
     const file = bucket.file(fileName);
-    file.download().then(downloadResponse => {
-        return res.status(200).type('image/png').send(downloadResponse[0]);
-    }, err => {
-        return res.status(404).json(errorModel("File not found!!", req.originalUrl))
-    });
+    file.download().then(
+        (downloadResponse) => {
+            return res.status(200).type("image/png").send(downloadResponse[0]);
+        },
+        (err) => {
+            return res
+                .status(404)
+                .json(errorModel("File not found!!", req.originalUrl));
+        }
+    );
 });
 
 // upload solution image
 // condition (file size < 10 MB, file multipart, file upload per solution, file type image only, path storage property)
-router.post('/:endpoint/:id', upload.single('file'), async (req, res) => {
+router.post("/:endpoint/:id", upload.single("file"), async (req, res) => {
     if (req.params.id == "undefined" || req.params.endpoint == "undefined") {
-        return res.status(400).send(errorModel("upload file is blocked", req.originalUrl));
+        return res
+            .status(400)
+            .send(errorModel("upload file is blocked", req.originalUrl));
     }
     // getUpload(req, res, err => {
 
@@ -75,30 +85,41 @@ router.post('/:endpoint/:id', upload.single('file'), async (req, res) => {
     if (req.params.endpoint == "problems") {
         for (let i in PROBLEM) {
             if (req.params.id == PROBLEM[i]) {
-                return res.status(403).send(errorModel("This file cannot delete!!", req.originalUrl))
+                return res
+                    .status(403)
+                    .send(errorModel("This file cannot delete!!", req.originalUrl));
             }
         }
     }
 
-    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`
-    const fileName = req.query.step != undefined ? `${folder}/${req.params.id}/${req.query.step}.png` : `${folder}/${req.params.id}.png`
-    const fileUpload = bucket.file(fileName)
+    if (req.params.endpoint == "items") {
+        return res
+            .status(403)
+            .send(errorModel("This file cannot delete!!", req.originalUrl));
+    }
+
+    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`;
+    const fileName =
+        req.query.step != undefined
+            ? `${folder}/${req.params.id}/${req.query.step}.png`
+            : `${folder}/${req.params.id}.png`;
+    const fileUpload = bucket.file(fileName);
     const blobStream = fileUpload.createWriteStream({
         metadata: {
-            contentType: req.file.mimetype
-        }
+            contentType: req.file.mimetype,
+        },
     });
-    blobStream.on('error', (err) => {
+    blobStream.on("error", (err) => {
         res.status(400).json(err);
     });
-    blobStream.on('finish', () => {
-        res.status(201).json({message:'Upload complete!'});
+    blobStream.on("finish", () => {
+        res.status(201).json({ message: "Upload complete!" });
     });
     blobStream.end(req.file.buffer);
-})
+});
 
 // delete solution image
-router.delete('/:endpoint/:id', async (req, res) => {
+router.delete("/:endpoint/:id", async (req, res) => {
     // let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
     // fs.unlink(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png'), (err) => {
     //     if (err) {
@@ -106,24 +127,37 @@ router.delete('/:endpoint/:id', async (req, res) => {
     //     }
     //     res.send({ message: "file has been deleted" })
     // })
-    for (let i in PROBLEM) {
-        if (req.params.id == PROBLEM[i]) {
-            return res.status(403).send(errorModel("This file cannot delete!!", req.originalUrl))
+
+    if (req.params.endpoint == "problems") {
+        for (let i in PROBLEM) {
+            if (req.params.id == PROBLEM[i]) {
+                return res
+                    .status(403)
+                    .send(errorModel("This file cannot delete!!", req.originalUrl));
+            }
         }
     }
-    const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`
-    const fileName = `${folder}/${req.params.id}.png`
-    bucket.deleteFiles({
-        prefix: fileName
-    });
-    const directory = `${folder}/${req.params.id}/`
-    bucket.deleteFiles({
-        prefix: directory
-    });
-    return res.status(200).json({message:'Delete complete!'});
-})
 
-module.exports = router
+    if (req.params.endpoint == "items") {
+        return res
+            .status(403)
+            .send(errorModel("This file cannot delete!!", req.originalUrl));
+    }
+
+    const folder = `images/${mode == "development" ? "developments" : "productions"
+        }/${req.params.endpoint}`;
+    const fileName = `${folder}/${req.params.id}.png`;
+    bucket.deleteFiles({
+        prefix: fileName,
+    });
+    const directory = `${folder}/${req.params.id}/`;
+    bucket.deleteFiles({
+        prefix: directory,
+    });
+    return res.status(200).json({ message: "Delete complete!" });
+});
+
+module.exports = router;
 
 // please replace
 
@@ -153,16 +187,16 @@ module.exports = router
 
 //         }else{
 //             return res.status(404).json(errorModel("not found id !!!",req.originalUrl))
-//         }    
+//         }
 //     }else
 //     if(stage==3&&num!=0){
 //         num+=2
-//         if(num<=max && num>=min){ 
+//         if(num<=max && num>=min){
 //             return  res.status(200).download(`${__dirname}/../../assets/images/stage/stage_5/${num}.png`)
 
 //         }else{
 //             return res.status(404).json(errorModel("not found id !!!",req.originalUrl))
-//         } 
+//         }
 //     }else
 //     if(stage==2&&num!=0){
 //         num+=3
@@ -175,11 +209,9 @@ module.exports = router
 //     }else{
 //         return res.status(404).json(errorModel('not found !!!',req.originalUrl))
 //     }
-    
+
 //     // res.download(`${__dirname}/../../images/stage/stage_5/${req.params.id}.png`)
 
 // })
-
-
 
 // module.exports=router

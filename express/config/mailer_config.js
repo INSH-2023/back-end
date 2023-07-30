@@ -1,10 +1,11 @@
 const nodemailer=require('nodemailer')
 require('dotenv').config().parsed
 
-let report_html=(service='',subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',msg='')=>{
+let report_html=(service='',subj='',tOfUse='',tOfMachine='',brand='',problem='',other='',msg='',status='')=>{
  if(service.length==0,subj.length==0||problem.length==0){
     throw 'cannot make template for e-mail !!'
  }
+ console.log(status)
 
  let info_service=`
  <tr>
@@ -82,9 +83,16 @@ let info_brand=brand.length==0?'':`
 </div>
  `
 
+ let info_status=`
+ <div style="margin:10px 15px 0px 15px;">
+   <h5 style="display: block;text-align: left;font-weight: bold;">
+      สถานะของการรับแจ้ง : ${status.length==0?'-':status}
+   </h5>
+</div>
+ `
+
 return `
 <div style='width:100%;height:fit-content;font-size:15px'>        
-  
      <div style="=width:90%;margin:auto;">
      <h5 style='width:fit-content;margin:auto;margin-top:10px;margin-bottom:10px;font-size: 23px;font-weight: bold;'>คำร้องขอรับบริการของคุณ</h5>
 
@@ -102,13 +110,13 @@ return `
                +info_problems
                +info_other
                +info_message
-              
+               +info_status
         +`</div>
      </div>
   </div> 
 `
-
 }
+
 const sendMail=async (positionName=undefined,res=undefined,sub=undefined,html=undefined,to=undefined)=>{
     let status=undefined
 
@@ -167,11 +175,9 @@ const sendMail=async (positionName=undefined,res=undefined,sub=undefined,html=un
         html:html
     }
     try {
-
         if(positionName==undefined||res==undefined||sub==undefined||html==undefined||to==undefined){
             throw new Error('invalid parameter data cannot send email!!!')
         }
-
 
         transporter.sendMail(content)
         .then (info=>{

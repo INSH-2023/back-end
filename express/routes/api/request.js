@@ -70,14 +70,14 @@ router.get('/:id', JwtAuth, async (req, res) => {
         let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(
             validator.foundId(table, columns,
                 [{ col: "requestId", val: req.params.id }],
-                [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` },]
+                [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
             ))
         if (status_p && requests.length == 0) {
             return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
         }
 
-        let { status_pool: status_p1, data: problems, msg: msg1 } = await connMSQL.connection_pool(
-            validator.foundId('problem', '', [{ col: "problem_type", val: requests[0].request_subject }]))
+        // let { status_pool: status_p1, data: problems, msg: msg1 } = await connMSQL.connection_pool(
+        //     validator.foundId('problem', '', [{ col: "problem_type", val: requests[0].request_subject }]))
 
         // user can get with their email only
         if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
@@ -93,7 +93,9 @@ router.get('/:id', JwtAuth, async (req, res) => {
 
         if (status_p && requests.length != 0) {
             requests[0].request_req_date = new Date(req.request_req_date).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
-            requests[0].problem_upload = problems[0].problem_upload
+            // if(problems[0] == undefined) {
+            //     requests[0].problem_upload = problems[0].problem_upload
+            // }
             return res.status(200).json(requests)
         }
     } catch (error) {
@@ -247,8 +249,8 @@ router.post('/', JwtAuth, async (req, res) => {
                 let other = await req.body.request_other
                 let message = await req.body.request_message
                 let email = await req.body.request_email
-                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message), email)
-                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message)
+                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message, "กำลังรับเรื่อง"), email)
+                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message,"กำลังรับเรื่อง")
                 return res.status(201).json({ message: `create ${table} success!!` })
             } else if (!status_p && msg.errno == 1062) {
                 return res.status(400).json(errorModel("input has been duplicate", req.originalUrl))
@@ -291,8 +293,6 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
         }
 
-        let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'requestId'))
-
         // user can get with their email only
         if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
             return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
@@ -305,11 +305,31 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
             return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
         }
 
-        if (status_p && requests.affectedRows != 0) {
-            console.log(msg)
+        let { status_pool: status_p, data: requests, msg1 } = await connMSQL.connection_pool(
+            validator.foundId(table, columns,
+                [{ col: "requestId", val: req.params.id }],
+                [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
+        ))
+
+        if (status_p && requests.length != 0) {
+            await connMSQL.connection_pool(validator.deleteData(req, table, 'requestId'))
+
+            let sub = 'Admin has removed your report!!'
+            let service = requests[0].request_service_type
+            let fname = `${requests[0].request_first_name} ${requests[0].request_last_name}`
+            let subject = requests[0].request_subject
+            let type_of_use = requests[0].request_use_type
+            let type_machine = requests[0].request_type_matchine
+            let brand_name = requests[0].request_brand
+            let problems = requests[0].request_problems
+            let other = requests[0].request_other
+            let message = requests[0].request_message
+            let email = requests[0].request_email
+            await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message, "admin ได้ลบการแจ้งเรื่องแล้ว"), email)
+            await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message, "admin ได้ลบการแจ้งเรื่องแล้ว")
             return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!` })
 
-        } else if (status_p && requests.affectedRows == 0) {
+        } else if (status_p && requests.length == 0) {
             return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
             // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
         }
@@ -327,6 +347,8 @@ router.delete('/updated/notify/:id', JwtAuth, async (req, res) => {
         }
 
         let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, 'request_history', 'request_historyId'))
+
+        await connMSQL.connection_pool(validator.deleteData(req, 'request_history', 'request_historyId'))
 
         if (status_p && requests.affectedRows != 0) {
             return res.status(200).json({ message: `delete request history id ${req.params.id} success!!` })
@@ -367,7 +389,11 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
     if (status == true) {
         // update data
         try {
-            let { status_pool, data: requests, msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{ col: "requestId", val: req.params.id }]))
+            let { status_pool, data: requests, msg } = await connMSQL.connection_pool(
+                validator.foundId(table, columns,
+                    [{ col: "requestId", val: req.params.id }],
+                    [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
+                ))
             if (requests.length == 0) {
                 return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
             } else {
@@ -388,7 +414,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
                 let reqId = req.params.id
 
                 let { status_pool, data: user, msg } = await connMSQL.connection_pool(validator.foundId(
-                    userView, ['userId', 'request_update'], [{ col: "user_emp_code", val: requests[0].user_emp_code }]))
+                    userView, ['userId', 'request_update'], [{ col: "user_email", val: requests[0].request_email }]))
 
                 user[0].request_update++
 
@@ -407,6 +433,22 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
                 ]
 
                 await connMSQL.connection_pool(validator.createData(log, 'request_history'))
+
+                console.log(requests[0])
+
+                let sub = 'Admin has updated your report!!'
+                let service = requests[0].request_service_type
+                let fname = `${requests[0].request_first_name} ${requests[0].request_last_name}`
+                let subject = requests[0].request_subject
+                let type_of_use = requests[0].request_use_type
+                let type_machine = requests[0].request_type_matchine
+                let brand_name = requests[0].request_brand
+                let problems = requests[0].request_problems
+                let other = requests[0].request_other
+                let message = requests[0].request_message
+                let email = requests[0].request_email
+                await sendMail.sendMail('request', res, sub, sendMail.report_html(service, subject, type_of_use, type_machine, brand_name, problems, other, message, "admin ได้แก้ไขการแจ้งเรื่องแล้ว"), email)
+                await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message, "admin ได้แก้ไขการแจ้งเรื่องแล้ว")        
 
                 return res.status(200).json({ message: `update ${table} id ${reqId} success!!` })
             }
