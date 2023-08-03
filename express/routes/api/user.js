@@ -117,7 +117,7 @@ router.get("/:id", JwtAuth, async (req, res) => {
         );
     }
 
-    if (!connMSQL.handdleConnection()) {
+    // if (!connMSQL.handdleConnection()) {
       // console.log(typeof req.params.id)
       // console.log(typeof Number(req.params.id))
       let {
@@ -161,10 +161,10 @@ router.get("/:id", JwtAuth, async (req, res) => {
             )
           );
       }
-    } else {
-      console.log(`Cannot connect to mysql server !!`);
-      throw new Error("connection error something");
-    }
+    // } else {
+    //   console.log(`Cannot connect to mysql server !!`);
+    //   throw new Error("connection error something");
+    // }
   } catch (error) {
     res.status(500).json(errorModel(error.message, req.originalUrl));
   }
@@ -387,7 +387,7 @@ router.delete(
           );
       }
 
-      if (!connMSQL.handdleConnection()) {
+      // if (!connMSQL.handdleConnection()) {
         // delete
         let {
           status_pool: status_p,
@@ -415,10 +415,10 @@ router.delete(
             );
           // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
         }
-      } else {
-        console.log(`Cannot connect to mysql server !!`);
-        throw new Error("connection error something");
-      }
+      // } else {
+      //   console.log(`Cannot connect to mysql server !!`);
+      //   throw new Error("connection error something");
+      // }
     } catch (error) {
       res.status(400).json(errorModel(error.message, req.originalUrl));
     }
@@ -537,14 +537,16 @@ router.put("/:id", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
   } catch (err) {
     console.log(err);
     status = false;
-    // console.log(status)
-    res.status(400).json(errorModel(err.message, req.originalUrl));
+    // console.log("status fail before update")
+    return res.status(400).json(errorModel(err.message, req.originalUrl));
+    // return res.status(400).json(errorModel("status fail before update", req.originalUrl));
+    
   }
 
   if (status == true) {
     // update data
     try {
-      if (!connMSQL.handdleConnection()) {
+      // if (!connMSQL.handdleConnection()) {
         let {
           status_pool: status_p,
           data: users,
@@ -573,10 +575,10 @@ router.put("/:id", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
             .status(400)
             .json(errorModel("bad request!!", req.originalUrl));
         }
-      } else {
-        console.log(`Cannot connect to mysql server !!`);
-        throw new Error("connection error something");
-      }
+      // } else {
+      //   console.log(`Cannot connect to mysql server !!`);
+      //   throw new Error("connection error something");
+      // }
     } catch (error) {
       res.status(400).json(errorModel(error.message, req.originalUrl));
     }

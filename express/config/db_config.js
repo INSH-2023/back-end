@@ -73,7 +73,7 @@ const connection_pool = async (statement) => {
         
         // end connection pool
         conn.release()
-        conn.end()
+        // conn.end()
 
         testing_data.status_pool = true
     } catch (error) {
