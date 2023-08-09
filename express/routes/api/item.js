@@ -46,8 +46,8 @@ router.get('/', JwtAuth, async (req, res) => {
             throw new Error('connection error something')
         }
     } catch (error) {
-        console.log(error)
-        return res.status(500).json(errorModel(error.message, req.originalUrl))
+        // console.log(error)
+        next(errorModel(error.message, req.originalUrl,500))
     }
 })
 
@@ -64,7 +64,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
 
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
         }
 
         let { status_pool: status_p, data: items, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, columns,
@@ -79,25 +79,25 @@ router.get('/:id', JwtAuth, async (req, res) => {
         else if (status_p && items.length == 0) {
 
             if (req.user.user_role == "user" && items[0].user_email !== req.user.user_email) {
-                return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+                next(errorModel(`cannot access other user email with user permission`, req.originalUrl,403))
             }
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
         }
         // } else {
         //     console.log(`Cannot connect to mysql server !!`)
         //     throw new Error('connection error something')
         // }
     } catch (error) {
-        res.status(500).json(errorModel(error.message, req.originalUrl))
+        res.status(500).json()
+        next(errorModel(error.message, req.originalUrl,500))
     }
-
 })
 
 router.get('/emp-code/:id', JwtAuth, async (req, res) => {
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
         }
 
 
@@ -113,20 +113,20 @@ router.get('/emp-code/:id', JwtAuth, async (req, res) => {
         ))
 
         if (req.user.user_role == "user" && items[0].user_email !== req.user.user_email) {
-            return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+            next(errorModel(`cannot access other user email with user permission`, req.originalUrl,403))
         }
 
         if (status_p && items.length != 0) {
             return res.status(200).json(items)
         } else if (status_p && items.length == 0) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
         }
         // } else {
         //     console.log(`Cannot connect to mysql server !!`)
         //     throw new Error('connection error something')
         // }
     } catch (error) {
-        res.status(500).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,500))
     }
 })
 

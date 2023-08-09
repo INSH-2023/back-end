@@ -19,6 +19,17 @@ const limiter = RateLimit({
   windowMs: 1 * 30 * 1000, // 30 second
   max: 200,
 });
+
+const errorHandler = (error, req, res, next) => {
+  console.log(error)
+  // send back an easily understandable error message to the caller
+  res.status(error.status).send({
+    msg: error.msg,
+    endpoint: error.endpoint,
+    timestamp: error.timestamp
+  })
+}
+
 // Apply rate limiter to all requests
 app.use(limiter);
 
@@ -42,6 +53,8 @@ app.use('/api/solutions',require('./routes/api/solution.js'))
 app.use('/api/authentication',require('./routes/api/authen.js'))
 app.use('/api/images',require('./routes/api/images.js'))
 app.use('/api/send-mail',require('./routes/api/mailer.js'))
+
+app.use(errorHandler)
 
 const PORT =process.env.PORT || 5000
 

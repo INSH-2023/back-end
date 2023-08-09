@@ -12,7 +12,7 @@ const stepTable = 'step_solution'
 const stepColumn = ["step_", "step_name", "step_description", "step_upload"]
 
 //get solution
-router.get('/', JwtAuth, async (req, res) => {
+router.get('/', JwtAuth, async (req, res, next) => {
     try {
         // เรียกข้อมูลของ solution ออกมา
         let { status_pool: sp1, data: solutions } = await connMSQL.connection_pool(validator.foundId(table))
@@ -31,24 +31,24 @@ router.get('/', JwtAuth, async (req, res) => {
         }))
         return res.status(200).json(solutions)
     } catch (error) {
-        return res.status(500).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,500))
     }
 })
 
 
 // get solution by id
-router.get('/:id', JwtAuth, async (req, res) => {
+router.get('/:id', JwtAuth, async (req, res, next) => {
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl,404))
         }
 
         let { status_pool: sp1, data: solution } = await connMSQL.connection_pool(validator.foundId(table, '',
             [{ col: 'solutionId', val: req.params.id }]
         ))
         if (sp1 && solution.length == 0) {
-            return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
+            next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl,404))
         } else if (sp1 && solution.length != 0) {
             let { status_pool: sp2, data: steps } = await connMSQL.connection_pool(validator.foundId(stepTable, stepColumn,
                 [{ col: 'solution_Id', val: solution[0].solutionId }]
@@ -60,12 +60,12 @@ router.get('/:id', JwtAuth, async (req, res) => {
             return res.status(200).send(solution)
         }
     } catch (error) {
-        res.status(500).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,500))
     }
 })
 
 // create solution
-router.post('/', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (req, res) => {
+router.post('/', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (req, res, next) => {
     let input
     let status = undefined
     try {
@@ -82,7 +82,7 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (re
         console.log(err)
         status = false
         // console.log(status)
-        return res.status(400).json(errorModel(err.message, req.originalUrl))
+        next(errorModel(err.message, req.originalUrl,400))
     }
 
     if (status == true) {
@@ -105,20 +105,20 @@ router.post('/', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (re
             // error
             return res.status(201).json(req.body)
         } catch (error) {
-            res.status(400).json(errorModel(error.message, req.originalUrl))
+            next(errorModel(error.message, req.originalUrl,400))
         }
     } else {
-        return res.status(500).json(errorModel('data not valid', req.originalUrl))
+        next(errorModel('data not valid', req.originalUrl,500))
     }
 })
 
 // delete solution
-router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (req, res) => {
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), async (req, res, next) => {
     // delete data
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl, 404))
         }
 
         // delete data
@@ -141,11 +141,11 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it), asyn
 
         } else
             if (status_p && sol.affectedRows == 0) {
-                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+                next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
             }
     } catch (error) {
-        res.status(500).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,500))
     }
 })
 

@@ -40,7 +40,7 @@ const upload = multer({
 });
 
 // read solution image (not found case)
-router.get("/:endpoint/:id", async (req, res) => {
+router.get("/:endpoint/:id", async (req, res, next) => {
     // let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
     // res.sendFile(path.resolve(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png')),
     //     err => {
@@ -59,20 +59,16 @@ router.get("/:endpoint/:id", async (req, res) => {
             return res.status(200).type("image/png").send(downloadResponse[0]);
         },
         (err) => {
-            return res
-                .status(404)
-                .json(errorModel("File not found!!", req.originalUrl));
+            next(errorModel("File not found!!", req.originalUrl,404))
         }
     );
 });
 
 // upload solution image
 // condition (file size < 10 MB, file multipart, file upload per solution, file type image only, path storage property)
-router.post("/:endpoint/:id", upload.single("file"), async (req, res) => {
+router.post("/:endpoint/:id", upload.single("file"), async (req, res, next) => {
     if (req.params.id == "undefined" || req.params.endpoint == "undefined") {
-        return res
-            .status(400)
-            .send(errorModel("upload file is blocked", req.originalUrl));
+        next(errorModel("upload file is blocked", req.originalUrl,400))
     }
     // getUpload(req, res, err => {
 
@@ -85,17 +81,13 @@ router.post("/:endpoint/:id", upload.single("file"), async (req, res) => {
     if (req.params.endpoint == "problems") {
         for (let i in PROBLEM) {
             if (req.params.id == PROBLEM[i]) {
-                return res
-                    .status(403)
-                    .send(errorModel("This file cannot delete!!", req.originalUrl));
+                next(errorModel("This file cannot delete!!", req.originalUrl,403))
             }
         }
     }
 
     if (req.params.endpoint == "items") {
-        return res
-            .status(403)
-            .send(errorModel("This file cannot delete!!", req.originalUrl));
+        next(errorModel("This file cannot delete!!", req.originalUrl,403))
     }
 
     const folder = `images/${mode == "development" ? "developments" : "productions"}/${req.params.endpoint}`;
@@ -110,7 +102,7 @@ router.post("/:endpoint/:id", upload.single("file"), async (req, res) => {
         },
     });
     blobStream.on("error", (err) => {
-        res.status(400).json(err);
+        next(errorModel(err,req.originalUrl,400))
     });
     blobStream.on("finish", () => {
         res.status(201).json({ message: "Upload complete!" });
@@ -119,7 +111,7 @@ router.post("/:endpoint/:id", upload.single("file"), async (req, res) => {
 });
 
 // delete solution image
-router.delete("/:endpoint/:id", async (req, res) => {
+router.delete("/:endpoint/:id", async (req, res, next) => {
     // let pathed = `/../../assets/images/${req.params.endpoint}/${req.params.id}`
     // fs.unlink(__dirname + pathed + (req.query.step != undefined ? `/${req.query.step}.png` : '.png'), (err) => {
     //     if (err) {
@@ -131,17 +123,13 @@ router.delete("/:endpoint/:id", async (req, res) => {
     if (req.params.endpoint == "problems") {
         for (let i in PROBLEM) {
             if (req.params.id == PROBLEM[i]) {
-                return res
-                    .status(403)
-                    .send(errorModel("This file cannot delete!!", req.originalUrl));
+                next(errorModel("This file cannot delete!!", req.originalUrl,403))
             }
         }
     }
 
     if (req.params.endpoint == "items") {
-        return res
-            .status(403)
-            .send(errorModel("This file cannot delete!!", req.originalUrl));
+        next(errorModel("This file cannot delete!!", req.originalUrl,403))
     }
 
     const folder = `images/${mode == "development" ? "developments" : "productions"

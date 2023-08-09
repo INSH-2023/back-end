@@ -14,7 +14,7 @@ router.get(
   "/",
   JwtAuth,
   verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_admin),
-  async (req, res) => {
+  async (req, res, next) => {
     // connMSQL.testinsg_pool()
     try {
       // if(!connMSQL.handdleConnection()){
@@ -34,7 +34,8 @@ router.get(
       // }
     } catch (error) {
       console.log(error);
-      return res.status(500).json(errorModel(error.message, req.originalUrl));
+      // return res.status(500).json(errorModel(error.message, req.originalUrl));
+      next(errorModel(error.message, req.originalUrl,500))
     }
   }
 );
@@ -44,7 +45,7 @@ router.get(
   "/role/:role",
   JwtAuth,
   verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_admin),
-  async (req, res) => {
+  async (req, res, next) => {
     // connMSQL.testinsg_pool()
     try {
       // if(!connMSQL.handdleConnection()){
@@ -55,14 +56,10 @@ router.get(
           req.params.role
         )
       ) {
-        return res
-          .status(404)
-          .json(
-            errorModel(
-              `${table} id  ${req.params.role} does not exist`,
-              req.originalUrl
-            )
-          );
+        next(errorModel(
+            `${table} id  ${req.params.role} does not exist`,
+            req.originalUrl, 404
+        ))
       }
 
       // get user with roles
@@ -97,92 +94,76 @@ router.get(
       //     throw new Error('connection error something')
       // }
     } catch (error) {
-      console.log(error);
-      return res.status(400).json(errorModel(error.message, req.originalUrl));
+      // console.log(error);
+      next(errorModel(error.message, req.originalUrl, 400))
     }
   }
 );
 
-router.get("/:id", JwtAuth, async (req, res) => {
+router.get("/:id", JwtAuth, async (req, res, next) => {
   try {
     // sql injection basic protector
     if (isNaN(Number(req.params.id))) {
-      return res
-        .status(404)
-        .json(
-          errorModel(
-            `${table} id  ${req.params.id} does not exist`,
-            req.originalUrl
-          )
-        );
+        next(errorModel(
+            `${table} id ${req.params.id} does not exist`,
+            req.originalUrl,404
+        ))
     }
 
     // if (!connMSQL.handdleConnection()) {
-      // console.log(typeof req.params.id)
-      // console.log(typeof Number(req.params.id))
-      let {
-        status_pool: status_p,
-        data: users,
-        msg: msg,
-      } = await connMSQL.connection_pool(
-        validator.foundId(viewTable, "", [
-          { col: "userId", val: Number(req.params.id) },
-        ])
-      );
-      if (status_p && users.length != 0) {
-        users.forEach((user) => {
-          user.user_createdAt = user.user_createdAt.toLocaleString("th-TH", {
-            timeZone: "Asia/Bangkok",
-          });
-          user.user_updatedAt = user.user_updatedAt.toLocaleString("th-TH", {
-            timeZone: "Asia/Bangkok",
-          });
+    // console.log(typeof req.params.id)
+    // console.log(typeof Number(req.params.id))
+    let {
+      status_pool: status_p,
+      data: users,
+      msg: msg,
+    } = await connMSQL.connection_pool(
+      validator.foundId(viewTable, "", [
+        { col: "userId", val: Number(req.params.id) },
+      ])
+    );
+    if (status_p && users.length != 0) {
+      users.forEach((user) => {
+        user.user_createdAt = user.user_createdAt.toLocaleString("th-TH", {
+          timeZone: "Asia/Bangkok",
         });
-        // block user when they see other user except owner
-        if (
-          req.user.user_role === ROLE.user &&
-          users[0].userId != req.params.id
-        ) {
-          return res
-            .status(403)
-            .json(
-              errorModel("the role is not allowed to use", req.originalUrl)
-            );
-        }
-        return res.status(200).json(users);
-      } else if (status_p && users.length == 0) {
-        // console.log(msg)
-        return res
-          .status(404)
-          .json(
-            errorModel(
-              `${table} id  ${req.params.id} does not exist`,
-              req.originalUrl
-            )
-          );
+        user.user_updatedAt = user.user_updatedAt.toLocaleString("th-TH", {
+          timeZone: "Asia/Bangkok",
+        });
+      });
+      // block user when they see other user except owner
+      if (
+        req.user.user_role === ROLE.user &&
+        users[0].userId != req.params.id
+      ) {
+        next(errorModel("the role is not allowed to use", req.originalUrl,403))
       }
+      return res.status(200).json(users);
+    } else if (status_p && users.length == 0) {
+      // console.log(msg)
+      next(errorModel(
+            `${table} id ${req.params.id} does not exist`,
+            req.originalUrl,404
+      ))
+    }
     // } else {
     //   console.log(`Cannot connect to mysql server !!`);
     //   throw new Error("connection error something");
     // }
   } catch (error) {
-    res.status(500).json(errorModel(error.message, req.originalUrl));
+    next(errorModel(error.message, req.originalUrl,500))
   }
 });
 
 // get data by emp code
-router.get("/emp-code/:id", JwtAuth, async (req, res) => {
+router.get("/emp-code/:id", JwtAuth, async (req, res, next) => {
   try {
     // sql injection basic protector
     if (isNaN(Number(req.params.id))) {
-      return res
-        .status(404)
-        .json(
-          errorModel(
-            `${table} id  ${req.params.id} does not exist`,
-            req.originalUrl
-          )
-        );
+      next(errorModel(
+        `${table} employee code ${req.params.id} does not exist`,
+        req.originalUrl, 404
+      ))
     }
 
     let {
@@ -191,7 +172,7 @@ router.get("/emp-code/:id", JwtAuth, async (req, res) => {
       msg: msg,
     } = await connMSQL.connection_pool(
       validator.foundId(viewTable, "", [
-        { col: "user_emp_code", val: req.params.id },
+        { col: "user_emp_code", val: req.params.id }
       ])
     );
     if (status_p && users.length != 0) {
@@ -200,29 +181,32 @@ router.get("/emp-code/:id", JwtAuth, async (req, res) => {
         req.user.user_role == ROLE.user &&
         users[0].user_emp_code != req.params.id
       ) {
-        return res
-          .status(403)
-          .json(errorModel("the role is not allowed to use", req.originalUrl));
+        next(errorModel(
+          "the role is not allowed to use", req.originalUrl, 403
+        ))
       }
       return res.status(200).json(users);
     } else if (status_p && users.length == 0) {
       // console.log(msg)
-      return res
-        .status(404)
-        .json(
-          errorModel(
-            `${table} id  ${req.params.id} does not exist`,
-            req.originalUrl
-          )
-        );
+      next(errorModel(
+        `${table} employee code ${req.params.id} does not exist`,
+        req.originalUrl, 404
+      ))
+
+      // return res
+      //   .status(404)
+      //   .json(
+      //     `${table} employee code ${req.params.id} does not exist`
+      //   );
     }
   } catch (error) {
-    res.status(400).json(errorModel(error.message, req.originalUrl));
+    // res.status(400).json(errorModel(error.message, req.originalUrl));
+    next(errorModel(error.message, req.originalUrl, 400))
   }
 });
 
 // create user
-router.post("/", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
+router.post("/", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res, next) => {
   let input;
   let status = undefined;
   try {
@@ -337,7 +321,7 @@ router.post("/", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     status = false;
     // console.log(status)
 
-    res.status(400).json(errorModel(err.message, req.originalUrl));
+    next(errorModel(err.message, req.originalUrl,400))
   }
 
   if (status == true) {
@@ -362,7 +346,7 @@ router.post("/", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
       // }
     } catch (error) {
       // console.log(error.errno)
-      res.status(400).json(errorModel(error.message, req.originalUrl));
+      next(errorModel(error.message, req.originalUrl, 400))
     }
   }
 });
@@ -377,50 +361,42 @@ router.delete(
     try {
       // sql injection basic protector
       if (isNaN(Number(req.params.id))) {
-        return res
-          .status(404)
-          .json(
-            errorModel(
+        next(errorModel(
               `${table} id  ${req.params.id} does not exist`,
-              req.originalUrl
-            )
-          );
+              req.originalUrl, 404
+        ))
       }
 
       // if (!connMSQL.handdleConnection()) {
-        // delete
-        let {
-          status_pool: status_p,
-          data: users,
-          msg: msg,
-        } = await connMSQL.connection_pool(
-          validator.deleteData(req, table, "userId")
-        );
+      // delete
+      let {
+        status_pool: status_p,
+        data: users,
+        msg: msg,
+      } = await connMSQL.connection_pool(
+        validator.deleteData(req, table, "userId")
+      );
 
-        if (status_p && users.affectedRows != 0) {
-          return res
-            .status(200)
-            .json({
-              message: `delete ${table} id ${req.params.id} success!!`,
-              status: "200",
-            });
-        } else if (status_p && users.affectedRows == 0) {
-          return res
-            .status(404)
-            .json(
-              errorModel(
-                `${table} id  ${req.params.id} does not exist`,
-                req.originalUrl
-              )
-            );
-          // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-        }
+      if (status_p && users.affectedRows != 0) {
+        return res
+          .status(200)
+          .json({
+            message: `delete ${table} id ${req.params.id} success!!`,
+            status: "200",
+          });
+      } else if (status_p && users.affectedRows == 0) {
+          next(errorModel(
+              `${table} id  ${req.params.id} does not exist`,
+              req.originalUrl, 404
+          ));
+        // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+      }
       // } else {
       //   console.log(`Cannot connect to mysql server !!`);
       //   throw new Error("connection error something");
       // }
     } catch (error) {
-      res.status(400).json(errorModel(error.message, req.originalUrl));
+      next(errorModel(error.message, req.originalUrl,400))
     }
   }
 );
@@ -432,14 +408,10 @@ router.put("/:id", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
 
   // sql injection basic protector
   if (isNaN(Number(req.params.id))) {
-    return res
-      .status(404)
-      .json(
-        errorModel(
+    next(errorModel(
           `${table} id  ${req.params.id} does not exist`,
-          req.originalUrl
-        )
-      );
+          req.originalUrl, 404
+    ))
   }
 
   try {
@@ -535,52 +507,50 @@ router.put("/:id", JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
     status = !(await validator.checkUndefindData(input, table));
     // validator.createData(data,table)
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     status = false;
     // console.log("status fail before update")
-    return res.status(400).json(errorModel(err.message, req.originalUrl));
+    next(errorModel(err.message, req.originalUrl,500))
     // return res.status(400).json(errorModel("status fail before update", req.originalUrl));
-    
   }
 
   if (status == true) {
     // update data
     try {
       // if (!connMSQL.handdleConnection()) {
-        let {
-          status_pool: status_p,
-          data: users,
-          msg: msg,
-        } = await connMSQL.connection_pool(
-          validator.updateData(req, input, table)
-        );
-        if (status_p && users.affectedRows != 0) {
-          return res
-            .status(200)
-            .json({
-              message: `update ${table} id ${req.params.id} success!!`,
-              status: "200",
-            });
-        } else if (status_p && users.affectedRows == 0) {
-          return res
-            .status(404)
-            .json(
-              errorModel(
-                `${table} id  ${req.params.id} does not exist`,
-                req.originalUrl
-              )
-            );
-        } else if (status_p == false) {
-          return res
-            .status(400)
-            .json(errorModel("bad request!!", req.originalUrl));
-        }
+      let {
+        status_pool: status_p,
+        data: users,
+        msg: msg,
+      } = await connMSQL.connection_pool(
+        validator.updateData(req, input, table)
+      );
+      if (status_p && users.affectedRows != 0) {
+        return res
+          .status(200)
+          .json({
+            message: `update ${table} id ${req.params.id} success!!`,
+            status: "200",
+          });
+      } else if (status_p && users.affectedRows == 0) {
+        return res
+          .status(404)
+          .json(
+            errorModel(
+              `${table} id  ${req.params.id} does not exist`,
+              req.originalUrl
+            )
+          );
+      } else if (status_p == false) {
+        next(errorModel("bad request!!", req.originalUrl, 400))
+      }
       // } else {
       //   console.log(`Cannot connect to mysql server !!`);
       //   throw new Error("connection error something");
       // }
     } catch (error) {
-      res.status(400).json(errorModel(error.message, req.originalUrl));
+      // res.status(400).json(errorModel(error.message, req.originalUrl));
+      next(errorModel(error.message, req.originalUrl, 500))
     }
   }
 });

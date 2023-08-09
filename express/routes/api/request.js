@@ -21,7 +21,7 @@ const { ROLE } = require('../../enum/UserType')
 const { SERVICE, USETYPE, STATUS, PROBLEM } = require('../../enum/Request')
 
 // get data
-router.get('/', JwtAuth, async (req, res) => {
+router.get('/', JwtAuth, async (req, res, next) => {
     // can sorted data
     try {
         // let columns = ['first_name', 'last_name', 'email', 'group', 'service_type', 'subject', 'status',
@@ -54,17 +54,17 @@ router.get('/', JwtAuth, async (req, res) => {
         await connMSQL.connection_pool(validator.updateData(req, input, user))
         return res.status(200).json({ data: data, request_count: requests[0].request_count })
     } catch (error) {
-        console.log(error)
-        return res.status(400).json(errorModel(error.message, req.originalUrl))
+        // console.log(error)
+        next(errorModel(error.message, req.originalUrl,400))
     }
 })
 
 // get data by id
-router.get('/:id', JwtAuth, async (req, res) => {
+router.get('/:id', JwtAuth, async (req, res, next) => {
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
         }
 
         let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(
@@ -73,7 +73,7 @@ router.get('/:id', JwtAuth, async (req, res) => {
                 [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
             ))
         if (status_p && requests.length == 0) {
-            return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
+            next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl, 404))
         }
 
         // let { status_pool: status_p1, data: problems, msg: msg1 } = await connMSQL.connection_pool(
@@ -81,14 +81,14 @@ router.get('/:id', JwtAuth, async (req, res) => {
 
         // user can get with their email only
         if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
-            return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+            next(errorModel(`cannot access other user email with user permission`, req.originalUrl, 403))
         }
 
         // validate role of admin IT and admin PR who can upload by This role only
         if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== SERVICE.Admin_it) {
-            return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
+            next(errorModel("admin it role can assign in it service only", req.originalUrl,403))
         } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== SERVICE.Admin_pr) {
-            return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
+            next(errorModel("admin pr role can assign in pr service only", req.originalUrl,403))
         }
 
         if (status_p && requests.length != 0) {
@@ -99,11 +99,11 @@ router.get('/:id', JwtAuth, async (req, res) => {
             return res.status(200).json(requests)
         }
     } catch (error) {
-        return res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,400))
     }
 })
 
-router.get('/updated/notify', JwtAuth, async (req, res) => {
+router.get('/updated/notify', JwtAuth, async (req, res, next) => {
     try {
         let { status_pool, data, msg } = await connMSQL.connection_pool(
             validator.foundId('request_history', notifyMessage,
@@ -116,12 +116,12 @@ router.get('/updated/notify', JwtAuth, async (req, res) => {
         })
         return res.status(200).json(data)
     } catch (error) {
-        return res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,400))
     }
     // todo ให้ list เฉพาะอีเมลของตัวเองเมื่อมีการแจ้งซ่อม และเมื่อกดปุ่มรับแจ้งจะสามารถดูข้อมูลสรุปว่าใครสามารถแจ้งซ่อมได้
 })
 
-router.put('/updated/notify', JwtAuth, async (req, res) => {
+router.put('/updated/notify', JwtAuth, async (req, res, next) => {
     try {
         // update user request by count for notify
         let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId"],
@@ -134,11 +134,11 @@ router.put('/updated/notify', JwtAuth, async (req, res) => {
         await connMSQL.connection_pool(validator.updateData(req, input, user))
         return res.status(200).json({ message: `notification is confirmed!!` })
     } catch (error) {
-        return res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,400))
     }
 })
 
-router.get('/status/user', JwtAuth, async (req, res) => {
+router.get('/status/user', JwtAuth, async (req, res, next) => {
     try {
         let { status_pool, data, msg } = await connMSQL.connection_pool(
             validator.foundId(table, columns,
@@ -152,11 +152,11 @@ router.get('/status/user', JwtAuth, async (req, res) => {
             opencase: data.filter(e => e.request_status == STATUS.OpenCase).length
         })
     } catch (error) {
-        return res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,400))
     }
 })
 
-router.get('/status/admin', JwtAuth, async (req, res) => {
+router.get('/status/admin', JwtAuth, async (req, res, next) => {
     try {
         // if (!connMSQL.handdleConnection()) {
         let { status_pool, data, msg } = await connMSQL.connection_pool(
@@ -178,12 +178,12 @@ router.get('/status/admin', JwtAuth, async (req, res) => {
             opencase: data.filter(e => e.request_status == STATUS.OpenCase).length
         })
     } catch (error) {
-        return res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl, 400))
     }
 })
 
 // create request
-router.post('/', JwtAuth, async (req, res) => {
+router.post('/', JwtAuth, async (req, res, next) => {
     let input
     let status = undefined
     try {
@@ -197,9 +197,9 @@ router.post('/', JwtAuth, async (req, res) => {
             ])
         )
         if (userInput.length == 0) {
-            return res.status(404).json(errorModel(`this ${table} does not exist by 
+            next(errorModel(`this ${table} does not exist by 
             ${req.body.request_first_name} ${req.body.request_last_name}
-            ${req.body.request_email} ${req.body.request_group}`, req.originalUrl))
+            ${req.body.request_email} ${req.body.request_group}`, req.originalUrl, 404))
         }
 
         input = [
@@ -224,14 +224,14 @@ router.post('/', JwtAuth, async (req, res) => {
 
         // user can get with their email only
         if (req.user.user_role == ROLE.User && userInput[0].user_email !== req.user.user_email) {
-            return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+            next(errorModel(`cannot access other user email with user permission`, req.originalUrl,403))
         }
 
     } catch (err) {
         console.log(err)
         status = false
         // console.log(status)
-        return res.status(400).json(errorModel(err.message, req.originalUrl))
+        next(errorModel(err.message, req.originalUrl,400))
     }
 
     if (status == true) {
@@ -253,7 +253,7 @@ router.post('/', JwtAuth, async (req, res) => {
                 await line.send(service, fname, email, subject, type_of_use, type_machine, brand_name, problems, other, message,"กำลังรับเรื่อง")
                 return res.status(201).json({ message: `create ${table} success!!` })
             } else if (!status_p && msg.errno == 1062) {
-                return res.status(400).json(errorModel("input has been duplicate", req.originalUrl))
+                next(errorModel("input has been duplicate", req.originalUrl,400))
             }
             // connMSQL.connection.query(
 
@@ -277,32 +277,32 @@ router.post('/', JwtAuth, async (req, res) => {
             // } 
         } catch (error) {
             console.log(error)
-            return res.status(500).json(errorModel(error.message, req.originalUrl))
+            next(errorModel(error.message, req.originalUrl, 500))
         }
     } else {
-        return res.status(400).json(errorModel('data not valid', req.originalUrl))
+        next(errorModel('data not valid', req.originalUrl,400))
     }
 })
 
 // delete
-router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) => {
+router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res, next) => {
     // delete data
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
         }
 
         // user can get with their email only
         if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
-            return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+            next(errorModel(`cannot access other user email with user permission`, req.originalUrl, 403))
         }
 
         // validate role of admin IT and admin PR who can upload by This role only
         if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== SERVICE.Admin_it) {
-            return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
+            next(errorModel("admin it role can assign in it service only", req.originalUrl,403))
         } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== SERVICE.Admin_pr) {
-            return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
+            next(errorModel("admin pr role can assign in pr service only", req.originalUrl,403))
         }
 
         let { status_pool: status_p, data: requests, msg1 } = await connMSQL.connection_pool(
@@ -330,20 +330,20 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Super_admin), async (req, res) =>
             return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!` })
 
         } else if (status_p && requests.length == 0) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
             // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
         }
     } catch (error) {
-        res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,400))
     }
 })
 
-router.delete('/updated/notify/:id', JwtAuth, async (req, res) => {
+router.delete('/updated/notify/:id', JwtAuth, async (req, res, next) => {
     // delete data
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+            next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl, 404))
         }
 
         let { status_pool: status_p, data: requests, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, 'request_history', 'request_historyId'))
@@ -354,21 +354,21 @@ router.delete('/updated/notify/:id', JwtAuth, async (req, res) => {
             return res.status(200).json({ message: `delete request history id ${req.params.id} success!!` })
 
         } else if (status_p && requests.affectedRows == 0) {
-            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
+            next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl, 404))
         }
     } catch (error) {
-        res.status(400).json(errorModel(error.message, req.originalUrl))
+        next(errorModel(error.message, req.originalUrl,400))
     }
 })
 
 // update data
-router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Admin_pr), async (req, res) => {
+router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Admin_pr), async (req, res, next) => {
     let input
     let status = undefined
 
     // sql injection basic protector
     if (isNaN(Number(req.params.id))) {
-        return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
+        next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl,404))
     }
 
     try {
@@ -383,7 +383,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
         console.log(err)
         status = false
         // console.log(status)
-        res.status(400).json(errorModel(err.message, req.originalUrl))
+        next(errorModel(err.message, req.originalUrl,400))
     }
 
     if (status == true) {
@@ -395,18 +395,18 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
                     [{ table: `moral_it_device.${userView} as us`, on: `us.user_emp_code=re.user_emp_code` }]
                 ))
             if (requests.length == 0) {
-                return res.status(404).json(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl))
+                next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl, 404))
             } else {
                 // user can get with their email only
                 if (req.user.user_role == ROLE.User && requests[0].request_email !== req.user.user_email) {
-                    return res.status(403).json(errorModel(`cannot access other user email with user permission`, req.originalUrl))
+                    next(errorModel(`cannot access other user email with user permission`, req.originalUrl, 403))
                 }
 
                 // validate role of admin IT and admin PR who can upload by This role only
                 if (req.user.user_role == ROLE.Admin_it && requests[0].request_service_type !== SERVICE.Admin_it) {
-                    return res.status(403).json(errorModel("admin it role can assign in it service only", req.originalUrl))
+                    next(errorModel("admin it role can assign in it service only", req.originalUrl, 403))
                 } else if (req.user.user_role == ROLE.Admin_pr && requests[0].request_service_type !== SERVICE.Admin_pr) {
-                    return res.status(403).json(errorModel("admin pr role can assign in pr service only", req.originalUrl))
+                    next(errorModel("admin pr role can assign in pr service only", req.originalUrl, 403))
                 }
 
                 await connMSQL.connection_pool(validator.updateData(req, input, table))
@@ -434,7 +434,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
 
                 await connMSQL.connection_pool(validator.createData(log, 'request_history'))
 
-                console.log(requests[0])
+                // console.log(requests[0])
 
                 let sub = 'Admin has updated your report!!'
                 let service = requests[0].request_service_type
@@ -453,7 +453,7 @@ router.put('/:id', JwtAuth, verifyRole(ROLE.Super_admin, ROLE.Admin_it, ROLE.Adm
                 return res.status(200).json({ message: `update ${table} id ${reqId} success!!` })
             }
         } catch (error) {
-            res.status(400).json(errorModel(error.message, req.originalUrl))
+            next(errorModel(error.message, req.originalUrl))
         }
     }
 })
