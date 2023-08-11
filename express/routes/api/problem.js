@@ -24,7 +24,7 @@ router.get('/', JwtAuth, async (req, res) => {
         }
     } catch (error) {
         console.log(error)
-        next(errorModel(error.message, req.originalUrl, 500))
+        return res.status(500).json(errorModel(error.message, req.originalUrl))
     }
 })
 
@@ -36,9 +36,9 @@ router.get('/type/:type', JwtAuth, async (req, res) => {
         }
 
         if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(req.params.type)) {
-            next(errorModel(`${table} type ${req.params.type} is forbidden for admin_it`, req.originalUrl, 403))
+            return res.status(403).json(errorModel(`${table} type ${req.params.type} is forbidden for admin_it`, req.originalUrl))
         } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(req.params.type)) {
-            next(errorModel(`${table} type ${req.params.type} is forbidden for admin_pr`, req.originalUrl, 403))
+            return res.status(403).json(errorModel(`${table} type ${req.params.type} is forbidden for admin_pr`, req.originalUrl))
         }
         let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '', [{ col: "problem_type", val: req.params.type }]))
         if (status_p) {
@@ -46,7 +46,7 @@ router.get('/type/:type', JwtAuth, async (req, res) => {
         }
     } catch (error) {
         console.log(error)
-        next(errorModel(error.message, req.originalUrl,500))
+        return res.status(500).json(errorModel(error.message, req.originalUrl))
     }
 })
 
@@ -62,9 +62,9 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_ad
             { prop: "problem_upload", value: validator.validateBoolean(await req.body.problem_upload, table, "problem_upload"), type: 'int' }
         ]
         if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(req.body.problem_type)) {
-            next(errorModel(`${table} type ${req.body.problem_type} is forbidden for admin_it`, req.originalUrl,403))
+            return res.status(403).json(errorModel(`${table} type ${req.body.problem_type} is forbidden for admin_it`, req.originalUrl))
         } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(req.body.problem_type)) {
-            next(errorModel(`${table} type ${req.body.problem_type} is forbidden for admin_pr`, req.originalUrl,403))
+            return res.status(403).json(errorModel(`${table} type ${req.body.problem_type} is forbidden for admin_pr`, req.originalUrl))
         }
 
         // console.log('testing',await req.body.role)
@@ -75,7 +75,7 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_ad
         status = false
         // console.log(status)
 
-        next(errorModel(err.message, req.originalUrl, 400))
+        return res.status(400).json(errorModel(err.message, req.originalUrl))
     }
 
     if (status == true) {
@@ -86,7 +86,7 @@ router.post('/', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Super_ad
                 return res.status(201).json(req.body)
             }
         } catch (error) {
-            next(errorModel(error.message, req.originalUrl,500))
+            res.status(500).json(errorModel(error.message, req.originalUrl))
         }
     }
 })
@@ -97,14 +97,14 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
     try {
         // sql injection basic protector
         if (isNaN(Number(req.params.id))) {
-            next(errorModel(`${table} id ${req.params.id} does not exist`, req.originalUrl, 404))
+            return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl));
         }
 
         let { status_pool: status_p1, data: problems1, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(table, ['problem_type'], [{ col: "problemId", val: req.params.id }]))
         if (req.user.role_user == ROLE.Admin_it && problemTypePr.includes(problems1[0].problem_type)) {
-            next(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_it`, req.originalUrl, 403))
+            return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_it`, req.originalUrl))
         } else if (req.user.role_user == ROLE.Admin_pr && problemTypeIt.includes(problems1[0].problem_type)) {
-            next(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_pr`, req.originalUrl, 403))
+            return res.status(403).json(errorModel(`${table} type ${problems1[0].problem_type} is forbidden for admin_pr`, req.originalUrl))
         }
 
         let { status_pool: status_p, data: problems, msg: msg } = await connMSQL.connection_pool(validator.deleteData(req, table, 'problemId'))
@@ -119,11 +119,11 @@ router.delete('/:id', JwtAuth, verifyRole(ROLE.Admin_it, ROLE.Admin_pr, ROLE.Sup
             return res.status(200).json({ message: `delete ${table} id ${req.params.id} success!!`, status: '200' })
         } else
             if (status_p && problems.affectedRows == 0) {
+                return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl))
                 // return res.status(404).json(errorModel(`${table} id  ${req.params.id} does not exist`,req.originalUrl))
-                next(errorModel(`${table} id  ${req.params.id} does not exist`, req.originalUrl, 404))
             }
     } catch (error) {
-        next(errorModel(error.message, req.originalUrl, 500))
+        res.status(500).json(errorModel(error.message, req.originalUrl))
     }
 })
 
