@@ -38,11 +38,6 @@ router.get('/', JwtAuth, async (req, res) => {
             data = data.filter(e => e.request_service_type == SERVICE.Admin_pr)
         }
 
-        // format for request date
-        data.forEach(req => {
-            req.request_req_date = new Date(req.request_req_date).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
-        })
-
         // update user request by count for notify
         let { status_pool: status_p, data: requests, msg: msg1 } = await connMSQL.connection_pool(validator.foundId(userView, ["userId", "request_count", "request_update"],
             [{ col: "user_email", val: req.user.user_email }]

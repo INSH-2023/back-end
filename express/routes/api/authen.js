@@ -161,19 +161,19 @@ router.get("/signout", (req, res) => {
 router.post('/verify', async (req, res) => {
   let { email } = req.body
   // เรียกข้อมูล user โดยใช้ email
-  let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '',
-    [{ col: 'user_email', val: validator.validateEmail(email, 50, table, "user_email") }]
-  ))
-  if (user.length == 0) {
-    return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
-  }
-
   let input
   let status = undefined
   try {
+    let { status_pool: status_p, data: user, msg: msg } = await connMSQL.connection_pool(validator.foundId(table, '',
+      [{ col: 'user_email', val: validator.validateEmail(email, 50, table, "user_email") }]
+    ))
+    if (user.length == 0) {
+      return res.status(404).json(errorModel(`user email : ${email} does not exist`, req.originalUrl))
+    }
+
     input = [
       { prop: "uuId_token", value: uuidv4(), type: 'str' },
-      { prop: "user_email", value: validator.validateEmail(await email, 50, table_log, 'user_email'), type: 'str' },
+      { prop: "user_email", value: email, type: 'str' },
     ]
     status = !(await validator.checkUndefindData(input, table))
 
@@ -231,7 +231,7 @@ router.post('/verify/count', async (req, res) => {
 })
 
 router.put('/reset_password', async (req, res) => {
-  let uuId_token = req.headers.authorization.substring(7, 43)
+  let uuId_token = req.body.uuid
   let { password } = req.body
   // เรียกข้อมูล user โดยใช้ email
   let { status_pool: status_p, data: logs, msg: msg } = await connMSQL.connection_pool(

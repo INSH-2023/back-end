@@ -12,7 +12,7 @@ exports.JwtAuth = (req, res, next) => {
   const jwtToken = "Bearer " + req.cookies.token;
   // const jwtRefreshToken = req.headers.refresh || "Bearer " + req.cookies.refreshToken ;
   // ตรวจสอบถ้าไม่มี token จะเข้าสู่ระบบไม่ได้
-  if (["null","undefined"].includes(jwtToken.substring(7))) return res.status(401).json(errorModel("need login first",req.originalUrl))
+  if ([null,undefined].includes(req.cookies.token)) return res.status(401).json(errorModel("need login first",req.originalUrl))
   try {
     // ตรวจสอบ user ใน access token 
     let user = jwt.verify(jwtToken.substring(7), process.env.TOKEN_SECRET);
@@ -33,7 +33,7 @@ exports.JwtAuth = (req, res, next) => {
 exports.verifyRole = (...roles) => {
   return (req,res,next) => {
     // เรียก role จาก header หรือ cookie
-    const jwtToken =  req.headers.authorization || "Bearer " + req.cookies.token
+    const jwtToken =  "Bearer " + req.cookies.token;
     const reqRole = getUser(jwtToken.substring(7)).user_role;
 
     // ถ้าไม่มี role จะไม่มีสิทธิ์สำหรับการเข้าระบบ
