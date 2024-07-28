@@ -62,3 +62,16 @@ C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\obj\Debug\net8.0\refint\Hel
 C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\obj\Debug\net8.0\HelpDeskNet.pdb
 C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\obj\Debug\net8.0\HelpDeskNet.genruntimeconfig.cache
 C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\obj\Debug\net8.0\ref\HelpDeskNet.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\AWSSDK.Core.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\AWSSDK.SecurityToken.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\DnsClient.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\MongoDB.Bson.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\MongoDB.Driver.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\MongoDB.Driver.Core.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\MongoDB.Libmongocrypt.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\SharpCompress.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\Snappier.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\ZstdSharp.dll
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\runtimes\linux\native\libmongocrypt.so
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\runtimes\osx\native\libmongocrypt.dylib
+C:\Users\Admin\Documents\GitHub\back-end\HelpDeskNet\bin\Debug\net8.0\runtimes\win\native\mongocrypt.dll
